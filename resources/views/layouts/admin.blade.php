@@ -63,11 +63,11 @@
             </a>
         </li>
 
-        <!-- Nav Item - About -->
-        <li class="nav-item {{ Nav::isRoute('about') }}">
-            <a class="nav-link" href="{{ route('about') }}">
-                <i class="fas fa-fw fa-hands-helping"></i>
-                <span>{{ __('About') }}</span>
+        <!-- Nav Item - Data -->
+        <li class="nav-item {{ Nav::isRoute('data') }}">
+            <a class="nav-link" href="{{ route('data') }}">
+                <i class="fas fa-fw fa-database"></i>
+                <span>{{ __('Data') }}</span>
             </a>
         </li>
 
