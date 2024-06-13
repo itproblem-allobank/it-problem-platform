@@ -24,31 +24,62 @@
 @endif
 
 
-<div class="container-fluid text-center">
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="get_data" class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Key</th>
-                            <th>Env</th>
-                            <th>Problem Category</th>
-                            <th>Summary</th>
-                            <th>Priority</th>
-                            <th>Status</th>
-                            <th>Impact Analyst</th>
-                            <th>Root Cause</th>
-                            <th>Work Around</th>
-                            <th>Assignee</th>
-                            <th>Updated</th>
-                        </tr>
-                    </thead>
-                </table>
+<body>
+    <div style="margin-left: 25px; margin-bottom: 15px"">
+        <button class="btn btn-primary" id="import" data-toggle="modal" data-target="#importExcel">Import Data</button>
+        <button class="btn btn-success">Export Data</button>
+    </div>
+    <div class="container-fluid text-center">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="get_data" class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Env</th>
+                                <th>Problem Category</th>
+                                <th>Summary</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Impact Analyst</th>
+                                <th>Root Cause</th>
+                                <th>Work Around</th>
+                                <th>Assignee</th>
+                                <th>Updated</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
+</body>
+
+
+<div class="modal fade" id="importExcel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form method="post" action="/importdata" name="importdata" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Import Excel</h5>
+                </div>
+                <div class="modal-body">
+                    <label>Pilih file excel</label>
+                    <div class="form-group">
+                        <input type="file" name="importexcel" required="required">
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+
 
 <link href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css" rel="stylesheet">
@@ -79,35 +110,6 @@
           });
         });
 </script>
-
-<!-- <script>
-    $(document).ready(function () {
-
-        var dataTable = $('#get_data').DataTable({
-            'processing': true,
-            'serverSide': true,
-            'serverMethod': 'get',
-            'ajax': {
-                'url': '{{route("data.getdata")}}',
-            },
-            'aaSorting': [],
-            'columns': [
-                { data: 'code_jira' },
-                { data: 'environment' },
-                { data: 'problem_category' },
-                { data: 'summary' },
-                { data: 'priority' },
-                { data: 'status' },
-                { data: 'impact_analyst' },
-                { data: 'root_cause' },
-                { data: 'work_around' },
-                { data: 'assignee_to' },
-                { data: 'updated' }
-            ]
-        });
-
-    });
-</script> -->
 
 
 @endsection
