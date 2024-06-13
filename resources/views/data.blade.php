@@ -38,7 +38,7 @@
                     <table id="get_data" class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Key</th>
+                                <!-- <th>Key</th> -->
                                 <th>Env</th>
                                 <th>Problem Category</th>
                                 <th>Summary</th>
@@ -100,7 +100,7 @@
               serverSide: true,
               ajax: "{{ route('data.getdata') }}",
               columns: [
-                  {data: 'code_jira', name: 'code_jira'},
+                //   {data: 'code_jira', name: 'code_jira'},
                   {data: 'environment', name: 'environment'},
                   {data: 'problem_category', name: 'problem_category'},
                   {data: 'summary', name: 'summary'},
