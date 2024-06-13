@@ -26,8 +26,10 @@
 
 <body>
     <div style="margin-left: 25px; margin-bottom: 15px"">
-        <button class="btn btn-primary" id="import" data-toggle="modal" data-target="#importExcel">Import Data</button>
-        <button class="btn btn-success">Export Data</button>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#import">
+    Import Data
+    </button>
+    <button class="btn btn-success">Export Data</button>
     </div>
     <div class="container-fluid text-center">
         <div class="card">
@@ -57,26 +59,30 @@
 </body>
 
 
-<div class="modal fade" id="importExcel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<!-- modal -->
+<div class="modal fade" id="import" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <form method="post" action="/importdata" name="importdata" enctype="multipart/form-data">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Import Excel</h5>
-                </div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('data.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
                 <div class="modal-body">
-                    <label>Pilih file excel</label>
                     <div class="form-group">
-                        <input type="file" name="importexcel" required="required">
+                        <label>PILIH FILE</label>
+                        <input type="file" name="file" class="form-control" required>
                     </div>
-
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Import</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" class="btn btn-success">IMPORT</button>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 

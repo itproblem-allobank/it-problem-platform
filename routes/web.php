@@ -26,7 +26,8 @@ Route::get('/profile', 'ProfileController@index')->name('profile');
 Route::put('/profile', 'ProfileController@update')->name('profile.update');
 
 Route::get('/data', 'DataController@index')->name('data');
-Route::get('/getdata', 'DataController@getdata')->name('data.getdata');
+Route::get('/data/getdata', 'DataController@getdata')->name('data.getdata');
+Route::post('/data/import', 'DataController@import')->name('data.import');
 
 Route::get('/about', function () {
     return view('about');
