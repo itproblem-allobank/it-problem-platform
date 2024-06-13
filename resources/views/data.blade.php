@@ -50,7 +50,37 @@
     </div>
 </div>
 
-<script>
+<link href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js" defer></script>
+<script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
+
+
+<script type="text/javascript">
+    $(function () {
+          var table = $('#get_data').DataTable({
+              processing: true,
+              serverSide: true,
+              ajax: "{{ route('data.getdata') }}",
+              columns: [
+                  {data: 'code_jira', name: 'code_jira'},
+                  {data: 'environment', name: 'environment'},
+                  {data: 'problem_category', name: 'problem_category'},
+                  {data: 'summary', name: 'summary'},
+                  {data: 'priority', name: 'priority'},
+                  {data: 'status', name: 'status'},
+                  {data: 'impact_analyst', name: 'impact_analyst'},
+                  {data: 'root_cause', name: 'root_cause'},
+                  {data: 'work_around', name: 'work_around'},
+                  {data: 'assignee_to', name: 'assignee_to'},
+                  {data: 'updated', name: 'updated'},
+              ]
+          });
+        });
+</script>
+
+<!-- <script>
     $(document).ready(function () {
 
         var dataTable = $('#get_data').DataTable({
@@ -77,7 +107,7 @@
         });
 
     });
-</script>
+</script> -->
 
 
 @endsection
