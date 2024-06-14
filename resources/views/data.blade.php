@@ -29,7 +29,8 @@
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#import">
     Import Data
     </button>
-    <button class="btn btn-success">Export Data</button>
+    <button class="btn btn-success" data-toggle="modal" data-target="#export" >Export Data</button>
+    <a href="{{ route('data.export') }}" class="btn btn-success">Export</a>
     </div>
     <div class="container-fluid text-center">
         <div class="card">
@@ -59,7 +60,7 @@
 </body>
 
 
-<!-- modal -->
+<!-- modal import -->
 <div class="modal fade" id="import" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -69,7 +70,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('data.import') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('data.import') }}" method="GET" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
@@ -85,6 +86,27 @@
         </div>
     </div>
 </div>
+
+<!-- modal export -->
+<div class="modal fade" id="export" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('data.export') }}" method="POST">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" class="btn btn-success">EXPORT</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 
 <link href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" rel="stylesheet">

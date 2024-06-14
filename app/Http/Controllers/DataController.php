@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Imports\DataImports;
+use PhpOffice\PhpPresentation\PhpPresentation;
+use PhpOffice\PhpPresentation\Shape\Drawing;
+use PhpOffice\PhpPresentation\Style\Alignment;
+use PhpOffice\PhpPresentation\Style\Color;
+use PhpOffice\PhpPresentation\Style\Fill;
 
 class DataController extends Controller
 {
@@ -67,5 +72,34 @@ class DataController extends Controller
             return redirect()->route('data')->with(['error' => 'Data Gagal Diimport!']);
         }
     }
+
+
+    public function export()
+    {
+        $presentation = new PhpPresentation();
+
+        // Retrieve data from database, example:
+        $data = Data::all();
+
+        // Create a slide
+        $slide = $presentation->getActiveSlide();
+
+        // Add data from database to slide
+        foreach ($data as $item) {
+            $shape = $slide->createRichTextShape();
+            $shape->setHeight(300);
+            $shape->setWidth(600);
+            $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $shape->getActiveParagraph()->createTextRun($item->field1 . ' - ' . $item->field2);
+        }
+
+        // Save PowerPoint file
+        $writer = new \PhpOffice\PhpPresentation\Writer\PowerPoint2007($presentation);
+        // $writer->save(storage_path('app/public/powerpoint.pptx'));
+        $writer->save(storage_path('app/public/powerpoint.pptx'));
+
+        return 'PowerPoint file has been generated!';
+    }
+    
 
 }
