@@ -40,7 +40,7 @@
                     <table id="get_data" class="table table-bordered">
                         <thead>
                             <tr>
-                                <!-- <th>Key</th> -->
+                                <!-- <th>No</th> -->
                                 <th>Env</th>
                                 <th>Problem Category</th>
                                 <th>Summary</th>
@@ -71,7 +71,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('data.import') }}" method="GET" enctype="multipart/form-data">
+            <form action="{{ route('data.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">

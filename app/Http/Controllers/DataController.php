@@ -27,7 +27,6 @@ class DataController extends Controller
     {
         try {
             $data = Data::all();
-
             return response()->json([
               'status' => 'success',
               'message' => 'Get all data success',
@@ -44,29 +43,22 @@ class DataController extends Controller
 
     public function import(Request $request)
     {
+        Data::truncate();
         $this->validate($request, [
             'file' => 'required|mimes:csv,xls,xlsx'
         ]);
-
         $file = $request->file('file');
-
         // membuat nama file unik
         $nama_file = $file->hashName();
-
         //temporary file
         $path = $file->storeAs('public/excel/',$nama_file);
-
         // import data
         $import = Excel::import(new DataImports(), storage_path('app/public/excel/'.$nama_file));
-
         //remove from server
         Storage::delete($path);
-
         if($import) {
-            //redirect
             return redirect()->route('data')->with(['success' => 'Data Berhasil Diimport!']);
         } else {
-            //redirect
             return redirect()->route('data')->with(['error' => 'Data Gagal Diimport!']);
         }
     }
@@ -83,13 +75,10 @@ class DataController extends Controller
     public function export()
     {
         $presentation = new PhpPresentation();
-
         // Retrieve data from database, example:
         $data = Data::all();
-
         // Create a slide
         $slide = $presentation->getActiveSlide();
-
         // Add data from database to slide
         foreach ($data as $item) {
             $shape = $slide->createRichTextShape();
@@ -98,12 +87,10 @@ class DataController extends Controller
             $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $shape->getActiveParagraph()->createTextRun($item->field1 . ' - ' . $item->field2);
         }
-
         // Save PowerPoint file
         $writer = new \PhpOffice\PhpPresentation\Writer\PowerPoint2007($presentation);
         // $writer->save(storage_path('app/public/powerpoint.pptx'));
         $writer->save(storage_path('app/public/powerpoint.pptx'));
-
         return 'PowerPoint file has been generated!';
     }
     

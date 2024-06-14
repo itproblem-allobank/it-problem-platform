@@ -10,30 +10,37 @@
 		table tr th{
 			font-size: 6pt;
 		}
+		table.fixed {
+      table-layout: fixed;
+      width: 100%;
+    	}
+		table.fixed td {
+		overflow: hidden;
+		}
 	</style>
 	<center>
 		<h5>Report Weekly IT Problem</h4>
 	</center>
- 
-	<table class='table table-bordered'>
+	
+	<table class='table-bordered fixed'>
 		<thead>
 			<tr>
-                <th>No</th>
-                <th>Problem</th>
-                <th>Root Cause</th>
-                <th>Work Around</th>
-                <th>Status</th>
+				<th style="width: 5%">No</th>
+				<th style="width: 20%">Problem</th>
+				<th style="width: 30%">Root Cause</th>
+				<th style="width: 30%">Work Around</th>
+				<th style="width: 15%">Status</th>
 			</tr>
 		</thead>
 		<tbody>
 			@php $i=1 @endphp
-			@foreach($data as $p)
+			@foreach($data as $d)
 			<tr>
-				<td>{{ $i++ }}</td>
-                <td>{{ $p->summary }}</td>
-                <td>{{ $p->root_cause }}</td>
-                <td>{{ $p->work_around }}</td>
-                <td>{{ $p->status }}</td>
+				<td >{{ $i++ }}</td>
+                <td >{{ $d->summary }}</td>
+                <td>{{ $d->root_cause }}</td>
+                <td>{{ $d->work_around }}</td>
+                <td>{{ $d->status }} - {{$d->pending_reason}}</td>
 			</tr>
 			@endforeach
 		</tbody>
