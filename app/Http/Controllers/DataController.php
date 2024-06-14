@@ -8,10 +8,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Imports\DataImports;
 use PhpOffice\PhpPresentation\PhpPresentation;
-use PhpOffice\PhpPresentation\Shape\Drawing;
 use PhpOffice\PhpPresentation\Style\Alignment;
-use PhpOffice\PhpPresentation\Style\Color;
-use PhpOffice\PhpPresentation\Style\Fill;
+use Barryvdh\DomPDF\Facade\PDF;
 
 class DataController extends Controller
 {
@@ -71,6 +69,14 @@ class DataController extends Controller
             //redirect
             return redirect()->route('data')->with(['error' => 'Data Gagal Diimport!']);
         }
+    }
+
+    public function cetak_pdf()
+    {
+        $data = Data::all();
+    
+        $pdf = PDF::loadview('data_pdf',['data'=>$data]);
+        return $pdf->download('laporan-data.pdf');
     }
 
 

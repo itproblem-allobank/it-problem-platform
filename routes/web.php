@@ -30,6 +30,8 @@ Route::get('/data/getdata', 'DataController@getdata')->name('data.getdata');
 Route::post('/data/import', 'DataController@import')->name('data.import');
 Route::get('/data/export', 'DataController@export')->name('data.export');
 
+Route::get('/data/cetak_pdf', 'DataController@cetak_pdf')->name('data.cetakpdf');
+
 Route::get('/about', function () {
     return view('about');
 })->name('about');

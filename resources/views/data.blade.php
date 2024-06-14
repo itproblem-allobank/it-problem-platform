@@ -29,8 +29,9 @@
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#import">
     Import Data
     </button>
-    <button class="btn btn-success" data-toggle="modal" data-target="#export" >Export Data</button>
-    <a href="{{ route('data.export') }}" class="btn btn-success">Export</a>
+    <!-- <button class="btn btn-success" data-toggle="modal" data-target="#export" >Export Data</button> -->
+    <!-- <a href="{{ route('data.export') }}" class="btn btn-success">Export</a> -->
+    <a href="/data/cetak_pdf" class="btn btn-primary" target="_blank">CETAK PDF</a>
     </div>
     <div class="container-fluid text-center">
         <div class="card">
