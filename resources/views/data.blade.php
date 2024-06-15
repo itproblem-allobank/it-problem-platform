@@ -5,33 +5,31 @@
 <h1 class="h3 mb-4 text-gray-800">{{ __('Data') }}</h1>
 
 @if (session('success'))
-    <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
+<div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
+    {{ session('success') }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
 @endif
 
 @if ($errors->any())
-    <div class="alert alert-danger border-left-danger" role="alert">
-        <ul class="pl-4 my-2">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
+<div class="alert alert-danger border-left-danger" role="alert">
+    <ul class="pl-4 my-2">
+        @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
 @endif
 
 
 <body>
     <div style="margin-left: 25px; margin-bottom: 15px"">
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#import">
-    Import Data
-    </button>
-    <!-- <button class="btn btn-success" data-toggle="modal" data-target="#export" >Export Data</button> -->
-    <!-- <a href="{{ route('data.export') }}" class="btn btn-success">Export</a> -->
-    <a href="/data/cetak_pdf" class="btn btn-primary" target="_blank">CETAK PDF</a>
+    <button type=" button" class="btn btn-primary" data-toggle="modal" data-target="#import">
+        Import Data
+        </button>
+        <a href="/data/cetak_pdf" class="btn btn-primary" target="_blank">CETAK PDF</a>
     </div>
     <div class="container-fluid text-center">
         <div class="card">
@@ -117,26 +115,56 @@
 
 
 <script type="text/javascript">
-    $(function () {
-          var table = $('#get_data').DataTable({
-              processing: true,
-              serverSide: true,
-              ajax: "{{ route('data.getdata') }}",
-              columns: [
+    $(function() {
+        var table = $('#get_data').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ route('data.getdata') }}",
+            columns: [
                 //   {data: 'code_jira', name: 'code_jira'},
-                  {data: 'environment', name: 'environment'},
-                  {data: 'problem_category', name: 'problem_category'},
-                  {data: 'summary', name: 'summary'},
-                  {data: 'priority', name: 'priority'},
-                  {data: 'status', name: 'status'},
-                  {data: 'impact_analyst', name: 'impact_analyst'},
-                  {data: 'root_cause', name: 'root_cause'},
-                  {data: 'work_around', name: 'work_around'},
-                  {data: 'assignee_to', name: 'assignee_to'},
-                  {data: 'updated', name: 'updated'},
-              ]
-          });
+                {
+                    data: 'environment',
+                    name: 'environment'
+                },
+                {
+                    data: 'problem_category',
+                    name: 'problem_category'
+                },
+                {
+                    data: 'summary',
+                    name: 'summary'
+                },
+                {
+                    data: 'priority',
+                    name: 'priority'
+                },
+                {
+                    data: 'status',
+                    name: 'status'
+                },
+                {
+                    data: 'impact_analyst',
+                    name: 'impact_analyst'
+                },
+                {
+                    data: 'root_cause',
+                    name: 'root_cause'
+                },
+                {
+                    data: 'work_around',
+                    name: 'work_around'
+                },
+                {
+                    data: 'assignee_to',
+                    name: 'assignee_to'
+                },
+                {
+                    data: 'updated',
+                    name: 'updated'
+                },
+            ]
         });
+    });
 </script>
 
 

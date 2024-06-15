@@ -20,6 +20,13 @@ class DataImports implements ToModel, WithStartRow
     }
     public function model(array $row)
     {
+        //format
+        $row14 = ($row[14] - 25569) * 86400;
+        $created = gmdate("Y-m-d H:i:s", $row14);
+        $row15 = ($row[15] - 25569) * 86400;
+        $updated = gmdate("Y-m-d H:i:s", $row15);
+
+        //insert
         return new Data([
             'code_jira'         => $row[0],
             'environment'       => $row[1],
@@ -35,8 +42,8 @@ class DataImports implements ToModel, WithStartRow
             'work_around'       => $row[11],
             'reporter'          => $row[12],
             'assignee_to'       => $row[13],
-            'created'           => $row[14],
-            'updated'           => $row[15],
+            'created'           => $created,
+            'updated'           => $updated
         ]);
     }
 }
