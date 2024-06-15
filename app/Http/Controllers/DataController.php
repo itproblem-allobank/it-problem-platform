@@ -65,7 +65,8 @@ class DataController extends Controller
 
   public function cetak_pdf()
   {
-    $data = Data::all();
+    // $data = Data::all(); 
+    $data = Data::whereDate('created', '>', now()->subDays(7))->get();
 
     $pdf = PDF::loadview('data_pdf', ['data' => $data]);
     // return $pdf->download('laporan-data.pdf');
