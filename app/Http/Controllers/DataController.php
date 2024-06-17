@@ -20,7 +20,12 @@ class DataController extends Controller
 
   public function index()
   {
-    return view('data');
+    $highest = Data::where('Priority', 'Highest')->get()->count();
+    $high = Data::where('Priority', 'High')->get()->count();
+    $medium = Data::where('Priority', 'Medium')->get()->count();
+    $low = Data::where('Priority', 'Low')->get()->count();
+    $lowest = Data::where('Priority', 'Lowest')->get()->count();
+    return view('data', compact( 'highest', 'high', 'medium', 'low', 'lowest'));
   }
 
   public function getData()

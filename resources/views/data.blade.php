@@ -26,11 +26,14 @@
 
 <body>
     <div style="margin-left: 25px; margin-bottom: 15px"">
-    <button type=" button" class="btn btn-primary" data-toggle="modal" data-target="#import">
+        <button type=" button" class="btn btn-primary" data-toggle="modal" data-target="#import">
         Import Data
         </button>
         <a href="/data/cetak_pdf" class="btn btn-primary" target="_blank">CETAK PDF</a>
     </div>
+
+    <div id="piechart" style="width: 900px; height: 500px;"></div>
+
     <div class="container-fluid text-center">
         <div class="card">
             <div class="card-body">
@@ -166,6 +169,43 @@
         });
     });
 </script>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        
+    var highest = <?php echo $highest; ?>;
+    var high = <?php echo $high; ?>;
+    var medium = <?php echo $medium; ?>;
+    var low = <?php echo $low; ?>;
+    var lowest = <?php echo $lowest; ?>;
+
+    var datajira = {
+      'high': highest + high,
+      'medium': medium,
+      'low': low + lowest
+    };
+    console.log(datajira);
+
+        var data = google.visualization.arrayToDataTable([
+          ['Priority', 'Total'],
+          ['High', highest + high],
+          ['Medium', medium],
+          ['Low', low + lowest]
+        ]);
+
+        var options = {
+          title: 'My Daily Activities'
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+
+        chart.draw(data, options);
+      }
+    </script>
 
 
 @endsection
