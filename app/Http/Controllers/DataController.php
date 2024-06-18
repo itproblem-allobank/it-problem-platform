@@ -25,13 +25,20 @@ class DataController extends Controller
     $medium = Data::where('Priority', 'Medium')->get()->count();
     $low = Data::where('Priority', 'Low')->get()->count();
     $lowest = Data::where('Priority', 'Lowest')->get()->count();
-    return view('data', compact( 'highest', 'high', 'medium', 'low', 'lowest'));
+
+    // ticket weekly
+    $ticket_weekly = Data::whereDate('created', '>', now()->subDays(7))->get();
+
+
+    return view('data', compact( 'highest', 'high', 'medium', 'low', 'lowest', 'ticket_weekly')); 
   }
 
   public function getData()
   {
     try {
-      $data = Data::all();
+      // $data = Data::all();
+      
+    $data = Data::whereDate('created', '>', now()->subDays(7))->get();
       return response()->json([
         'status' => 'success',
         'message' => 'Get all data success',

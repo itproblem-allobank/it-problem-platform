@@ -32,7 +32,19 @@
         <a href="/data/cetak_pdf" class="btn btn-primary" target="_blank">CETAK PDF</a>
     </div>
 
-    <div id="piechart" style="width: 900px; height: 500px;"></div>
+    <div class="container-fluid" style="margin-bottom: 25px;">
+        <div class="row align-items-start">
+            <div class="col">
+                <div id="columnchart_material" style="width: 450px; height: 450px;"></div>
+            </div>
+            <div class="col">
+                <div id="barchart_values" style="width: 450px; height: 450px;"></div>
+            </div>
+            <div class="col">
+                <div id="piechart" style="width: 450px; height: 450px;"></div>
+            </div>
+        </div>
+    </div>
 
     <div class="container-fluid text-center">
         <div class="card">
@@ -171,41 +183,104 @@
 </script>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
-      google.charts.setOnLoadCallback(drawChart);
+<script type="text/javascript">
+    google.charts.load('current', {
+        'packages': ['corechart']
+    });
+    google.charts.setOnLoadCallback(drawChart);
 
-      function drawChart() {
-        
-    var highest = <?php echo $highest; ?>;
-    var high = <?php echo $high; ?>;
-    var medium = <?php echo $medium; ?>;
-    var low = <?php echo $low; ?>;
-    var lowest = <?php echo $lowest; ?>;
+    function drawChart() {
 
-    var datajira = {
-      'high': highest + high,
-      'medium': medium,
-      'low': low + lowest
-    };
-    console.log(datajira);
+        var highest = <?php echo $highest; ?>;
+        var high = <?php echo $high; ?>;
+        var medium = <?php echo $medium; ?>;
+        var low = <?php echo $low; ?>;
+        var lowest = <?php echo $lowest; ?>;
+
+        var datajira = {
+            'high': highest + high,
+            'medium': medium,
+            'low': low + lowest
+        };
+        console.log(datajira);
 
         var data = google.visualization.arrayToDataTable([
-          ['Priority', 'Total'],
-          ['High', highest + high],
-          ['Medium', medium],
-          ['Low', low + lowest]
+            ['Priority', 'Total'],
+            ['High', highest + high],
+            ['Medium', medium],
+            ['Low', low + lowest]
         ]);
 
         var options = {
-          title: 'My Daily Activities'
+            title: 'Ticket Priority',
+            pieSliceText: 'value'
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart'));
 
         chart.draw(data, options);
-      }
-    </script>
+    }
+</script>
+
+<script type="text/javascript">
+    google.charts.load("current", {
+        packages: ["corechart"]
+    });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart () {
+    $.ajax({
+        url: "{{ route('data.getdata') }}",
+        dataType: "json",
+        success: function (jsonData) {
+            var data = new google.visualization.DataTable();
+            // assumes "word" is a string and "count" is a number
+            data.addColumn('string', 'word');
+            data.addColumn('number', 'count');
+            console.log(jsonData.data);
+
+            for (var i = 0; i < jsonData.data.length; i++) {
+                data.addRow([jsonData.data[i].problem_category, 3]);
+            }
+            console.log(data);
+
+            var options = {
+                title: 'Ticket Weekly',
+                is3D: true
+            };
+            var chart = new google.visualization.BarChart(document.getElementById("barchart_values"));
+            chart.draw(data, options);
+        }
+    });
+}
+</script>
+
+<script type="text/javascript">
+    google.charts.load('current', {
+        'packages': ['bar']
+    });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Year', 'Sales', 'Expenses', 'Profit'],
+            ['2014', 1000, 400, 200],
+            ['2015', 1170, 460, 250],
+            ['2016', 660, 1120, 300],
+            ['2017', 1030, 540, 350]
+        ]);
+
+        var options = {
+            chart: {
+                title: "Total Ticket Problem",
+            }
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+    }
+</script>
 
 
 @endsection
