@@ -53,7 +53,7 @@
                     <table id="get_data" class="table table-bordered">
                         <thead>
                             <tr>
-                                <!-- <th>No</th> -->
+                                <th>No</th>
                                 <th>Env</th>
                                 <th>Problem Category</th>
                                 <th>Summary</th>
@@ -131,12 +131,17 @@
 
 <script type="text/javascript">
     $(function() {
+        let i = 1;
         var table = $('#get_data').DataTable({
             processing: true,
             serverSide: true,
             ajax: "{{ route('data.getdata') }}",
             columns: [
-                //   {data: 'code_jira', name: 'code_jira'},
+                {
+                    "render": function() {
+                        return i++;
+                    }
+                },
                 {
                     data: 'environment',
                     name: 'environment'
@@ -228,31 +233,50 @@
     });
     google.charts.setOnLoadCallback(drawChart);
 
-    function drawChart () {
-    $.ajax({
-        url: "{{ route('data.getdata') }}",
-        dataType: "json",
-        success: function (jsonData) {
-            var data = new google.visualization.DataTable();
-            // assumes "word" is a string and "count" is a number
-            data.addColumn('string', 'word');
-            data.addColumn('number', 'count');
-            console.log(jsonData.data);
+    function drawChart() {
+        $.ajax({
+            url: "{{ route('chart.weekly') }}",
+            dataType: "json",
+            success: function(jsonData) {
 
-            for (var i = 0; i < jsonData.data.length; i++) {
-                data.addRow([jsonData.data[i].problem_category, 3]);
+                var category = [];
+                category.push('Category');
+                jsonData.data.forEach(function(data) {
+                    category.push(data.problem_category);
+                })
+                category.push({role: 'annotation'});
+
+                var value = [];
+                value.push('Last Week');
+                jsonData.data.forEach(function(data) {
+                    value.push(data.count);
+                })
+                value.push('');
+
+                // console.log(value);
+
+                var data = google.visualization.arrayToDataTable([
+                    category,
+                    value,
+                ]);
+
+                console.log(data);
+
+                var options = {
+                        title: 'Ticket Weekly',
+                    legend: {
+                        position: 'bottom',
+                    },
+                    bar: {
+                        groupWidth: '80%'
+                    },
+                    // isStacked: true
+                };
+                var chart = new google.visualization.BarChart(document.getElementById("barchart_values"));
+                chart.draw(data, options);
             }
-            console.log(data);
-
-            var options = {
-                title: 'Ticket Weekly',
-                is3D: true
-            };
-            var chart = new google.visualization.BarChart(document.getElementById("barchart_values"));
-            chart.draw(data, options);
-        }
-    });
-}
+        });
+    }
 </script>
 
 <script type="text/javascript">

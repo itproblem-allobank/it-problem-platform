@@ -32,6 +32,10 @@ Route::get('/data/export', 'DataController@export')->name('data.export');
 
 Route::get('/data/cetak_pdf', 'DataController@cetak_pdf')->name('data.cetakpdf');
 
+
+//Charts
+Route::get('/chart/weekly', 'ChartsController@weekly')->name('chart.weekly');
+
 Route::get('/about', function () {
     return view('about');
 })->name('about');
