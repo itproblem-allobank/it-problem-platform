@@ -136,8 +136,7 @@
             processing: true,
             serverSide: true,
             ajax: "{{ route('data.getdata') }}",
-            columns: [
-                {
+            columns: [{
                     "render": function() {
                         return i++;
                     }
@@ -207,7 +206,6 @@
             'medium': medium,
             'low': low + lowest
         };
-        console.log(datajira);
 
         var data = google.visualization.arrayToDataTable([
             ['Priority', 'Total'],
@@ -244,7 +242,9 @@
                 jsonData.data.forEach(function(data) {
                     category.push(data.problem_category);
                 })
-                category.push({role: 'annotation'});
+                category.push({
+                    role: 'annotation'
+                });
 
                 var value = [];
                 value.push('Last Week');
@@ -253,19 +253,16 @@
                 })
                 value.push('');
 
-                // console.log(value);
-
                 var data = google.visualization.arrayToDataTable([
                     category,
                     value,
                 ]);
 
-                console.log(data);
-
                 var options = {
-                        title: 'Ticket Weekly',
+                    title: 'Ticket Weekly',
                     legend: {
                         position: 'bottom',
+                        maxlines: 2,
                     },
                     bar: {
                         groupWidth: '80%'
@@ -286,23 +283,53 @@
     google.charts.setOnLoadCallback(drawChart);
 
     function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-            ['Year', 'Sales', 'Expenses', 'Profit'],
-            ['2014', 1000, 400, 200],
-            ['2015', 1170, 460, 250],
-            ['2016', 660, 1120, 300],
-            ['2017', 1030, 540, 350]
-        ]);
+        $.ajax({
+            url: "{{ route('chart.total') }}",
+            dataType: "json",
+            success: function(jsonData) {
+                var category = [];
+                category.push('Category');
+                jsonData.total.forEach(function(data) {
+                    category.push(data.problem_category);
+                });
 
-        var options = {
-            chart: {
-                title: "Total Ticket Problem",
+                var total = [];
+                total.push('Total');
+                jsonData.total.forEach(function(data) {
+                    total.push(data.count);
+                })
+                // console.log(jsonData.total);
+
+                var closed = [];
+                closed.push('Closed');
+                jsonData.total.forEach(function(data) {
+                    closed.push(data.count);
+                })
+                // console.log(jsonData.closed);
+
+                var data = google.visualization.arrayToDataTable([
+                    category,
+                    total,
+                    closed,
+                ])
+
+                var options = {
+                        title : "Total Ticket Problem",
+                        legend : {
+                            position : "bottom",
+                            maxlines: 2,
+                        },
+                        bar: {
+                        groupWidth: '100%'
+                    },
+
+                };
+
+                var chart = new google.visualization.ColumnChart(document.getElementById('columnchart_material'));
+                chart.draw(data, google.charts.Bar.convertOptions(options));
+
             }
-        };
-
-        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
-
-        chart.draw(data, google.charts.Bar.convertOptions(options));
+        });
     }
 </script>
 

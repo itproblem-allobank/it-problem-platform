@@ -9,10 +9,10 @@ use Maatwebsite\Excel\Concerns\WithStartRow;
 class DataImports implements ToModel, WithStartRow
 {
     /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
+     * @param array $row
+     *
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
 
     public function startRow(): int
     {
@@ -26,11 +26,15 @@ class DataImports implements ToModel, WithStartRow
         $row15 = ($row[15] - 25569) * 86400;
         $updated = gmdate("Y-m-d H:i:s", $row15);
 
+        $str = $row[2];
+        $probcat = explode(" - ", $str);
+        $subcategory = $probcat[1] ?? '';
         //insert
         return new Data([
             'code_jira'         => $row[0],
             'environment'       => $row[1],
-            'problem_category'  => $row[2],
+            'problem_category'  => $probcat[0],
+            'subcategory'       => $subcategory,
             'summary'           => $row[3],
             'zentao_link'       => $row[4],
             'priority'          => $row[5],
