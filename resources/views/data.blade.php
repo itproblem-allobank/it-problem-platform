@@ -305,12 +305,19 @@
                 jsonData.total.forEach(function(data) {
                     closed.push(data.count);
                 })
-                // console.log(jsonData.closed);
+
+                var pending = [];
+                pending.push('Pending');
+                jsonData.total.forEach(function(data) {
+                    pending.push(data.count);
+                })
+                console.log(jsonData.pending);
 
                 var data = google.visualization.arrayToDataTable([
                     category,
                     total,
                     closed,
+                    pending,
                 ])
 
                 var options = {

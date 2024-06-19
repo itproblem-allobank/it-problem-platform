@@ -38,8 +38,12 @@ class ChartsController extends Controller
                 ->get();
 
             $closed = Data::select('problem_category', DB::raw('count(*) as count'))
-                ->where('status', 'Closed')
                 ->groupBy('problem_category')
+                ->get();
+
+            $pending = Data::select('problem_category', DB::raw('count(*) as count'))
+                ->groupBy('problem_category')
+                ->where('status', 'Pending')
                 ->get();
 
             return response()->json([
@@ -48,6 +52,7 @@ class ChartsController extends Controller
                 'data' => $data,
                 'total' => $total,
                 'closed' => $closed,
+                'pending' => $pending,
             ]);
         } catch (\Exception $e) {
             return response()->json([
