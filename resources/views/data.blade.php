@@ -32,6 +32,10 @@
         <a href="/data/cetak_pdf" class="btn btn-primary" target="_blank">CETAK PDF</a>
     </div>
 
+    <!-- {{ $ticket_weekly }} -->
+    @if($ticket_weekly == '[]')
+    <br>
+    @else
     <div class="container-fluid" style="margin-bottom: 25px;">
         <div class="row align-items-start">
             <div class="col">
@@ -45,6 +49,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <div class="container-fluid text-center">
         <div class="card">
@@ -321,12 +326,12 @@
                 ])
 
                 var options = {
-                        title : "Total Ticket Problem",
-                        legend : {
-                            position : "bottom",
-                            maxlines: 2,
-                        },
-                        bar: {
+                    title: "Total Ticket Problem",
+                    legend: {
+                        position: "bottom",
+                        maxlines: 2,
+                    },
+                    bar: {
                         groupWidth: '100%'
                     },
 
