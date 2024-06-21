@@ -29,11 +29,35 @@
         <button type=" button" class="btn btn-primary" data-toggle="modal" data-target="#import">
         Import Data
         </button>
-        <a href="/data/cetak_pdf" class="btn btn-primary" target="_blank">CETAK PDF</a>
+        <!-- <a href="/data/cetak_pdf" class="btn btn-primary" target="_blank">CETAK PDF</a> -->
+        <form action="/chart/print" method="POST" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="weekly" id="weeklyData">
+            <input type="hidden" name="total" id="totalData">
+            <input type="hidden" name="priority" id="priorityData">
+            <input type="submit"  class="btn btn-primary" value="Print Chart">
+        </form>
     </div>
 
+
+    <div class="container-fluid" style="margin-bottom: 25px;">
+        <div class="row align-items-start">
+            <div class="col">
+            <div id="chart_weekly"  style="width: 450px; height: 450px;"></div>
+            </div>
+            <div class="col">
+            <div id="chart_total"  style="width: 450px; height: 450px;"></div>
+            </div>
+            <div class="col">
+                <div id="chart_priority" style="width: 450px; height: 450px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div id="draw-charts"></div> -->
+
     <!-- {{ $ticket_weekly }} -->
-    @if($ticket_weekly == '[]')
+    <!-- @if($ticket_weekly == '[]')
     <br>
     @else
     <div class="container-fluid" style="margin-bottom: 25px;">
@@ -49,7 +73,7 @@
             </div>
         </div>
     </div>
-    @endif
+    @endif -->
 
     <div class="container-fluid text-center">
         <div class="card">
@@ -193,6 +217,207 @@
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
+    $(function() {
+        $("#chart_weekly").append("<div id= 'chart_weekly'></div>");
+        google.charts.load("current", {
+            packages: ["corechart"]
+        });
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            $.ajax({
+                url: "{{ route('chart.weekly') }}",
+                dataType: "json",
+                success: function(jsonData) {
+
+                    var category = [];
+                    category.push('Category');
+                    jsonData.data.forEach(function(data) {
+                        category.push(data.problem_category);
+                    })
+                    category.push({
+                        role: 'annotation'
+                    });
+
+                    var value = [];
+                    value.push('Last Week');
+                    jsonData.data.forEach(function(data) {
+                        value.push(data.count);
+                    })
+                    value.push('');
+
+                    var data = google.visualization.arrayToDataTable([
+                        category,
+                        value,
+                    ]);
+
+                    var options = {
+                        title: 'Ticket Weekly',
+                        legend: {
+                            position: 'bottom',
+                            maxlines: 2,
+                        },
+                        bar: {
+                            groupWidth: '80%'
+                        },
+                        // isStacked: true
+                    };
+
+                    let chart_div = document.getElementById('chart_weekly');
+                    let chart = new google.visualization.BarChart(chart_div);
+
+                    google.visualization.events.addListener(chart, 'ready', function() {
+                        chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+                    });
+
+                    chart.draw(data, options);
+                }
+            });
+        }
+
+        setTimeout(function() {
+            let chartsData = $("#chart_weekly").html();
+            $("#weeklyData").val(chartsData);
+        }, 5000);
+
+    });
+</script>
+
+
+<!-- total -->
+<script type="text/javascript">
+    $(function() {
+        $("#chart_total").append("<div id= 'chart_total'></div>");
+        google.charts.load("current", {
+            packages: ["corechart"]
+        });
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            $.ajax({
+                url: "{{ route('chart.total') }}",
+                dataType: "json",
+                success: function(jsonData) {
+                    var category = [];
+                    category.push('Category');
+                    jsonData.total.forEach(function(data) {
+                        category.push(data.problem_category);
+                    });
+
+                    var total = [];
+                    total.push('Total');
+                    jsonData.total.forEach(function(data) {
+                        total.push(data.count);
+                    })
+                    // console.log(jsonData.total);
+
+                    var closed = [];
+                    closed.push('Closed');
+                    jsonData.total.forEach(function(data) {
+                        closed.push(data.count);
+                    })
+
+                    var pending = [];
+                    pending.push('Pending');
+                    jsonData.total.forEach(function(data) {
+                        pending.push(data.count);
+                    })
+                    console.log(jsonData.pending);
+
+                    var data = google.visualization.arrayToDataTable([
+                        category,
+                        total,
+                        closed,
+                        pending,
+                    ])
+
+                    var options = {
+                        title: "Total Ticket Problem",
+                        legend: {
+                            position: "bottom",
+                            maxlines: 4,
+                        },
+                        bar: {
+                            groupWidth: '100%'
+                        },
+
+                    };
+
+                    let chart_div = document.getElementById('chart_total');
+                    let chart = new google.visualization.ColumnChart(chart_div);
+
+                    google.visualization.events.addListener(chart, 'ready', function() {
+                        chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+                    });
+
+                    chart.draw(data, options);
+                }
+            });
+        }
+
+        setTimeout(function() {
+            let chartsData = $("#chart_total").html();
+            $("#totalData").val(chartsData);
+        }, 5000);
+
+    });
+</script>
+
+
+<!-- piecharts -->
+<script type="text/javascript">
+    $(function() {
+        $("#chart_priority").append("<div id= 'chart_priority'></div>");
+        google.charts.load('current', {
+            'packages': ['corechart']
+        });
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+
+            var highest = <?php echo $highest; ?>;
+            var high = <?php echo $high; ?>;
+            var medium = <?php echo $medium; ?>;
+            var low = <?php echo $low; ?>;
+            var lowest = <?php echo $lowest; ?>;
+
+            var datajira = {
+                'high': highest + high,
+                'medium': medium,
+                'low': low + lowest
+            };
+
+            var data = google.visualization.arrayToDataTable([
+                ['Priority', 'Total'],
+                ['High', highest + high],
+                ['Medium', medium],
+                ['Low', low + lowest]
+            ]);
+
+            var options = {
+                title: 'Ticket Priority',
+                pieSliceText: 'value'
+            };
+
+            let chart_div = document.getElementById('chart_priority');
+            let chart = new google.visualization.PieChart(chart_div);
+
+            google.visualization.events.addListener(chart, 'ready', function() {
+                chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">' ;
+            });
+
+            chart.draw(data, options);
+        }
+        setTimeout(function() {
+            let chartsData = $("#chart_priority").html();
+            $("#priorityData").val(chartsData);
+        }, 5000);
+    });
+</script>
+
+
+
+<!-- <script type="text/javascript">
     google.charts.load('current', {
         'packages': ['corechart']
     });
@@ -343,7 +568,7 @@
             }
         });
     }
-</script>
+</script> -->
 
 
 @endsection

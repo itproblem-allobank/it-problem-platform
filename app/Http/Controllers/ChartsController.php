@@ -4,10 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Data;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\PDF;
 use Carbon\Carbon;
 
 class ChartsController extends Controller
 {
+
+    public function print(Request $request)
+    {
+        // dd($request->all());
+        $table = Data::whereDate('created', '>', now()->subDays(7))->get();
+        $weekly = $request->weekly;
+        $total = $request->total;
+        $priority = $request->priority;
+        $pdf = PDF::loadView('temp', compact('weekly', 'total', 'priority', 'table'));
+        return $pdf->download('charts.pdf');
+    }
+
     public function weekly()
     {
         try {
