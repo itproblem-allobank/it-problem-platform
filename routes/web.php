@@ -28,8 +28,7 @@ Route::put('/profile', 'ProfileController@update')->name('profile.update');
 Route::get('/data', 'DataController@index')->name('data');
 Route::get('/data/getdata', 'DataController@getdata')->name('data.getdata');
 Route::post('/data/import', 'DataController@import')->name('data.import');
-Route::get('/data/export', 'DataController@export')->name('data.export');
-
+Route::post('/data/delete', 'DataController@delete')->name('data.delete');
 Route::get('/data/cetak_pdf', 'DataController@cetak_pdf')->name('data.cetakpdf');
 
 
