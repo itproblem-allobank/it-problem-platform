@@ -19,16 +19,23 @@
     table.fixed td {
         overflow: hidden;
     }
+
+    /* img {
+        width: 500;
+    } */
 </style>
 
 <div>
-    {!! $weekly !!}
-    {!! $total !!}
-    {!! $priority !!}
+    <div class="mt-4">
+        {!! $priority !!}</div>
+    <div class="mt-4">
+        {!! $weekly !!}</div>
+    <div class="mt-4">
+        {!! $total !!}</div>
 </div>
 
 
-<table class='table-bordered fixed'>
+<table class='table-bordered fixed mt-4'>
     <thead>
         <tr>
             <th style="width: 5%">No</th>

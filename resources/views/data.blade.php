@@ -43,14 +43,16 @@
     @else
     <div class="container-fluid" style="margin-bottom: 25px;">
         <div class="row align-items-start">
-            <div class="col">
-                <div id="chart_weekly" style="width: 450px; height: 450px;"></div>
+            <div class="col-8">
+                <div id="chart_weekly"></div>
             </div>
-            <div class="col">
-                <div id="chart_total" style="width: 450px; height: 450px;"></div>
+            <div class="col-4">
+                <div id="chart_priority"></div>
             </div>
-            <div class="col">
-                <div id="chart_priority" style="width: 450px; height: 450px;"></div>
+        </div>
+        <div class="row align-items-start mt-4">
+            <div class="col-12">
+                <div id="chart_total"></div>
             </div>
         </div>
     </div>
@@ -221,17 +223,21 @@
                     category.push('Category');
                     jsonData.data.forEach(function(data) {
                         category.push(data.problem_category);
+                        category.push({
+                            type: 'string',
+                            role: 'annotation'
+                        });
                     })
-                    category.push({
-                        role: 'annotation'
-                    });
 
                     var value = [];
                     value.push('Last Week');
                     jsonData.data.forEach(function(data) {
                         value.push(data.count);
+                        value.push(data.count.toString());
                     })
-                    value.push('');
+
+                    // console.log(category);
+                    // console.log(value);
 
                     var data = google.visualization.arrayToDataTable([
                         category,
@@ -242,10 +248,10 @@
                         title: 'Ticket Weekly',
                         legend: {
                             position: 'bottom',
-                            maxlines: 2,
+                            maxlines: 3,
                         },
                         bar: {
-                            groupWidth: '80%'
+                            groupWidth: '85%'
                         },
                         // isStacked: true
                     };
@@ -254,7 +260,7 @@
                     let chart = new google.visualization.BarChart(chart_div);
 
                     google.visualization.events.addListener(chart, 'ready', function() {
-                        chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+                        chart_div.innerHTML = '<img src="' + chart.getImageURI()  + '"' + 'width="650">';
                     });
 
                     chart.draw(data, options);
@@ -309,7 +315,7 @@
                     jsonData.total.forEach(function(data) {
                         pending.push(data.count);
                     })
-                    console.log(jsonData.pending);
+                    // console.log(jsonData.pending);
 
                     var data = google.visualization.arrayToDataTable([
                         category,
@@ -322,10 +328,10 @@
                         title: "Total Ticket Problem",
                         legend: {
                             position: "bottom",
-                            maxlines: 4,
+                            maxlines: 3,
                         },
                         bar: {
-                            groupWidth: '100%'
+                            groupWidth: '80%'
                         },
 
                     };
@@ -334,7 +340,7 @@
                     let chart = new google.visualization.ColumnChart(chart_div);
 
                     google.visualization.events.addListener(chart, 'ready', function() {
-                        chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+                        chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + 'width="700">';
                     });
 
                     chart.draw(data, options);
@@ -390,7 +396,7 @@
             let chart = new google.visualization.PieChart(chart_div);
 
             google.visualization.events.addListener(chart, 'ready', function() {
-                chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+                chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + 'width="400">';
             });
 
             chart.draw(data, options);
