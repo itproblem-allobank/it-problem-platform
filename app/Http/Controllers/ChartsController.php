@@ -11,14 +11,31 @@ use Carbon\Carbon;
 class ChartsController extends Controller
 {
 
+    public function index() {
+        $table = Data::whereDate('created', '>', now()->subDays(7))->get();
+        $highest = Data::where('Priority', 'Highest')->get()->count();
+        $high = Data::where('Priority', 'High')->get()->count();
+        $medium = Data::where('Priority', 'Medium')->get()->count();
+        $low = Data::where('Priority', 'Low')->get()->count();
+        $lowest = Data::where('Priority', 'Lowest')->get()->count();
+    
+        // ticket weekly
+        $ticket_weekly = Data::whereDate('created', '>', now()->subDays(7))->get();
+    
+    
+        return view('charts', compact( 'highest', 'high', 'medium', 'low', 'lowest', 'ticket_weekly', 'table')); 
+    }
+
     public function print(Request $request)
     {
         // dd($request->all());
+        $today = Carbon::today();
+        // dd($today);
         $table = Data::whereDate('created', '>', now()->subDays(7))->get();
         $weekly = $request->weekly;
         $total = $request->total;
         $priority = $request->priority;
-        $pdf = PDF::loadView('temp', compact('weekly', 'total', 'priority', 'table'));
+        $pdf = PDF::loadView('temp', compact('weekly', 'total', 'priority', 'table', 'today'));
         return $pdf->download('charts.pdf');
     }
 

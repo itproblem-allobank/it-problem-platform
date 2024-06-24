@@ -1,5 +1,4 @@
 @extends('layouts.admin')
-
 @section('main-content')
 <!-- Page Heading -->
 <h1 class="h3 mb-4 text-gray-800">{{ __('Data') }}</h1>
@@ -26,16 +25,16 @@
 
 <body>
     <div style="margin-left: 25px; margin-bottom: 15px"">
-        <form action=" /chart/print" method="POST" enctype="multipart/form-data">
-        @csrf
-        <input type="hidden" name="weekly" id="weeklyData">
-        <input type="hidden" name="total" id="totalData">
-        <input type="hidden" name="priority" id="priorityData">
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#import">Import Data</button>
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#delete">Delete Data</button>
-        <button type="submit" class="btn btn-primary">Export to PDF</button>
-        </form>
+        <button type=" button" class="btn btn-primary" data-toggle="modal" data-target="#import">Import Data</button>
+        @if($ticket_weekly == '[]')
+        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#delete" disabled>Delete Data</button>
+        <button type="button" class="btn btn-danger" disabled>Export to PDF</button>
+        @else
+        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#delete">Delete Data</button>
+        <a href="{{ route('chart.index') }}" class="btn btn-danger">Export to PDF</a>
+        @endif
     </div>
+
 
 
     @if($ticket_weekly == '[]')
@@ -207,7 +206,6 @@
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
     $(function() {
-        $("#chart_weekly").append("<div id= 'chart_weekly'></div>");
         google.charts.load("current", {
             packages: ["corechart"]
         });
@@ -259,9 +257,9 @@
                     let chart_div = document.getElementById('chart_weekly');
                     let chart = new google.visualization.BarChart(chart_div);
 
-                    google.visualization.events.addListener(chart, 'ready', function() {
-                        chart_div.innerHTML = '<img src="' + chart.getImageURI()  + '"' + 'width="650">';
-                    });
+                    // google.visualization.events.addListener(chart, 'ready', function() {
+                    //     chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + 'width="650">';
+                    // });
 
                     chart.draw(data, options);
                 }
@@ -280,7 +278,6 @@
 <!-- total -->
 <script type="text/javascript">
     $(function() {
-        $("#chart_total").append("<div id= 'chart_total'></div>");
         google.charts.load("current", {
             packages: ["corechart"]
         });
@@ -295,12 +292,17 @@
                     category.push('Category');
                     jsonData.total.forEach(function(data) {
                         category.push(data.problem_category);
+                        category.push({
+                            type: 'string',
+                            role: 'annotation'
+                        });
                     });
 
                     var total = [];
                     total.push('Total');
                     jsonData.total.forEach(function(data) {
                         total.push(data.count);
+                        total.push(data.count.toString());
                     })
                     // console.log(jsonData.total);
 
@@ -320,13 +322,19 @@
                     var data = google.visualization.arrayToDataTable([
                         category,
                         total,
-                        closed,
-                        pending,
+                        total,
+                        total,
                     ])
 
                     var options = {
                         title: "Total Ticket Problem",
                         legend: {
+                            annotations: {
+                                alwaysOutside: true,
+                                textStyle: {
+                                    fontSize: 14,
+                                }
+                            },
                             position: "bottom",
                             maxlines: 3,
                         },
@@ -339,9 +347,9 @@
                     let chart_div = document.getElementById('chart_total');
                     let chart = new google.visualization.ColumnChart(chart_div);
 
-                    google.visualization.events.addListener(chart, 'ready', function() {
-                        chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + 'width="700">';
-                    });
+                    // google.visualization.events.addListener(chart, 'ready', function() {
+                    //     chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + 'width="750">';
+                    // });
 
                     chart.draw(data, options);
                 }
@@ -360,7 +368,6 @@
 <!-- piecharts -->
 <script type="text/javascript">
     $(function() {
-        $("#chart_priority").append("<div id= 'chart_priority'></div>");
         google.charts.load('current', {
             'packages': ['corechart']
         });
@@ -395,9 +402,9 @@
             let chart_div = document.getElementById('chart_priority');
             let chart = new google.visualization.PieChart(chart_div);
 
-            google.visualization.events.addListener(chart, 'ready', function() {
-                chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + 'width="400">';
-            });
+            // google.visualization.events.addListener(chart, 'ready', function() {
+            //     chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + 'width="400">';
+            // });
 
             chart.draw(data, options);
         }

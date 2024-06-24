@@ -1,39 +1,46 @@
 <!DOCTYPE html>
 <html>
-<h1>Report IT Problem Weekly</h1>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-
-
 <style type="text/css">
     table tr td,
     table tr th {
         font-size: 8pt;
     }
-
     table.fixed {
         table-layout: fixed;
         width: 100%;
     }
-
     table.fixed td {
         overflow: hidden;
     }
-
-    /* img {
-        width: 500;
-    } */
+    .letter {
+        background-color: #FFFFFF;
+        padding: 20px;
+        height: auto;
+        width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .bordered {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-style: solid;
+        border-color: grey;
+        border-width: 1px;
+    }
 </style>
 
-<div>
-    <div class="mt-4">
+<h1>Report IT Problem Weekly</h1>
+<p>{!! $today->toFormattedDateString() !!}</p>
+
+<div class="mt-2">
+    <div class="bordered">
         {!! $priority !!}</div>
-    <div class="mt-4">
+    <div class="bordered">
         {!! $weekly !!}</div>
-    <div class="mt-4">
+    <div class="bordered">
         {!! $total !!}</div>
 </div>
-
 
 <table class='table-bordered fixed mt-4'>
     <thead>
@@ -58,5 +65,4 @@
         @endforeach
     </tbody>
 </table>
-
 </html>

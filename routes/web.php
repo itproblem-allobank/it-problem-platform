@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth/login');
 });
 
 Auth::routes();
@@ -33,6 +33,7 @@ Route::get('/data/cetak_pdf', 'DataController@cetak_pdf')->name('data.cetakpdf')
 
 
 //Charts
+Route::get('/chart/view', 'ChartsController@index')->name('chart.index');
 Route::get('/chart/weekly', 'ChartsController@weekly')->name('chart.weekly');
 Route::get('/chart/total', 'ChartsController@total')->name('chart.total');
 Route::post('/chart/print', 'ChartsController@print')->name('chart.print');
