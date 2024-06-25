@@ -11,19 +11,23 @@ use Carbon\Carbon;
 class ChartsController extends Controller
 {
 
-    public function index() {
+    public function index()
+    {
+        $datacategory = Data::all()->groupBy('problem_category');
+
+        // dd($datacategory['Paylater']);
         $table = Data::whereDate('created', '>', now()->subDays(7))->get();
         $highest = Data::where('Priority', 'Highest')->get()->count();
         $high = Data::where('Priority', 'High')->get()->count();
         $medium = Data::where('Priority', 'Medium')->get()->count();
         $low = Data::where('Priority', 'Low')->get()->count();
         $lowest = Data::where('Priority', 'Lowest')->get()->count();
-    
+
         // ticket weekly
         $ticket_weekly = Data::whereDate('created', '>', now()->subDays(7))->get();
-    
-    
-        return view('charts', compact( 'highest', 'high', 'medium', 'low', 'lowest', 'ticket_weekly', 'table')); 
+
+
+        return view('charts', compact('datacategory', 'highest', 'high', 'medium', 'low', 'lowest', 'ticket_weekly', 'table'));
     }
 
     public function print(Request $request)

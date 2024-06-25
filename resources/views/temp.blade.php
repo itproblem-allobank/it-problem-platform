@@ -6,13 +6,16 @@
     table tr th {
         font-size: 8pt;
     }
+
     table.fixed {
         table-layout: fixed;
         width: 100%;
     }
+
     table.fixed td {
         overflow: hidden;
     }
+
     .letter {
         background-color: #FFFFFF;
         padding: 20px;
@@ -21,12 +24,21 @@
         margin-left: auto;
         margin-right: auto;
     }
+
     .bordered {
         padding: 10px;
         margin-bottom: 10px;
         border-style: solid;
         border-color: grey;
         border-width: 1px;
+    }
+
+    th {
+        text-align: center;
+    }
+
+    tr {
+        text-align: center;
     }
 </style>
 
@@ -40,6 +52,69 @@
         {!! $weekly !!}</div>
     <div class="bordered">
         {!! $total !!}</div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <table class="table-bordered fixed">
+            <thead>
+                <tr>
+                    <th>Paylater</th>
+                </tr>
+            </thead>
+        </table>
+        <table class="table-bordered fixed">
+            <thead>
+                <tr>
+                    <th>H</th>
+                    <th>M</th>
+                    <th>L</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col">
+        <table class="table-bordered fixed">
+            <thead>
+                <tr>
+                    <th>Onboarding</th>
+                </tr>
+            </thead>
+        </table>
+        <table class="table-bordered fixed">
+            <thead>
+                <tr>
+                    <th>H</th>
+                    <th>M</th>
+                    <th>L</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <table class='table-bordered fixed mt-4'>
@@ -65,4 +140,5 @@
         @endforeach
     </tbody>
 </table>
+
 </html>

@@ -41,6 +41,14 @@
             border-color: grey;
             border-width: 1px;
         }
+
+        th {
+            text-align: center;
+        }
+
+        tr {
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -61,6 +69,72 @@
             <div class="bordered" id="chart_weekly"></div>
             <div class="bordered" id="chart_total"></div>
         </div>
+
+        <!-- {{!! $datacategory !!}} -->
+
+        <div class="row">
+            <div class="col">
+                <table class="table-bordered fixed">
+                    <thead>
+                        <tr>
+                            <th>Paylater</th>
+                        </tr>
+                    </thead>
+                </table>
+                <table class="table-bordered fixed">
+                    <thead>
+                        <tr>
+                            <th>H</th>
+                            <th>M</th>
+                            <th>L</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col">
+                <table class="table-bordered fixed">
+                    <thead>
+                        <tr>
+                            <th>Onboarding</th>
+                        </tr>
+                    </thead>
+                </table>
+                <table class="table-bordered fixed">
+                    <thead>
+                        <tr>
+                            <th>H</th>
+                            <th>M</th>
+                            <th>L</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <table class='table-bordered fixed mt-4'>
             <thead>
                 <tr>
