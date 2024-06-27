@@ -42,103 +42,110 @@
     }
 </style>
 
-<h1>Report IT Problem Weekly</h1>
-<p>{!! $today->toFormattedDateString() !!}</p>
+<body>
+    <div>
+        <h1>Report IT Problem Weekly</h1>
+        <p>{!! $today->toFormattedDateString() !!}</p>
 
-<div class="mt-2">
-    <div class="bordered">
-        {!! $priority !!}</div>
-    <div class="bordered">
-        {!! $weekly !!}</div>
-    <div class="bordered">
-        {!! $total !!}</div>
-</div>
+        <div class="mt-2">
+            <div class="bordered">
+                {!! $priority !!}</div>
+            <div class="bordered">
+                {!! $weekly !!}</div>
+            <div class="bordered">
+                {!! $total !!}</div>
+        </div>
 
-<div class="row">
-    <div class="col">
-        <table class="table-bordered fixed">
+        <div class="row">
+            <div class="col-3">
+                <table class="table-bordered fixed">
+                    <thead>
+                        <tr>
+                            <th>Paylater</th>
+                        </tr>
+                    </thead>
+                </table>
+                <table class="table-bordered fixed">
+                    <thead>
+                        <tr>
+                            <th>H</th>
+                            <th>M</th>
+                            <th>L</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-3">
+                <table class="table-bordered fixed">
+                    <thead>
+                        <tr>
+                            <th>Onboarding</th>
+                        </tr>
+                    </thead>
+                </table>
+                <table class="table-bordered fixed">
+                    <thead>
+                        <tr>
+                            <th>H</th>
+                            <th>M</th>
+                            <th>L</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <table class='table-bordered fixed mt-4'>
             <thead>
                 <tr>
-                    <th>Paylater</th>
-                </tr>
-            </thead>
-        </table>
-        <table class="table-bordered fixed">
-            <thead>
-                <tr>
-                    <th>H</th>
-                    <th>M</th>
-                    <th>L</th>
+                    <th style="width: 5%">No</th>
+                    <th style="width: 20%">Problem</th>
+                    <th style="width: 30%">Root Cause</th>
+                    <th style="width: 30%">Work Around</th>
+                    <th style="width: 15%">Status</th>
                 </tr>
             </thead>
             <tbody>
+                @php $i=1 @endphp
+                @foreach($table as $d)
                 <tr>
-                    <td>1</td>
-                    <td>2</td>
-                    <td>3</td>
+                    <td>{{ $i++ }}</td>
+                    <td>{{ $d->summary }}</td>
+                    <td>{{ $d->root_cause }}</td>
+                    <td>{{ $d->work_around }}</td>
+                    <td>{{ $d->status }} - {{$d->pending_reason}}</td>
                 </tr>
-                <tr>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
-    <div class="col">
-        <table class="table-bordered fixed">
-            <thead>
-                <tr>
-                    <th>Onboarding</th>
-                </tr>
-            </thead>
-        </table>
-        <table class="table-bordered fixed">
-            <thead>
-                <tr>
-                    <th>H</th>
-                    <th>M</th>
-                    <th>L</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>2</td>
-                    <td>3</td>
-                </tr>
-                <tr>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
 
-<table class='table-bordered fixed mt-4'>
-    <thead>
-        <tr>
-            <th style="width: 5%">No</th>
-            <th style="width: 20%">Problem</th>
-            <th style="width: 30%">Root Cause</th>
-            <th style="width: 30%">Work Around</th>
-            <th style="width: 15%">Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @php $i=1 @endphp
-        @foreach($table as $d)
-        <tr>
-            <td>{{ $i++ }}</td>
-            <td>{{ $d->summary }}</td>
-            <td>{{ $d->root_cause }}</td>
-            <td>{{ $d->work_around }}</td>
-            <td>{{ $d->status }} - {{$d->pending_reason}}</td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
+</body>
+
+
 
 </html>

@@ -36,6 +36,7 @@
         }
 
         .bordered {
+            padding: 10px;
             margin-bottom: 10px;
             border-style: solid;
             border-color: grey;
