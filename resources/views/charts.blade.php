@@ -36,7 +36,8 @@
         }
 
         .bordered {
-            padding: 10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
             margin-bottom: 10px;
             border-style: solid;
             border-color: grey;
@@ -71,7 +72,7 @@
             <div class="bordered" id="chart_total"></div>
         </div>
 
-        <!-- {{!! $datacategory !!}} -->
+        <!-- <div>{{$priority}}</div> -->
 
         <div class="row">
             <div class="col">

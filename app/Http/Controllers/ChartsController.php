@@ -13,9 +13,24 @@ class ChartsController extends Controller
 
     public function index()
     {
-        $datacategory = Data::all()->groupBy('problem_category');
+    //     $priority = Data::where([
+    //         'problem_category' => 'Paylater',
+    //         'priority' => 'High',
+    //  ])->get()->count();
 
-        // dd($datacategory['Paylater']);
+    $priority = Data::all()->transform(function ($item) {
+        return [
+            'problem_category' => $item->problem_category,
+            'priority' => [
+                'High'=> $item->priority == 'High',
+                'Medium'=> $item->priority == 'Medium',
+                'Low'=> $item->priority == 'Low',
+            ]
+        ];
+    });
+
+    //   dd($priority);
+
         $table = Data::whereDate('created', '>', now()->subDays(7))->get();
         $highest = Data::where('Priority', 'Highest')->get()->count();
         $high = Data::where('Priority', 'High')->get()->count();
@@ -27,7 +42,7 @@ class ChartsController extends Controller
         $ticket_weekly = Data::whereDate('created', '>', now()->subDays(7))->get();
 
 
-        return view('charts', compact('datacategory', 'highest', 'high', 'medium', 'low', 'lowest', 'ticket_weekly', 'table'));
+        return view('charts', compact('priority', 'highest', 'high', 'medium', 'low', 'lowest', 'ticket_weekly', 'table'));
     }
 
     public function print(Request $request)
