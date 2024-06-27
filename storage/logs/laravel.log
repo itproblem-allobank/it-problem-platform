@@ -11856,7 +11856,7 @@ Did you mean one of these?
 #47 C:\\Syauqi\\automation-reporting\\server.php(21): require_once('C:\\\\Syauqi\\\\autom...')
 #48 {main}
 "} 
-[2024-06-25 06:13:43] local.ERROR: Undefined constant App\Providers\RouteServiceProvider::HOME {"userId":1,"exception":"[object] (Error(code: 0): Undefined constant App\\Providers\\RouteServiceProvider::HOME at C:\\Syauqi\\automation-reporting\\app\\Http\\Middleware\\RedirectIfAuthenticated.php:24)
+[2024-06-25 06:13:43] local.ERROR: Undefined constant App\Providers\RouteServiceProvider::DATA {"userId":1,"exception":"[object] (Error(code: 0): Undefined constant App\\Providers\\RouteServiceProvider::DATA at C:\\Syauqi\\automation-reporting\\app\\Http\\Middleware\\RedirectIfAuthenticated.php:24)
 [stacktrace]
 #0 C:\\Syauqi\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): App\\Http\\Middleware\\RedirectIfAuthenticated->handle(Object(Illuminate\\Http\\Request), Object(Closure))
 #1 C:\\Syauqi\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Middleware\\SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
@@ -11900,7 +11900,7 @@ Did you mean one of these?
 #39 C:\\Syauqi\\automation-reporting\\server.php(21): require_once('C:\\\\Syauqi\\\\autom...')
 #40 {main}
 "} 
-[2024-06-25 06:14:27] local.ERROR: Undefined constant App\Providers\RouteServiceProvider::HOME {"userId":1,"exception":"[object] (Error(code: 0): Undefined constant App\\Providers\\RouteServiceProvider::HOME at C:\\Syauqi\\automation-reporting\\app\\Http\\Middleware\\RedirectIfAuthenticated.php:24)
+[2024-06-25 06:14:27] local.ERROR: Undefined constant App\Providers\RouteServiceProvider::DATA {"userId":1,"exception":"[object] (Error(code: 0): Undefined constant App\\Providers\\RouteServiceProvider::DATA at C:\\Syauqi\\automation-reporting\\app\\Http\\Middleware\\RedirectIfAuthenticated.php:24)
 [stacktrace]
 #0 C:\\Syauqi\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): App\\Http\\Middleware\\RedirectIfAuthenticated->handle(Object(Illuminate\\Http\\Request), Object(Closure))
 #1 C:\\Syauqi\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Middleware\\SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
@@ -11944,7 +11944,7 @@ Did you mean one of these?
 #39 C:\\Syauqi\\automation-reporting\\server.php(21): require_once('C:\\\\Syauqi\\\\autom...')
 #40 {main}
 "} 
-[2024-06-25 06:15:25] local.ERROR: Undefined constant App\Providers\RouteServiceProvider::HOME {"userId":1,"exception":"[object] (Error(code: 0): Undefined constant App\\Providers\\RouteServiceProvider::HOME at C:\\Syauqi\\automation-reporting\\app\\Http\\Middleware\\RedirectIfAuthenticated.php:24)
+[2024-06-25 06:15:25] local.ERROR: Undefined constant App\Providers\RouteServiceProvider::DATA {"userId":1,"exception":"[object] (Error(code: 0): Undefined constant App\\Providers\\RouteServiceProvider::DATA at C:\\Syauqi\\automation-reporting\\app\\Http\\Middleware\\RedirectIfAuthenticated.php:24)
 [stacktrace]
 #0 C:\\Syauqi\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): App\\Http\\Middleware\\RedirectIfAuthenticated->handle(Object(Illuminate\\Http\\Request), Object(Closure))
 #1 C:\\Syauqi\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Middleware\\SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
@@ -17431,4 +17431,50 @@ Did you mean one of these?
 #44 C:\\Syauqi\\automation-reporting\\public\\index.php(54): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
 #45 C:\\Syauqi\\automation-reporting\\server.php(21): require_once('C:\\\\Syauqi\\\\autom...')
 #46 {main}
+"} 
+[2024-06-27 13:06:49] local.ERROR: Command "serev" is not defined. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"serev\" is not defined. at G:\\Allo\\automation-reporting\\vendor\\symfony\\console\\Application.php:702)
+[stacktrace]
+#0 G:\\Allo\\automation-reporting\\vendor\\symfony\\console\\Application.php(258): Symfony\\Component\\Console\\Application->find('serev')
+#1 G:\\Allo\\automation-reporting\\vendor\\symfony\\console\\Application.php(167): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#2 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(196): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#3 G:\\Allo\\automation-reporting\\artisan(35): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#4 {main}
+"} 
+[2024-06-27 13:07:02] local.ERROR: Undefined constant App\Providers\RouteServiceProvider::DATA {"exception":"[object] (Error(code: 0): Undefined constant App\\Providers\\RouteServiceProvider::DATA at G:\\Allo\\automation-reporting\\app\\Http\\Controllers\\Auth\\RegisterController.php:32)
+[stacktrace]
+#0 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(944): ReflectionClass->newInstanceArgs(Array)
+#1 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(787): Illuminate\\Container\\Container->build('App\\\\Http\\\\Contro...')
+#2 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1041): Illuminate\\Container\\Container->resolve('App\\\\Http\\\\Contro...', Array, true)
+#3 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(723): Illuminate\\Foundation\\Application->resolve('App\\\\Http\\\\Contro...', Array)
+#4 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1026): Illuminate\\Container\\Container->make('App\\\\Http\\\\Contro...', Array)
+#5 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(279): Illuminate\\Foundation\\Application->make('App\\\\Http\\\\Contro...')
+#6 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(1105): Illuminate\\Routing\\Route->getController()
+#7 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(1036): Illuminate\\Routing\\Route->controllerMiddleware()
+#8 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(818): Illuminate\\Routing\\Route->gatherMiddleware()
+#9 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(800): Illuminate\\Routing\\Router->gatherRouteMiddleware(Object(Illuminate\\Routing\\Route))
+#10 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(784): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#11 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(748): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#12 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(737): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#13 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#14 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(144): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#15 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#16 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#17 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#18 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#19 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#20 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#21 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#22 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#23 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance.php(110): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#24 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#25 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\HandleCors.php(49): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#26 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\TrustProxies.php(57): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(119): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#30 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#31 G:\\Allo\\automation-reporting\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#32 G:\\Allo\\automation-reporting\\public\\index.php(54): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#33 G:\\Allo\\automation-reporting\\server.php(21): require_once('G:\\\\Allo\\\\automat...')
+#34 {main}
 "} 
