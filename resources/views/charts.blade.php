@@ -217,7 +217,7 @@
                     var options = {
                         title: 'Ticket Weekly',
                         legend: {
-                            position: 'bottom',
+                            position: 'top',
                             maxlines: 3,
                         },
                         bar: {
@@ -301,16 +301,11 @@
                     ])
 
                     var options = {
-                        title: "Total Ticket Problem",
+                        title: 'Total Ticket',
+                        chartArea: {height: '55%' },
                         legend: {
-                            annotations: {
-                                alwaysOutside: true,
-                                textStyle: {
-                                    fontSize: 14,
-                                }
-                            },
-                            position: "bottom",
-                            maxLines: 2,
+                            position: 'top',
+                            maxLines: 2
                         },
                         bar: {
                             groupWidth: '80%'

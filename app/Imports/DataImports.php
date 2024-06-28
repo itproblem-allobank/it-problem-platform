@@ -70,7 +70,7 @@ class DataImports implements ToModel, WithStartRow
             ]);
         } else if ($ctr[0] == 'Surrounding Apps' || $ctr[0] == 'E-Statement' || $ctr[0] == 'Message' || $ctr[0] == 'Server' || $ctr[0] == 'Database' || $ctr[0] == 'Requirement') {
             $data = array_merge($data, [
-                'problem' => 'Core System & Surrounding Apps',
+                'problem' => 'Core & Surrounding',
             ]);
         } else if ($ctr[0] == 'Temenos' || $ctr[0] == 'IBB' || $ctr[0] == 'BI Applications' || $ctr[0] == 'Bank Devisa' || $ctr[0] == 'Payroll' ) {
             $data = array_merge($data, [
