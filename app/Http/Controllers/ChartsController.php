@@ -14,13 +14,13 @@ class ChartsController extends Controller
     public function index()
     {
     //     $priority = Data::where([
-    //         'problem_category' => 'Paylater',
+    //         'category' => 'Paylater',
     //         'priority' => 'High',
     //  ])->get()->count();
 
     $priority = Data::all()->transform(function ($item) {
         return [
-            'problem_category' => $item->problem_category,
+            'category' => $item->category,
             'priority' => [
                 'High'=> $item->priority == 'High',
                 'Medium'=> $item->priority == 'Medium',
@@ -62,8 +62,8 @@ class ChartsController extends Controller
     {
         try {
             $data = Data::whereDate('created', '>', now()->subDays(7))
-                ->select('problem_category', DB::raw('count(*) as count'))
-                ->groupBy('problem_category')
+                ->select('category', DB::raw('count(*) as count'))
+                ->groupBy('category')
                 ->get();
             return response()->json([
                 'status' => 'success',
@@ -83,16 +83,17 @@ class ChartsController extends Controller
     {
         try {
             $data = Data::all();
-            $total = Data::select('problem_category', DB::raw('count(*) as count'))
-                ->groupBy('problem_category')
+            $total = Data::select('problem', DB::raw('count(*) as count'))
+                ->groupBy('problem')
                 ->get();
 
-            $closed = Data::select('problem_category', DB::raw('count(*) as count'))
-                ->groupBy('problem_category')
+            $closed = Data::select('problem', DB::raw('count(*) as count'))
+                ->where('status', 'Closed')
+                ->groupBy('problem')
                 ->get();
 
-            $pending = Data::select('problem_category', DB::raw('count(*) as count'))
-                ->groupBy('problem_category')
+            $pending = Data::select('problem', DB::raw('count(*) as count'))
+                ->groupBy('problem')
                 ->where('status', 'Pending')
                 ->get();
 

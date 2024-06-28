@@ -163,8 +163,8 @@
                     name: 'environment'
                 },
                 {
-                    data: 'problem_category',
-                    name: 'problem_category'
+                    data: 'category',
+                    name: 'category'
                 },
                 {
                     data: 'summary',
@@ -220,7 +220,7 @@
                     var category = [];
                     category.push('Category');
                     jsonData.data.forEach(function(data) {
-                        category.push(data.problem_category);
+                        category.push(data.category);
                         category.push({
                             type: 'string',
                             role: 'annotation'
@@ -288,11 +288,11 @@
                 url: "{{ route('chart.total') }}",
                 dataType: "json",
                 success: function(jsonData) {
-                    var category = [];
-                    category.push('Category');
+                    var problem = [];
+                    problem.push('Problem');
                     jsonData.total.forEach(function(data) {
-                        category.push(data.problem_category);
-                        category.push({
+                        problem.push(data.problem);
+                        problem.push({
                             type: 'string',
                             role: 'annotation'
                         });
@@ -304,26 +304,30 @@
                         total.push(data.count);
                         total.push(data.count.toString());
                     })
-                    // console.log(jsonData.total);
 
                     var closed = [];
                     closed.push('Closed');
-                    jsonData.total.forEach(function(data) {
+                    jsonData.closed.forEach(function(data) {
                         closed.push(data.count);
+                        closed.push(data.count.toString());
                     })
 
                     var pending = [];
                     pending.push('Pending');
-                    jsonData.total.forEach(function(data) {
+                    jsonData.pending.forEach(function(data) {
                         pending.push(data.count);
+                        pending.push(data.count.toString());
                     })
-                    // console.log(jsonData.pending);
+
+                    // console.log(total);
+                    // console.log(closed);
+                    // console.log(pending);
 
                     var data = google.visualization.arrayToDataTable([
-                        category,
+                        problem,
                         total,
-                        total,
-                        total,
+                        closed,
+                        pending,
                     ])
 
                     var options = {
