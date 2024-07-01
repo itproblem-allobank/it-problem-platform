@@ -36,9 +36,12 @@
         @endif
     </div>
 
+    <div class="card shadow p-4 mb-2">
+        <div id="chart_total"></div>
+    </div>
 
     <div class="card shadow p-4">
-        <table id="getTables" class="table table-striped">
+        <table id="getTables" class="stripe" style="width:100%">
             <thead>
                 <tr>
                     <th>No</th>
@@ -58,11 +61,15 @@
     </div>
 
 </body>
+
+
+
+
+
 <link href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js" defer></script>
-
 <script>
     $(document).ready(function () {
         let i = 1;
@@ -71,7 +78,7 @@
             serverSide: true,
             ajax: '{{ route('monthly') }}',
             columns: [
-                { "render": function () { return i++; } },
+                { data: 'id', name: 'id' },
                 { data: 'environment', name: 'environment' },
                 { data: 'problem', name: 'problem' },
                 { data: 'summary', name: 'summary' },
@@ -88,4 +95,113 @@
     });
 </script>
 
+<!-- total -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', {
+        packages: ['corechart', 'bar']
+    });
+    google.charts.setOnLoadCallback(drawColColors);
+
+    function drawColColors() {
+        $.ajax({
+            url: "{{ route('monthly.chart') }}",
+            dataType: "json",
+            success: function(jsonData) {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Category');
+                data.addColumn('number', 'High');
+                data.addColumn({
+                    type: 'string',
+                    role: 'annotation'
+                })
+                data.addColumn('number', 'Medium');
+                data.addColumn({
+                    type: 'string',
+                    role: 'annotation'
+                })
+                data.addColumn('number', 'Low');
+                data.addColumn({
+                    type: 'string',
+                    role: 'annotation'
+                })
+
+                tempdata = [];
+
+                jsonData.total.forEach(function(data) {
+                    tempdata.push([data.problem, data.total, data.total.toString(), data.total, data.total.toString(), data.total, data.total.toString()])
+                })
+
+                console.log(tempdata);
+
+                data.addRows(tempdata);
+
+                var options = {
+                    title: 'Monthly Report IT Problem',
+                    colors: ['#B22222', '#FFA500', '#9ACD32'],
+                    isStacked: true,
+
+                };
+
+                var chart = new google.visualization.ColumnChart(document.getElementById('chart_total'));
+                chart.draw(data, options);
+            },
+        });
+    }
+</script>
+
 @endsection
+
+
+<!-- modal import -->
+<div class="modal fade" id="import" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('monthly.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>PILIH FILE</label>
+                        <input type="file" name="file" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" class="btn btn-success">IMPORT</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- modal delete -->
+<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('monthly.delete') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Apakah Anda yakin ingin menghapus semua data ini?</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batalkan</button>
+                    <button type="submit" class="btn btn-success">Yakin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

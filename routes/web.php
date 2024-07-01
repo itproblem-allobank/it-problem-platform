@@ -40,6 +40,9 @@ Route::post('/chart/print', 'ChartsController@print')->name('chart.print');
 
 //monthly
 Route::get('/monthly', 'MonthlyController@index')->name('monthly');
+Route::post('/monthly/import', 'MonthlyController@import')->name('monthly.import');
+Route::post('/monthly/delete', 'MonthlyController@delete')->name('monthly.delete');
+Route::get('/monthly/chart', 'MonthlyController@chart')->name('monthly.chart');
 
 Route::get('/about', function () {
     return view('about');
