@@ -38,6 +38,9 @@ Route::get('/chart/weekly', 'ChartsController@weekly')->name('chart.weekly');
 Route::get('/chart/total', 'ChartsController@total')->name('chart.total');
 Route::post('/chart/print', 'ChartsController@print')->name('chart.print');
 
+//monthly
+Route::get('/monthly', 'MonthlyController@index')->name('monthly');
+
 Route::get('/about', function () {
     return view('about');
 })->name('about');
