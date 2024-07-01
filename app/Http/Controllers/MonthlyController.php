@@ -19,10 +19,11 @@ class MonthlyController extends Controller
 
     public function index()
     {
+        
+        $data = Data::all();
         if (request()->ajax()) {
             return DataTables::make(Data::all())->make(true);
         }
-        $data = Data::whereDate('created', '>', now()->subDays(30))->get();
         return view('monthly', compact('data'));
     }
 }
