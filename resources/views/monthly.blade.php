@@ -37,7 +37,12 @@
     </div>
 
     <div class="card shadow p-4 mb-2">
-        <div id="chart_total"></div>
+        <div class="row">
+            <div class="col-4" id="chart_total"></div>
+            <div class="col-4" id="chart_test"></div>
+            <div class="col-4" id="chart_test1"></div>
+
+        </div>
     </div>
 
     <div class="card shadow p-4">
@@ -107,7 +112,7 @@
         $.ajax({
             url: "{{ route('monthly.chart') }}",
             dataType: "json",
-            success: function(jsonData) {
+            success: function (jsonData) {
                 var data = new google.visualization.DataTable();
                 data.addColumn('string', 'Category');
                 data.addColumn('number', 'High');
@@ -115,7 +120,7 @@
                     type: 'string',
                     role: 'annotation'
                 })
-                data.addColumn('number', 'Medium');
+                data.addColumn('number', 'Med');
                 data.addColumn({
                     type: 'string',
                     role: 'annotation'
@@ -128,8 +133,8 @@
 
                 tempdata = [];
 
-                jsonData.total.forEach(function(data) {
-                    tempdata.push([data.problem, data.total, data.total.toString(), data.total, data.total.toString(), data.total, data.total.toString()])
+                jsonData.total.forEach(function (data) {
+                    tempdata.push([data.problem + ': ' + data.total, data.high, data.high.toString(), data.medium, data.medium.toString(), data.low, data.low.toString()])
                 })
 
                 console.log(tempdata);
@@ -137,9 +142,15 @@
                 data.addRows(tempdata);
 
                 var options = {
-                    title: 'Monthly Report IT Problem',
+                    height: 400,
+                    title: 'Ticket Total',
                     colors: ['#B22222', '#FFA500', '#9ACD32'],
                     isStacked: true,
+                    annotations: {
+                        textStyle: {
+                            fontSize: 10,
+                        },
+                    },
 
                 };
 
@@ -147,7 +158,115 @@
                 chart.draw(data, options);
             },
         });
-    }
+    }
+</script>
+
+<script type="text/javascript">
+    google.charts.load('current', {
+        packages: ['corechart', 'bar']
+    });
+    google.charts.setOnLoadCallback(drawColColors);
+
+    function drawColColors() {
+        $.ajax({
+            url: "{{ route('monthly.chart') }}",
+            dataType: "json",
+            success: function (jsonData) {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Category');
+                data.addColumn('number', 'High');
+                data.addColumn({
+                    type: 'string',
+                    role: 'annotation'
+                })
+                data.addColumn('number', 'Med');
+                data.addColumn({
+                    type: 'string',
+                    role: 'annotation'
+                })
+                data.addColumn('number', 'Low');
+                data.addColumn({
+                    type: 'string',
+                    role: 'annotation'
+                })
+
+                tempdata = [];
+
+                jsonData.pending.forEach(function (data) {
+                    tempdata.push([data.problem + ': ' + data.total, data.high, data.high.toString(), data.medium, data.medium.toString(), data.low, data.low.toString()])
+                })
+
+                console.log(tempdata);
+
+                data.addRows(tempdata);
+
+                var options = {
+                    height: 400,
+                    title: 'Ticket Pending',
+                    colors: ['#B22222', '#FFA500', '#9ACD32'],
+                    isStacked: true,
+
+                };
+
+                var chart = new google.visualization.ColumnChart(document.getElementById('chart_test'));
+                chart.draw(data, options);
+            },
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    google.charts.load('current', {
+        packages: ['corechart', 'bar']
+    });
+    google.charts.setOnLoadCallback(drawColColors);
+
+    function drawColColors() {
+        $.ajax({
+            url: "{{ route('monthly.chart') }}",
+            dataType: "json",
+            success: function (jsonData) {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Category');
+                data.addColumn('number', 'High');
+                data.addColumn({
+                    type: 'string',
+                    role: 'annotation'
+                })
+                data.addColumn('number', 'Med');
+                data.addColumn({
+                    type: 'string',
+                    role: 'annotation'
+                })
+                data.addColumn('number', 'Low');
+                data.addColumn({
+                    type: 'string',
+                    role: 'annotation'
+                })
+
+                tempdata = [];
+
+                jsonData.closed.forEach(function (data) {
+                    tempdata.push([data.problem + ': ' + data.total, data.high, data.high.toString(), data.medium, data.medium.toString(), data.low, data.low.toString()])
+                })
+
+                console.log(tempdata);
+
+                data.addRows(tempdata);
+
+                var options = {
+                    height: 400,
+                    title: 'Ticket Closed',
+                    colors: ['#B22222', '#FFA500', '#9ACD32'],
+                    isStacked: true,
+
+                };
+
+                var chart = new google.visualization.ColumnChart(document.getElementById('chart_test1'));
+                chart.draw(data, options);
+            },
+        });
+    }
 </script>
 
 @endsection

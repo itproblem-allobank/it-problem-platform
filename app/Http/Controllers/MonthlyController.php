@@ -59,13 +59,61 @@ class MonthlyController extends Controller
     public function chart()
     {
         try {
-            $data = Data::all();
-            $total = Data::select('problem', DB::raw('count(*) as total'))->groupBy('problem')->get();
+            $problem = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+            $total = [];
+            foreach ($problem as $key => $value) {
+                $highest = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Highest')->get()->count();
+                $high = Data::where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
+                $medium = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
+                $low = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
+                $lowest = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Lowest')->get()->count();
+                $total[] = [
+                    'problem' => $value->problem,
+                    'total' => $value->count,
+                    'high' => $highest+$high,
+                    'medium' => $medium,
+                    'low' => $low+$lowest,
+                ];
+            }
+            $problem_pending = Data::where('status', '=', 'Pending')->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+            $pending = [];
+            foreach ($problem_pending as $key => $value) {
+                $highest = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Highest')->get()->count();
+                $high = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
+                $medium = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
+                $low = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
+                $lowest = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Lowest')->get()->count();
+                $pending[] = [
+                    'problem' => $value->problem,
+                    'total' => $value->count,
+                    'high' => $highest+$high,
+                    'medium' => $medium,
+                    'low' => $low+$lowest,
+                ];
+            }
+            $problem_closed = Data::where('status', '=', 'Closed')->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+            $closed = [];
+            foreach ($problem_closed as $key => $value) {
+                $highest = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Highest')->get()->count();
+                $high = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'High')->get()->count();
+                $medium = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Medium')->get()->count();
+                $low = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Low')->get()->count();
+                $lowest = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Lowest')->get()->count();
+                $closed[] = [
+                    'problem' => $value->problem,
+                    'total' => $value->count,
+                    'high' => $highest+$high,
+                    'medium' => $medium,
+                    'low' => $low+$lowest,
+                ];
+            }
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Get all data success',
-                'data' => $data,
-                'total' => $total
+                'total' => $total,
+                'pending' => $pending,
+                'closed' => $closed,
             ]);
         } catch (\Exception $e) {
             return response()->json([
