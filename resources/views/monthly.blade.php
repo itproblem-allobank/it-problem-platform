@@ -29,10 +29,10 @@
         @if($data == '[]')
         <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#delete" disabled>Delete
             Data</button>
-        <button type="button" class="btn btn-danger" disabled>Export to PDF</button>
+        <button type="button" class="btn btn-danger" disabled>Export to Word</button>
         @else
         <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#delete">Delete Data</button>
-        <a href="{{ route('chart.index') }}" class="btn btn-danger">Export to PDF</a>
+        <a href="{{ route('monthly.export') }}" class="btn btn-danger">Export to Word</a>
         @endif
     </div>
 
@@ -42,6 +42,10 @@
             <div class="col-4" id="chart_pending"></div>
             <div class="col-4" id="chart_closed"></div>
         </div>
+    </div>
+
+    <div>
+        <p id="image_total"></p>
     </div>
 
     <div class="card shadow p-4">
@@ -177,8 +181,16 @@
                     },
 
                 };
+                var image_url = [];
+                let chart_div = document.getElementById('chart_total');
+                var chart = new google.visualization.ColumnChart(chart_div);
+                google.visualization.events.addListener(chart, 'ready', function() {
+                    chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + '>';
+                    image_url.push(chart.getImageURI());
+                });
 
-                var chart = new google.visualization.ColumnChart(document.getElementById('chart_total'));
+                console.log(image_url);
+                document.getElementById("image_total").innerHTML = image_url;
                 chart.draw(data, options);
             },
         });
@@ -234,7 +246,11 @@
 
                 };
 
-                var chart = new google.visualization.ColumnChart(document.getElementById('chart_pending'));
+                let chart_div = document.getElementById('chart_pending');
+                var chart = new google.visualization.ColumnChart(chart_div);
+                google.visualization.events.addListener(chart, 'ready', function() {
+                    chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + '>';
+                });
                 chart.draw(data, options);
             },
         });
@@ -291,15 +307,16 @@
 
                 };
 
-                var chart = new google.visualization.ColumnChart(document.getElementById('chart_closed'));
+                let chart_div = document.getElementById('chart_closed');
+                var chart = new google.visualization.ColumnChart(chart_div);
+                google.visualization.events.addListener(chart, 'ready', function() {
+                    chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + '>';
+                });
                 chart.draw(data, options);
             },
         });
     }
 </script>
-
-@endsection
-
 
 <!-- modal import -->
 <div class="modal fade" id="import" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -353,3 +370,8 @@
         </div>
     </div>
 </div>
+
+
+
+
+@endsection

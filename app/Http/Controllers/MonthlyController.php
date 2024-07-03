@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Data;
-use DataTables;
+use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Imports\DataImports;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\PDF;
+use Exception;
 
 class MonthlyController extends Controller
 {
@@ -50,6 +51,25 @@ class MonthlyController extends Controller
         }
     }
 
+    public function export()
+    {
+    $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        $section = $phpWord->addSection();
+        $description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodoconsequat. Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat nonproident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+        $section->addText('Report IT Problem');
+        $section->addText($description);
+        // $section->addImage($imagedecode);
+
+
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        try {
+
+            $objWriter->save(storage_path('helloWorld.docx'));
+        } catch (Exception $e) {
+        }
+        return response()->download(storage_path('helloWorld.docx'));
+    }
+
     public function delete()
     {
         Data::truncate();
@@ -70,9 +90,9 @@ class MonthlyController extends Controller
                 $total[] = [
                     'problem' => $value->problem,
                     'total' => $value->count,
-                    'high' => $highest+$high,
+                    'high' => $highest + $high,
                     'medium' => $medium,
-                    'low' => $low+$lowest,
+                    'low' => $low + $lowest,
                 ];
             }
             $problem_pending = Data::where('status', '=', 'Pending')->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
@@ -86,9 +106,9 @@ class MonthlyController extends Controller
                 $pending[] = [
                     'problem' => $value->problem,
                     'total' => $value->count,
-                    'high' => $highest+$high,
+                    'high' => $highest + $high,
                     'medium' => $medium,
-                    'low' => $low+$lowest,
+                    'low' => $low + $lowest,
                 ];
             }
             $problem_closed = Data::where('status', '=', 'Closed')->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
@@ -102,9 +122,9 @@ class MonthlyController extends Controller
                 $closed[] = [
                     'problem' => $value->problem,
                     'total' => $value->count,
-                    'high' => $highest+$high,
+                    'high' => $highest + $high,
                     'medium' => $medium,
-                    'low' => $low+$lowest,
+                    'low' => $low + $lowest,
                 ];
             }
 
