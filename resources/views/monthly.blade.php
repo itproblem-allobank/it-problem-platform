@@ -27,22 +27,18 @@
     <div style="margin-left: 25px; margin-bottom: 15px">
         <button type=" button" class="btn btn-primary" data-toggle="modal" data-target="#import">Import Data</button>
         @if($data == '[]')
-        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#delete" disabled>Delete
-            Data</button>
-        <button type="button" class="btn btn-danger" disabled>Export to Word</button>
+        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#delete" disabled>Delete Data</button>
         @else
         <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#delete">Delete Data</button>
-        <a href="{{ route('monthly.export') }}" class="btn btn-danger">Export to Word</a>
+        <form action="{{ route('monthly.export') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="total" id="url_total">
+            <input type="hidden" name="pending" id="url_pending">
+            <input type="hidden" name="closed" id="url_closed">
+            <button type="submit" class="btn btn-danger mt-2">Export to Word</button>
+        </form>
         @endif
     </div>
-
-    <form action="{{ route('monthly.export') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        <input type="hidden" name="total" id="url_total">
-        <input type="hidden" name="pending" id="url_pending">
-        <input type="hidden" name="closed" id="url_closed">
-        <button type="submit">EXPORT WORD</button>
-    </form>
 
     <div id="container_chart" class="card shadow p-4 mb-2">
         <div class="row">
@@ -199,7 +195,7 @@
                 var chart = new google.visualization.ColumnChart(chart_div);
                 google.visualization.events.addListener(chart, 'ready', function() {
                     chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + '>';
-                    
+
                     $("#url_total").val(chart.getImageURI());
                 });
                 chart.draw(data, options);
