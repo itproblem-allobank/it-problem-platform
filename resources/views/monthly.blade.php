@@ -36,6 +36,14 @@
         @endif
     </div>
 
+    <form action="{{ route('monthly.export') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <input type="hidden" name="total" id="url_total">
+        <input type="hidden" name="pending" id="url_pending">
+        <input type="hidden" name="closed" id="url_closed">
+        <button type="submit">EXPORT WORD</button>
+    </form>
+
     <div id="container_chart" class="card shadow p-4 mb-2">
         <div class="row">
             <div class="col-4" id="chart_total"></div>
@@ -44,9 +52,13 @@
         </div>
     </div>
 
-    <div>
-        <p id="image_total"></p>
-    </div>
+    <!-- <div class="card shadow p-4 mb-2">
+        <div class="row">
+            <div class="col-4" id="url_total"></div>
+            <div class="col-4" id="url_pending"></div>
+            <div class="col-4" id="url_closed"></div>
+        </div>
+    </div> -->
 
     <div class="card shadow p-4">
         <table id="getTables" class="stripe" style="width:100%">
@@ -133,12 +145,14 @@
 <!-- total -->
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
+    var image_url = [];
+
     google.charts.load('current', {
         packages: ['corechart', 'bar']
     });
-    google.charts.setOnLoadCallback(drawColColors);
+    google.charts.setOnLoadCallback(drawTotal);
 
-    function drawColColors() {
+    function drawTotal() {
         $.ajax({
             url: "{{ route('monthly.chart') }}",
             dataType: "json",
@@ -181,29 +195,26 @@
                     },
 
                 };
-                var image_url = [];
                 let chart_div = document.getElementById('chart_total');
                 var chart = new google.visualization.ColumnChart(chart_div);
                 google.visualization.events.addListener(chart, 'ready', function() {
                     chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + '>';
-                    image_url.push(chart.getImageURI());
+                    
+                    $("#url_total").val(chart.getImageURI());
                 });
-
-                console.log(image_url);
-                document.getElementById("image_total").innerHTML = image_url;
                 chart.draw(data, options);
             },
         });
     }
-</script>
 
-<script type="text/javascript">
+
+    // pending
     google.charts.load('current', {
         packages: ['corechart', 'bar']
     });
-    google.charts.setOnLoadCallback(drawColColors);
+    google.charts.setOnLoadCallback(drawPending);
 
-    function drawColColors() {
+    function drawPending() {
         $.ajax({
             url: "{{ route('monthly.chart') }}",
             dataType: "json",
@@ -250,20 +261,21 @@
                 var chart = new google.visualization.ColumnChart(chart_div);
                 google.visualization.events.addListener(chart, 'ready', function() {
                     chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + '>';
+
+                    $("#url_pending").val(chart.getImageURI());
                 });
                 chart.draw(data, options);
             },
         });
     }
-</script>
 
-<script type="text/javascript">
+    //closed
     google.charts.load('current', {
         packages: ['corechart', 'bar']
     });
-    google.charts.setOnLoadCallback(drawColColors);
+    google.charts.setOnLoadCallback(drawClosed);
 
-    function drawColColors() {
+    function drawClosed() {
         $.ajax({
             url: "{{ route('monthly.chart') }}",
             dataType: "json",
@@ -311,6 +323,8 @@
                 var chart = new google.visualization.ColumnChart(chart_div);
                 google.visualization.events.addListener(chart, 'ready', function() {
                     chart_div.innerHTML = '<img src="' + chart.getImageURI() + '"' + '>';
+
+                    $("#url_closed").val(chart.getImageURI());
                 });
                 chart.draw(data, options);
             },
