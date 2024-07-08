@@ -38,12 +38,20 @@ class MonthlyController extends Controller
             $medium = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
             $low = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
             $lowest = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Lowest')->get()->count();
+            $highestmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Highest')->where('created' ,'>', now()->subDays(30))->get()->count();
+            $highmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'High')->where('created' ,'>', now()->subDays(30))->get()->count();
+            $mediummonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->where('created' ,'>', now()->subDays(30))->get()->count();
+            $lowmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Low')->where('created' ,'>', now()->subDays(30))->get()->count();
+            $lowestmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Lowest')->where('created' ,'>', now()->subDays(30))->get()->count();
             $total[] = [
                 'problem' => $value->problem,
                 'total' => $value->count,
                 'high' => $highest + $high,
                 'medium' => $medium,
                 'low' => $low + $lowest,
+                'highmonthly' => $highestmonthly + $highmonthly,
+                'mediummonthly' => $mediummonthly,
+                'lowmonthly' => $lowmonthly + $lowestmonthly
             ];
         }
         $data = Data::all();

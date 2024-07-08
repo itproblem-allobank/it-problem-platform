@@ -47,7 +47,7 @@
             <div class="col">
                 <table border="1">
                     <tr>
-                        <th colspan="3" style="text-align: center; padding-left: 10px; padding-right: 10px">{{ $data['problem']}}</td>
+                        <th colspan="3" style="text-align: center; padding-left: 10px; padding-right: 10px">{{ $data['total']}}<br>{{ $data['problem']}}</td>
                     </tr>
                     <tr>
                         <td style="text-align: center;padding-left: 10px; padding-right: 10px">High</td>
@@ -58,6 +58,11 @@
                         <td style="text-align: center;padding-left: 10px; padding-right: 10px">{{ $data['high'] }}</td>
                         <td style="text-align: center;padding-left: 10px; padding-right: 10px">{{ $data['medium'] }}</td>
                         <td style="text-align: center;padding-left: 10px; padding-right: 10px">{{ $data['low'] }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">{{ $data['highmonthly'] }}</td>
+                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">{{ $data['mediummonthly'] }}</td>
+                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">{{ $data['lowmonthly'] }}</td>
                     </tr>
                 </table>
             </div>
