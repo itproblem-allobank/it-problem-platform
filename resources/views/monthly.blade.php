@@ -41,11 +41,15 @@
         @endif
     </div>
 
+    
+    @if($data == '[]')
+    <br>
+    @else
     <div class="card shadow p-4 mb-2">
-        <div class="row">
+        <div class="row mb-4">
             @foreach ($total as $data)
             <div class="col">
-                <table border="1">
+                <table border="1" style="border-radius: 10px">
                     <tr>
                         <th colspan="3" style="text-align: center; padding-left: 10px; padding-right: 10px">{{ $data['total']}}<br>{{ $data['problem']}}</td>
                     </tr>
@@ -68,15 +72,21 @@
             </div>
             @endforeach
         </div>
-    </div>
 
-    <div id="container_chart" class="card shadow p-4 mb-2">
+        <div class="row">
+            <div class="col-6" id="tsp_category"></div>
+            <div class="col-6" id="ticket_yearly"></div>
+        </div>
+    </div>
+    @endif
+
+    <!-- <div id="container_chart" class="card shadow p-4 mb-2">
         <div class="row">
             <div class="col-4" id="chart_total"></div>
             <div class="col-4" id="chart_pending"></div>
             <div class="col-4" id="chart_closed"></div>
         </div>
-    </div>
+    </div> -->
 
     <div class="card shadow p-4">
         <table id="getTables" class="stripe" style="width:100%">
@@ -107,61 +117,112 @@
 <link href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js" defer></script>
-<script>
-    $(document).ready(function() {
-        let i = 1;
-        $('#getTables').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: "{{ route('monthly') }}",
-            columns: [{
-                    data: 'id',
-                    name: 'id'
-                },
-                {
-                    data: 'problem',
-                    name: 'problem'
-                },
-                {
-                    data: 'summary',
-                    name: 'summary'
-                },
-                {
-                    data: 'priority',
-                    name: 'priority'
-                },
-                {
-                    data: 'status',
-                    name: 'status'
-                },
-                {
-                    data: 'impact_analyst',
-                    name: 'impact_analyst'
-                },
-                {
-                    data: 'root_cause',
-                    name: 'root_cause'
-                },
-                {
-                    data: 'work_around',
-                    name: 'work_around'
-                },
-                {
-                    data: 'assignee_to',
-                    name: 'assignee_to'
-                },
-                {
-                    data: 'updated',
-                    name: 'updated'
-                },
-            ],
-            responsive: true
-        });
+
+<!-- New Charts -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', {
+        packages: ['corechart', 'bar']
     });
+    google.charts.setOnLoadCallback(drawTSPCategory);
+
+    function drawTSPCategory() {
+        $.ajax({
+            url: "{{ route('monthly.chartcategory') }}",
+            dataType: "json",
+            success: function(jsonData) {
+
+                category = [];
+                category.push("Status");
+                jsonData.closed.forEach(function(data) {
+                    category.push(data.problem);
+                    category.push({
+                        type: "string",
+                        role: "annotation"
+                    });
+                })
+
+                //declare data closed
+                ticketclosed = [];
+                ticketclosed.push("Closed");
+                jsonData.closed.forEach(function(data) {
+                    ticketclosed.push(data.total);
+                    ticketclosed.push(data.total.toString());
+                })
+
+                //declare data pending
+                ticketpending = [];
+                ticketpending.push("Pending");
+                jsonData.pending.forEach(function(data) {
+                    ticketpending.push(data.total);
+                    ticketpending.push(data.total.toString());
+                })
+
+                //create charts
+                var data = google.visualization.arrayToDataTable([
+                    category,
+                    ticketclosed,
+                    ticketpending,
+                ]);
+
+                var options = {
+                    height: 400,
+                    title: 'Ticket By Category',
+                    annotations: {
+                        textStyle: {
+                            fontSize: 10,
+                        },
+                    },
+
+                };
+                let chart_div = document.getElementById('tsp_category');
+                var chart = new google.visualization.ColumnChart(chart_div);
+                chart.draw(data, options);
+            },
+        });
+    }
+
+    google.charts.load('current', {
+        packages: ['corechart', 'bar']
+    });
+    google.charts.setOnLoadCallback(drawTicketYearly);
+
+    function drawTicketYearly() {
+        $.ajax({
+            url: "{{ route('monthly.chartyearly') }}",
+            dataType: "json",
+            success: function(jsonData) {
+                var data = google.visualization.arrayToDataTable([
+                    ['Status', 'Total', {type: "string",role: "annotation"}, 'Closed', {type: "string",role: "annotation"},'Pending', {type: "string",role: "annotation"},'Work In Progress',{type: "string",role: "annotation"}],
+                    ['2024', jsonData.total2024, jsonData.total2024.toString(), jsonData.closed2024, jsonData.closed2024.toString(), jsonData.pending2024, jsonData.pending2024.toString(), jsonData.wip2024, jsonData.wip2024.toString()],
+                    ['2023', jsonData.total2023, jsonData.total2023.toString(), jsonData.closed2023, jsonData.closed2023.toString(), jsonData.pending2023, jsonData.pending2023.toString(), jsonData.wip2023, jsonData.wip2023.toString()],
+                ]);
+
+                var options = {
+                    title: 'Ticket By Yearly',
+                    height: 400,
+                    legend: {
+                        position: 'top',
+                        // maxLines: 3
+                    },
+                    bar: {
+                        groupWidth: '30%'
+                    },
+                    isStacked: true
+                };
+
+                //create charts
+                let chart_div = document.getElementById('ticket_yearly');
+                var chart = new google.visualization.BarChart(chart_div);
+                chart.draw(data, options);
+            },
+        });
+    }
 </script>
 
+
 <!-- total -->
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
     var image_url = [];
 
@@ -348,6 +409,60 @@
             },
         });
     }
+</script> -->
+
+
+<script>
+    $(document).ready(function() {
+        let i = 1;
+        $('#getTables').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ route('monthly') }}",
+            columns: [{
+                    data: 'id',
+                    name: 'id'
+                },
+                {
+                    data: 'problem',
+                    name: 'problem'
+                },
+                {
+                    data: 'summary',
+                    name: 'summary'
+                },
+                {
+                    data: 'priority',
+                    name: 'priority'
+                },
+                {
+                    data: 'status',
+                    name: 'status'
+                },
+                {
+                    data: 'impact_analyst',
+                    name: 'impact_analyst'
+                },
+                {
+                    data: 'root_cause',
+                    name: 'root_cause'
+                },
+                {
+                    data: 'work_around',
+                    name: 'work_around'
+                },
+                {
+                    data: 'assignee_to',
+                    name: 'assignee_to'
+                },
+                {
+                    data: 'updated',
+                    name: 'updated'
+                },
+            ],
+            responsive: true
+        });
+    });
 </script>
 
 <!-- modal import -->

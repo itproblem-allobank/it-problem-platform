@@ -43,6 +43,8 @@ Route::get('/monthly', 'MonthlyController@index')->name('monthly');
 Route::post('/monthly/import', 'MonthlyController@import')->name('monthly.import');
 Route::post('/monthly/delete', 'MonthlyController@delete')->name('monthly.delete');
 Route::get('/monthly/chart', 'MonthlyController@chart')->name('monthly.chart');
+Route::get('/monthly/chartcategory', 'MonthlyController@chartcategory')->name('monthly.chartcategory');
+Route::get('/monthly/chartyearly', 'MonthlyController@chartyearly')->name('monthly.chartyearly');
 Route::post('/monthly/export', 'MonthlyController@export')->name('monthly.export');
 Route::get('/monthly/pptx', 'MonthlyController@generateppt')->name('monthly.pptx');
 

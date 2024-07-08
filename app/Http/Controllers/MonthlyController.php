@@ -38,11 +38,11 @@ class MonthlyController extends Controller
             $medium = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
             $low = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
             $lowest = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Lowest')->get()->count();
-            $highestmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Highest')->where('created' ,'>', now()->subDays(30))->get()->count();
-            $highmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'High')->where('created' ,'>', now()->subDays(30))->get()->count();
-            $mediummonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->where('created' ,'>', now()->subDays(30))->get()->count();
-            $lowmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Low')->where('created' ,'>', now()->subDays(30))->get()->count();
-            $lowestmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Lowest')->where('created' ,'>', now()->subDays(30))->get()->count();
+            $highestmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Highest')->where('created', '>', now()->subDays(30))->get()->count();
+            $highmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'High')->where('created', '>', now()->subDays(30))->get()->count();
+            $mediummonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->where('created', '>', now()->subDays(30))->get()->count();
+            $lowmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Low')->where('created', '>', now()->subDays(30))->get()->count();
+            $lowestmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Lowest')->where('created', '>', now()->subDays(30))->get()->count();
             $total[] = [
                 'problem' => $value->problem,
                 'total' => $value->count,
@@ -58,7 +58,7 @@ class MonthlyController extends Controller
         if (request()->ajax()) {
             return DataTables::make(Data::all())->make(true);
         }
-        return view('monthly', compact('total','data'));
+        return view('monthly', compact('total', 'data'));
     }
 
     public function import(Request $request)
@@ -131,6 +131,89 @@ class MonthlyController extends Controller
     {
         Data::truncate();
         return redirect()->route('monthly')->with(['success' => 'Data Berhasil Dihapus!']);
+    }
+
+    public function chartcategory()
+    {
+        try {
+            $problem_pending = Data::where('status', '=', 'Pending')->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+            $pending = [];
+            foreach ($problem_pending as $key => $value) {
+                $highest = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Highest')->get()->count();
+                $high = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
+                $medium = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
+                $low = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
+                $lowest = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Lowest')->get()->count();
+                $pending[] = [
+                    'problem' => $value->problem,
+                    'total' => $value->count,
+                    'high' => $highest + $high,
+                    'medium' => $medium,
+                    'low' => $low + $lowest,
+                ];
+            }
+            $problem_closed = Data::where('status', '=', 'Closed')->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+            $closed = [];
+            foreach ($problem_closed as $key => $value) {
+                $highest = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Highest')->get()->count();
+                $high = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'High')->get()->count();
+                $medium = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Medium')->get()->count();
+                $low = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Low')->get()->count();
+                $lowest = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Lowest')->get()->count();
+                $closed[] = [
+                    'problem' => $value->problem,
+                    'total' => $value->count,
+                    'high' => $highest + $high,
+                    'medium' => $medium,
+                    'low' => $low + $lowest,
+                ];
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Get all data success',
+                'pending' => $pending,
+                'closed' => $closed,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Get all data failed',
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function chartyearly() {
+        try {
+            $total2024 = Data::where('created', 'like', '%2024%')->get()->count();
+            $closed2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Closed')->get()->count(); 
+            $pending2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Pending')->get()->count();
+            $wip2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Work In Progress')->get()->count();
+            $total2023 = Data::where('created', 'like', '%2023%')->get()->count();
+            $closed2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Closed')->get()->count(); 
+            $pending2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Pending')->get()->count();
+            $wip2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Work In Progress')->get()->count();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Get all data success',
+                'total2024' => $total2024,
+                'total2023' => $total2023,
+                'closed2024' => $closed2024,
+                'closed2023' => $closed2023,
+                'pending2024' => $pending2024,
+                'pending2023' => $pending2023,
+                'wip2024' => $wip2024,
+                'wip2023' => $wip2023,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Get all data failed',
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function chart()
