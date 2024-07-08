@@ -26,6 +26,7 @@
 <body>
     <div style="margin-left: 25px; margin-bottom: 15px">
         <button type=" button" class="btn btn-primary" data-toggle="modal" data-target="#import">Import Data</button>
+        <a type=" button" class="btn btn-primary" href="{{ route('monthly.pptx') }}">Generate PPTX</a>
         @if($data == '[]')
         <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#delete" disabled>Delete Data</button>
         @else
@@ -40,6 +41,30 @@
         @endif
     </div>
 
+    <div class="card shadow p-4 mb-2">
+        <div class="row">
+            @foreach ($total as $data)
+            <div class="col">
+                <table border="1">
+                    <tr>
+                        <th colspan="3" style="text-align: center; padding-left: 10px; padding-right: 10px">{{ $data['problem']}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">High</td>
+                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">Medium</td>
+                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">Low</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">{{ $data['high'] }}</td>
+                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">{{ $data['medium'] }}</td>
+                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">{{ $data['low'] }}</td>
+                    </tr>
+                </table>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
     <div id="container_chart" class="card shadow p-4 mb-2">
         <div class="row">
             <div class="col-4" id="chart_total"></div>
@@ -47,14 +72,6 @@
             <div class="col-4" id="chart_closed"></div>
         </div>
     </div>
-
-    <!-- <div class="card shadow p-4 mb-2">
-        <div class="row">
-            <div class="col-4" id="url_total"></div>
-            <div class="col-4" id="url_pending"></div>
-            <div class="col-4" id="url_closed"></div>
-        </div>
-    </div> -->
 
     <div class="card shadow p-4">
         <table id="getTables" class="stripe" style="width:100%">

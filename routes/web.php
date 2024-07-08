@@ -44,6 +44,7 @@ Route::post('/monthly/import', 'MonthlyController@import')->name('monthly.import
 Route::post('/monthly/delete', 'MonthlyController@delete')->name('monthly.delete');
 Route::get('/monthly/chart', 'MonthlyController@chart')->name('monthly.chart');
 Route::post('/monthly/export', 'MonthlyController@export')->name('monthly.export');
+Route::get('/monthly/pptx', 'MonthlyController@generateppt')->name('monthly.pptx');
 
 Route::get('/about', function () {
     return view('about');
