@@ -54,9 +54,9 @@
                         <th colspan="3" style="text-align: center; padding-left: 10px; padding-right: 10px">{{ $data['total']}}<br>{{ $data['problem']}}</td>
                     </tr>
                     <tr>
-                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">High</td>
-                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">Medium</td>
-                        <td style="text-align: center;padding-left: 10px; padding-right: 10px">Low</td>
+                        <th style="text-align: center;padding-left: 10px; padding-right: 10px">High</th>
+                        <th style="text-align: center;padding-left: 10px; padding-right: 10px">Medium</th>
+                        <th style="text-align: center;padding-left: 10px; padding-right: 10px">Low</th>
                     </tr>
                     <tr>
                         <td style="text-align: center;padding-left: 10px; padding-right: 10px">{{ $data['high'] }}</td>
@@ -144,7 +144,7 @@
 
                 //declare data closed
                 ticketclosed = [];
-                ticketclosed.push("Closed");
+                ticketclosed.push("Closed " + ': ' + jsonData.closed_total);
                 jsonData.closed.forEach(function(data) {
                     ticketclosed.push(data.total);
                     ticketclosed.push(data.total.toString());
@@ -152,7 +152,7 @@
 
                 //declare data pending
                 ticketpending = [];
-                ticketpending.push("Pending");
+                ticketpending.push("Pending " + ': ' + jsonData.pending_total);
                 jsonData.pending.forEach(function(data) {
                     ticketpending.push(data.total);
                     ticketpending.push(data.total.toString());

@@ -124,7 +124,7 @@ class MonthlyController extends Controller
         }
         return response()->download(storage_path('charts.docx'));
         // Hapus file gambar sementara
-        unlink($image1, $image2, $image3);
+        // unlink($image1, $image2, $image3);
     }
 
     public function delete()
@@ -136,6 +136,7 @@ class MonthlyController extends Controller
     public function chartcategory()
     {
         try {
+            $pending_total = Data::where('status', '=', 'Pending')->get()->count();
             $problem_pending = Data::where('status', '=', 'Pending')->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
             $pending = [];
             foreach ($problem_pending as $key => $value) {
@@ -152,6 +153,7 @@ class MonthlyController extends Controller
                     'low' => $low + $lowest,
                 ];
             }
+            $closed_total = Data::where('status', '=', 'Closed')->get()->count();
             $problem_closed = Data::where('status', '=', 'Closed')->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
             $closed = [];
             foreach ($problem_closed as $key => $value) {
@@ -172,6 +174,8 @@ class MonthlyController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Get all data success',
+                'pending_total' => $pending_total,
+                'closed_total' => $closed_total,
                 'pending' => $pending,
                 'closed' => $closed,
             ]);
@@ -302,13 +306,12 @@ class MonthlyController extends Controller
 
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        $textRun = $shape->createTextRun('Bar Chart Example');
+        $textRun = $shape->createTextRun('Report IT Problem');
         $textRun->getFont()->setBold(true)
             ->setSize(24)
             ->setColor(new Color('FFE06B20'));
 
         // Data untuk chart
-        $categories = ['Category 1', 'Category 2', 'Category 3'];
         $values1 = [10, 20, 30];
         $values2 = [15, 25, 35];
 
@@ -327,8 +330,8 @@ class MonthlyController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
 
         // Tambahkan seri data ke chart
-        $series1 = new Series('Series 1', $categories, $values1);
-        $series2 = new Series('Series 2', $categories, $values2);
+        $series1 = new Series('Series 1', $values1);
+        $series2 = new Series('Series 2',  $values2);
         $chartType->addSeries($series1);
         $chartType->addSeries($series2);
 
