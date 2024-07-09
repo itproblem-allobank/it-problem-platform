@@ -9,15 +9,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Imports\DataImports;
 use Illuminate\Support\Facades\DB;
-use PhpOffice\PhpPresentation\PhpPresentation;
-use PhpOffice\PhpPresentation\IOFactory;
-use PhpOffice\PhpPresentation\Style\Alignment;
-use PhpOffice\PhpPresentation\Style\Color;
-use PhpOffice\PhpPresentation\DocumentLayout;
-use PhpOffice\PhpPresentation\Shape\Chart\Axis;
-use PhpOffice\PhpPresentation\Shape\Chart\Type\Bar;
-use PhpOffice\PhpPresentation\Shape\Chart\Series;
-use PhpOffice\PhpPresentation\Shape\Chart\Legend;
 
 use Exception;
 
@@ -287,82 +278,5 @@ class MonthlyController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
-    }
-
-
-    public function generateppt()
-    {
-        // Buat instance baru dari PhpPresentation
-        $objPHPPresentation = new PhpPresentation();
-
-        // Tambahkan slide baru
-        $currentSlide = $objPHPPresentation->getActiveSlide();
-
-        //set size slide
-        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
-            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
-            ->setCY(700, DocumentLayout::UNIT_PIXEL);
-
-        // Tambahkan teks judul slide
-        $shape = $currentSlide->createRichTextShape()
-            ->setHeight(50)
-            ->setWidth(600)
-            ->setOffsetX(170)
-            ->setOffsetY(50);
-        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $shape->createTextRun('Report IT Problem');
-        $textRun->getFont()->setBold(true)
-            ->setSize(24)
-            ->setColor(new Color('FFE06B20'));
-
-        //set data
-        // $pending_total = Data::where('status', '=', 'Pending')->get()->count();
-        $datachart = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
-
-        // dd($datachart);
-        $resultdata = [];
-        foreach ($datachart as $key => $value) {
-            $status_closed = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
-            $status_pending = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
-            $resultdata[] =
-                [
-                    'problem' => $value->problem,
-                    'total' => $value->count,
-                    'count_closed' => $status_closed,
-                    'count_pending' => $status_pending,
-                ];
-        }
-
-        // dd($resultdata);
-
-        // Tambahkan chart bar ke slide
-        $chartShape = $currentSlide->createChartShape();
-        $chartShape->setHeight(400)
-            ->setWidth(600)
-            ->setOffsetX(170)
-            ->setOffsetY(150);
-
-        // Set judul chart
-        $chartShape->getTitle()->setText('Ticket by Category');
-
-        // Define tipe chart
-        $chartType = new Bar();
-        $chartShape->getPlotArea()->setType($chartType);
-
-        // Tambahkan seri data ke chart
-        foreach ($resultdata as $key => $value) {
-            $series = new Series($value['problem'], [$value['count_closed'], $value['count_pending']]);
-            $chartType->addSeries($series);
-        }
-
-        // Simpan presentasi ke dalam file
-        $filename = 'presentation_' . time() . '.pptx';
-        $savePath = storage_path($filename);
-
-        $writer = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
-        $writer->save($savePath);
-
-        // Return file sebagai response download
-        return response()->download($savePath)->deleteFileAfterSend(true);
     }
 }

@@ -46,7 +46,9 @@ Route::get('/monthly/chart', 'MonthlyController@chart')->name('monthly.chart');
 Route::get('/monthly/chartcategory', 'MonthlyController@chartcategory')->name('monthly.chartcategory');
 Route::get('/monthly/chartyearly', 'MonthlyController@chartyearly')->name('monthly.chartyearly');
 Route::post('/monthly/export', 'MonthlyController@export')->name('monthly.export');
-Route::get('/monthly/pptx', 'MonthlyController@generateppt')->name('monthly.pptx');
+
+//Generate PPT
+Route::get('/ppt/download', 'PPTController@generateppt')->name('ppt.download');
 
 Route::get('/about', function () {
     return view('about');

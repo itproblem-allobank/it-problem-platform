@@ -26,7 +26,7 @@
 <body>
     <div style="margin-left: 25px; margin-bottom: 15px">
         <button type=" button" class="btn btn-primary" data-toggle="modal" data-target="#import">Import Data</button>
-        <a type=" button" class="btn btn-primary" href="{{ route('monthly.pptx') }}">Generate PPTX</a>
+        <a type=" button" class="btn btn-primary" href="{{ route('ppt.download') }}">Generate PPTX</a>
         @if($data == '[]')
         <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#delete" disabled>Delete Data</button>
         @else
