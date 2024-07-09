@@ -127,7 +127,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; <a href="https://github.com/aleckrh" target="_blank">Aleckrh</a>
+                        <span>Copyright &copy; <a href="https://github.com/syauqiueo" target="_blank">Ahmad Syauqi</a>
                             {{ now()->year }}</span>
                     </div>
                 </div>
