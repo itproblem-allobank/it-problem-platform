@@ -13,9 +13,9 @@ use PhpOffice\PhpPresentation\PhpPresentation;
 use PhpOffice\PhpPresentation\IOFactory;
 use PhpOffice\PhpPresentation\Style\Alignment;
 use PhpOffice\PhpPresentation\Style\Color;
-use PhpOffice\PhpPresentation\Style\Font;
-use PhpOffice\PhpPresentation\Shape\Chart\Chart;
-use PhpOffice\PhpPresentation\Shape\Chart\Type\Bar3D;
+use PhpOffice\PhpPresentation\DocumentLayout;
+use PhpOffice\PhpPresentation\Shape\Chart\Axis;
+use PhpOffice\PhpPresentation\Shape\Chart\Type\Bar;
 use PhpOffice\PhpPresentation\Shape\Chart\Series;
 use PhpOffice\PhpPresentation\Shape\Chart\Legend;
 
@@ -188,14 +188,15 @@ class MonthlyController extends Controller
         }
     }
 
-    public function chartyearly() {
+    public function chartyearly()
+    {
         try {
             $total2024 = Data::where('created', 'like', '%2024%')->get()->count();
-            $closed2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Closed')->get()->count(); 
+            $closed2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Closed')->get()->count();
             $pending2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Pending')->get()->count();
             $wip2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Work In Progress')->get()->count();
             $total2023 = Data::where('created', 'like', '%2023%')->get()->count();
-            $closed2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Closed')->get()->count(); 
+            $closed2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Closed')->get()->count();
             $pending2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Pending')->get()->count();
             $wip2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Work In Progress')->get()->count();
 
@@ -297,23 +298,42 @@ class MonthlyController extends Controller
         // Tambahkan slide baru
         $currentSlide = $objPHPPresentation->getActiveSlide();
 
+        //set size slide
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
         // Tambahkan teks judul slide
         $shape = $currentSlide->createRichTextShape()
-            ->setHeight(100)
+            ->setHeight(50)
             ->setWidth(600)
             ->setOffsetX(170)
             ->setOffsetY(50);
-
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
         $textRun = $shape->createTextRun('Report IT Problem');
         $textRun->getFont()->setBold(true)
             ->setSize(24)
             ->setColor(new Color('FFE06B20'));
 
-        // Data untuk chart
-        $values1 = [10, 20, 30];
-        $values2 = [15, 25, 35];
+        //set data
+        // $pending_total = Data::where('status', '=', 'Pending')->get()->count();
+        $datachart = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+
+        // dd($datachart);
+        $resultdata = [];
+        foreach ($datachart as $key => $value) {
+            $status_closed = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
+            $status_pending = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
+            $resultdata[] =
+                [
+                    'problem' => $value->problem,
+                    'total' => $value->count,
+                    'count_closed' => $status_closed,
+                    'count_pending' => $status_pending,
+                ];
+        }
+
+        // dd($resultdata);
 
         // Tambahkan chart bar ke slide
         $chartShape = $currentSlide->createChartShape();
@@ -323,17 +343,17 @@ class MonthlyController extends Controller
             ->setOffsetY(150);
 
         // Set judul chart
-        $chartShape->getTitle()->setText('Sales Data');
+        $chartShape->getTitle()->setText('Ticket by Category');
 
         // Define tipe chart
-        $chartType = new Bar3D();
+        $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
 
         // Tambahkan seri data ke chart
-        $series1 = new Series('Series 1', $values1);
-        $series2 = new Series('Series 2',  $values2);
-        $chartType->addSeries($series1);
-        $chartType->addSeries($series2);
+        foreach ($resultdata as $key => $value) {
+            $series = new Series($value['problem'], [$value['count_closed'], $value['count_pending']]);
+            $chartType->addSeries($series);
+        }
 
         // Simpan presentasi ke dalam file
         $filename = 'presentation_' . time() . '.pptx';
