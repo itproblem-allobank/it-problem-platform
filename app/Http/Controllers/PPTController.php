@@ -13,6 +13,7 @@ use PhpOffice\PhpPresentation\DocumentLayout;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Bar;
 use PhpOffice\PhpPresentation\Shape\Chart\Series;
 use PhpOffice\PhpPresentation\Shape\Drawing\File;
+use PhpOffice\PhpPresentation\Style\Fill;
 
 class PPTController extends Controller
 {
@@ -70,13 +71,120 @@ class PPTController extends Controller
 
         //Slide 2
         $slide2 = $objPHPPresentation->createSlide();
+
+
+        // Tambahkan teks judul slide
+        $shape = $slide2->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(400)
+            ->setOffsetX(50)
+            ->setOffsetY(25);
+        $textRun = $shape->createTextRun('Document Control');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30)->setColor(new Color('FFFFA500'));
+
+        // Add a table for document control details
+        $tableShape = $slide2->createTableShape(2);
+        $tableShape->setWidth(600);
+
+        // Position the table on the slide
+        $tableShape->setOffsetX(50);
+        $tableShape->setOffsetY(120);
+
+        // Function to set cell text with font size
+        function setCellText($row, $cell, $text, $fontSize = 12)
+        {
+            $row->setHeight(60);  // Set row height
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $textRun = $cell->createTextRun($text);
+            $textRun->getFont()->setSize($fontSize);
+            $textRun->getFont()->setColor(new Color('FF000000')); // Black color
+        }
+
+        // Add rows and cells to the table
+        $row = $tableShape->createRow();
+        $cell = $row->nextCell();
+        setCellText($row, $cell, 'Division', 15);
+        $cell = $row->nextCell();
+        setCellText($row, $cell, 'Information Technology Infrastructure & Operations', 15);
+
+        $row = $tableShape->createRow();
+        $cell = $row->nextCell();
+        setCellText($row, $cell, 'Title', 15);
+        $cell = $row->nextCell();
+        setCellText($row, $cell, 'Report Monthly IT Problem', 15);
+
+        $row = $tableShape->createRow();
+        $cell = $row->nextCell();
+        setCellText($row, $cell, 'Version', 15);
+        $cell = $row->nextCell();
+        setCellText($row, $cell, 'Oktober 2023', 15);
+
+        $row = $tableShape->createRow();
+        $cell = $row->nextCell();
+        setCellText($row, $cell, 'Review date', 15);
+        $cell = $row->nextCell();
+        setCellText($row, $cell, '30 Oktober 2023', 15);
+
+        //Text Shape 1
+        $textShape1 = $slide2->createRichTextShape();
+        $textShape1->setHeight(250);
+        $textShape1->setWidth(300);
+        $textShape1->setOffsetX(50);
+        $textShape1->setOffsetY(420);
+        $textShape1->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+        // Create the text run for the left-aligned text
+        $textRun2 = $textShape1->createTextRun("Jakarta, 11 Desember 2023\n\nDisetujui oleh,\n\n\n\n\n");
+        $textRun2->getFont()->setSize(15);
+        $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
+
+        // Create the bold text run for "Iswibowo Isakar"
+        $boldTextRun = $textShape1->createTextRun("Iswibowo Isakar\n");
+        $boldTextRun->getFont()->setSize(15);
+        $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
+        $boldTextRun->getFont()->setBold(true); // Set the text to bold
+
+        // Create the text run for "IT infra Operation"
+        $textRun3 = $textShape1->createTextRun("Information Technology\nInfrastructure & Operations");
+        $textRun3->getFont()->setSize(15);
+        $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
+
+        //Text Shape 2
+        $textShape2 = $slide2->createRichTextShape();
+        $textShape2->setHeight(250);
+        $textShape2->setWidth(300);
+        $textShape2->setOffsetX(800);
+        $textShape2->setOffsetY(420);
+        $textShape2->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+        // Create the text run for the left-aligned text
+        $textRun2 = $textShape2->createTextRun("\n\nDibuat oleh,\n\n\n\n\n");
+        $textRun2->getFont()->setSize(15);
+        $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
+
+        // Create the bold text run for "Tri Intan Siska Permatasari"
+        $boldTextRun = $textShape2->createTextRun("Tri Intan Siska Permatasari\n");
+        $boldTextRun->getFont()->setSize(15);
+        $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
+        $boldTextRun->getFont()->setBold(true); // Set the text to bold
+
+        // Create the text run for "IT Problem Lead"
+        $textRun3 = $textShape2->createTextRun("IT Problem Lead");
+        $textRun3->getFont()->setSize(15);
+        $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
+
+
+
+        //Slide 3
+        $slide3 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
         $backgroundImage->setPath($backgroundImagePath);
         $backgroundImage->setWidth(1280);
         $backgroundImage->setOffsetX(0);
         $backgroundImage->setOffsetY(0);
-        $slide2->addShape($backgroundImage);
+        $slide3->addShape($backgroundImage);
 
 
         $imagePath = storage_path('image/allobank.png');
@@ -85,14 +193,14 @@ class PPTController extends Controller
         $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
         $pictureShape->setOffsetX(1050); // Posisi horizontal gambar
         $pictureShape->setOffsetY(20); // Posisi vertikal gambar
-        $slide2->addShape($pictureShape);
+        $slide3->addShape($pictureShape);
 
         $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
             ->setCX(1280, DocumentLayout::UNIT_PIXEL)
             ->setCY(700, DocumentLayout::UNIT_PIXEL);
 
         // Tambahkan teks judul slide
-        $shape = $slide2->createRichTextShape()
+        $shape = $slide3->createRichTextShape()
             ->setHeight(50)
             ->setWidth(400)
             ->setOffsetX(50)
@@ -101,7 +209,7 @@ class PPTController extends Controller
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
-        $shape = $slide2->createRichTextShape()
+        $shape = $slide3->createRichTextShape()
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(50)
@@ -142,7 +250,7 @@ class PPTController extends Controller
         //loop category data
         foreach ($total as $key => $data) {
             // Tambahkan tabel dengan 4 baris dan 3 kolom
-            $tableShape = $slide2->createTableShape(3);
+            $tableShape = $slide3->createTableShape(3);
             $tableShape->setHeight(100);
             $tableShape->setWidth(150);
             $tableShape->setOffsetX($offsetx);
@@ -214,7 +322,7 @@ class PPTController extends Controller
         }
 
         // Chart 1 
-        $chartShape = $slide2->createChartShape();
+        $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(400)
             ->setWidth(600)
             ->setOffsetX(20)
@@ -241,7 +349,7 @@ class PPTController extends Controller
         $wip2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Work In Progress')->get()->count();
 
         // Chart 2
-        $chartShape = $slide2->createChartShape();
+        $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(400)
             ->setWidth(600)
             ->setOffsetX(650)
