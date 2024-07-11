@@ -23,13 +23,13 @@ class PPTController extends Controller
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
         $backgroundImage->setPath($backgroundImagePath);
-        $backgroundImage->setWidth(1280); 
+        $backgroundImage->setWidth(1280);
         $backgroundImage->setOffsetX(0);
         $backgroundImage->setOffsetY(0);
         $currentSlide->addShape($backgroundImage);
 
 
-        $imagePath = storage_path('image/allobank.png'); 
+        $imagePath = storage_path('image/allobank.png');
         $pictureShape = new File();
         $pictureShape->setPath($imagePath);
         $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
@@ -50,6 +50,15 @@ class PPTController extends Controller
         $textRun = $shape->createTextRun('Report IT Problem');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
+
+        $shape = $currentSlide->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(50)
+            ->setOffsetY(75);
+        $date = date('d F Y');
+        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun->getFont()->setSize(14);
 
         //data container category
         $problem = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
@@ -79,7 +88,7 @@ class PPTController extends Controller
 
         //set tempat
         $offsetx = 50;
-        $offsety = 100;
+        $offsety = 120;
         //loop category data
         foreach ($total as $key => $data) {
             // Tambahkan tabel dengan 4 baris dan 3 kolom
