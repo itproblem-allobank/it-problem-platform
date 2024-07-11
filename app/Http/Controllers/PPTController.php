@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Data;
+use Illuminate\Support\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpPresentation\PhpPresentation;
@@ -308,12 +309,12 @@ class PPTController extends Controller
         }
 
         //set data chart 1
-        $datachart = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
-        $resultdata = [];
-        foreach ($datachart as $key => $value) {
+        $data_chart1 = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        $resultdata_chart1 = [];
+        foreach ($data_chart1 as $key => $value) {
             $status_closed = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
             $status_pending = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
-            $resultdata[] =
+            $resultdata_chart1[] =
                 [
                     'problem' => $value->problem,
                     'total' => $value->count,
@@ -334,20 +335,26 @@ class PPTController extends Controller
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket by Category');
         // Tambahkan seri data ke chart
-        foreach ($resultdata as $key => $value) {
+        foreach ($resultdata_chart1 as $key => $value) {
             $series = new Series($value['problem'], ['Closed' =>  $value['count_closed'], 'Pending' => $value['count_pending']]);
             $chartType->addSeries($series);
         }
 
-        //set data chart 2
-        $total2024 = Data::where('created', 'like', '%2024%')->get()->count();
-        $closed2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Closed')->get()->count();
-        $pending2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Pending')->get()->count();
-        $wip2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Work In Progress')->get()->count();
-        $total2023 = Data::where('created', 'like', '%2023%')->get()->count();
-        $closed2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Closed')->get()->count();
-        $pending2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Pending')->get()->count();
-        $wip2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Work In Progress')->get()->count();
+        // set Data Chart 2
+        $data_chart2 = Data::select(DB::raw('MONTH(created) as month'), DB::raw('count(*) as count'))
+        ->groupBy( DB::raw('MONTH(created)'))
+        ->get();
+        $resultdata_chart2 = [];
+        foreach ($data_chart2 as $key => $value) {
+            $closed = Data::where('status', '=', 'Closed')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
+            $pending = Data::where('status', '=', 'Pending')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
+            $resultdata_chart2[] = [
+                'month' => Carbon::create()->month($value->month)->format('F'),
+                'count' => $value->count,
+                'closed' => $closed,
+                'pending' => $pending
+            ];
+        }
 
         // Chart 2
         $chartShape = $slide3->createChartShape();
@@ -360,16 +367,59 @@ class PPTController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
 
         // Set judul chart
-        $chartShape->getTitle()->setText('Ticket by Yearly');
-        // Tambahkan seri data ke chart  
-        $total = new Series('Total', ['2024' =>  $total2024, '2023' => $total2023]);
-        $closed = new Series('Closed', ['2024' =>  $closed2024, '2023' => $closed2023]);
-        $pending = new Series('Pending', ['2024' =>  $pending2024, '2023' => $pending2023]);
-        $wik = new Series('Work In Progress', ['2024' =>  $wip2024, '2023' => $wip2023]);
-        $chartType->addSeries($total);
-        $chartType->addSeries($closed);
-        $chartType->addSeries($pending);
-        $chartType->addSeries($wik);
+        $chartShape->getTitle()->setText('Ticket by 3 Months');
+
+        $dataclosed = [];
+        foreach ($resultdata_chart2 as $key => $value) {
+            $dataclosed[$value['month']] =$value['closed'];
+        }
+        $datapending = [];
+        foreach ($resultdata_chart2 as $key => $value) {
+            $datapending[$value['month']] =$value['pending'];
+        }
+
+        $series = new Series('Closed', $dataclosed);
+        $series2 = new Series('Pending', $datapending);
+        $chartType->addSeries($series);
+        $chartType->addSeries($series2);
+
+        // foreach ($resultdata_chart2 as $key => $value) {
+        //     $series = new Series($value['month'], ['Closed' =>  $value['closed'], 'Pending' => $value['pending']]);
+        //     $chartType->addSeries($series);
+        // }
+        
+
+        // //set data chart 2
+        // $total2024 = Data::where('created', 'like', '%2024%')->get()->count();
+        // $closed2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Closed')->get()->count();
+        // $pending2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Pending')->get()->count();
+        // $wip2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Work In Progress')->get()->count();
+        // $total2023 = Data::where('created', 'like', '%2023%')->get()->count();
+        // $closed2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Closed')->get()->count();
+        // $pending2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Pending')->get()->count();
+        // $wip2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Work In Progress')->get()->count();
+
+        // // Chart 2
+        // $chartShape = $slide3->createChartShape();
+        // $chartShape->setHeight(400)
+        //     ->setWidth(600)
+        //     ->setOffsetX(650)
+        //     ->setOffsetY(250);
+        // // Define tipe chart
+        // $chartType = new Bar();
+        // $chartShape->getPlotArea()->setType($chartType);
+
+        // // Set judul chart
+        // $chartShape->getTitle()->setText('Ticket by Yearly');
+        // // Tambahkan seri data ke chart  
+        // $total = new Series('Total', ['2024' =>  $total2024, '2023' => $total2023]);
+        // $closed = new Series('Closed', ['2024' =>  $closed2024, '2023' => $closed2023]);
+        // $pending = new Series('Pending', ['2024' =>  $pending2024, '2023' => $pending2023]);
+        // $wik = new Series('Work In Progress', ['2024' =>  $wip2024, '2023' => $wip2023]);
+        // $chartType->addSeries($total);
+        // $chartType->addSeries($closed);
+        // $chartType->addSeries($pending);
+        // $chartType->addSeries($wik);
 
 
         //Slide 4
