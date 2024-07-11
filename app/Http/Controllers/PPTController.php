@@ -95,6 +95,7 @@ class PPTController extends Controller
         function setCellText($row, $cell, $text, $fontSize = 12)
         {
             $row->setHeight(60);  // Set row height
+            $cell->getActiveParagraph()->getAlignment()->setMarginLeft(10);
             $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $textRun = $cell->createTextRun($text);
             $textRun->getFont()->setSize($fontSize);
@@ -252,7 +253,7 @@ class PPTController extends Controller
             // Tambahkan tabel dengan 4 baris dan 3 kolom
             $tableShape = $slide3->createTableShape(3);
             $tableShape->setHeight(100);
-            $tableShape->setWidth(150);
+            $tableShape->setWidth(135);
             $tableShape->setOffsetX($offsetx);
             $tableShape->setOffsetY($offsety);
 
@@ -303,7 +304,7 @@ class PPTController extends Controller
             }
 
             //set tempat box selanjutnya
-            $offsetx = $offsetx + 200;
+            $offsetx = $offsetx + 145;
         }
 
         //set data chart 1
