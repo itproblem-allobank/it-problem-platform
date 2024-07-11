@@ -236,7 +236,7 @@ class PPTController extends Controller
         $chartShape->getTitle()->setText('Ticket by Category');
         // Tambahkan seri data ke chart
         foreach ($resultdata as $key => $value) {
-            $series = new Series($value['problem'], [$value['count_closed'], $value['count_pending']]);
+            $series = new Series($value['problem'], ['Closed' =>  $value['count_closed'], 'Pending' => $value['count_pending']]);
             $chartType->addSeries($series);
         }
 
@@ -263,10 +263,10 @@ class PPTController extends Controller
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket by Yearly');
         // Tambahkan seri data ke chart  
-        $total = new Series('Total', [$total2024, $total2023]);
-        $closed = new Series('Closed', [$closed2024, $closed2023]);
-        $pending = new Series('Pending', [$pending2024, $pending2023]);
-        $wik = new Series('Work In Progress', [$wip2024, $wip2023]);
+        $total = new Series('Total', ['2024' =>  $total2024, '2023' => $total2023]);
+        $closed = new Series('Closed', ['2024' =>  $closed2024, '2023' => $closed2023]);
+        $pending = new Series('Pending', ['2024' =>  $pending2024, '2023' => $pending2023]);
+        $wik = new Series('Work In Progress', [ '2024' =>  $wip2024, '2023' => $wip2023]);
         $chartType->addSeries($total);
         $chartType->addSeries($closed);
         $chartType->addSeries($pending);
