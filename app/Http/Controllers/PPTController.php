@@ -370,6 +370,27 @@ class PPTController extends Controller
         $chartType->addSeries($pending);
         $chartType->addSeries($wik);
 
+
+        //Slide 4
+        $slide4 = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background_end.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide4->addShape($backgroundImage);
+
+        $shape = $slide4->createRichTextShape()
+            ->setHeight(100)
+            ->setWidth(400)
+            ->setOffsetX(120)
+            ->setOffsetY(300);
+        $textRun = $shape->createTextRun('Thankyou');
+        $textRun->getFont()->setBold(true)
+            ->setSize(60)->setColor(new Color('FFFFFF'));
+
+
         // Simpan presentasi ke dalam file
         $filename = 'Report IT Problem ' . date('d F Y') . '.pptx';
         $savePath = storage_path($filename);
