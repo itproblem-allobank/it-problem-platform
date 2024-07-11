@@ -121,16 +121,17 @@ class PPTController extends Controller
                 $textRun->getFont()->setBold(true);
             }
 
-            //row value
-            $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(25);
-            $value = [$data['high'], $data['medium'], $data['low']];
-            foreach ($value as $key => $v) {
-                $cell = $rowShape->nextCell();
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $cell->createTextRun($v);
-            }
+            //row value //dibatalin karna munculin bulanan aja 
+            
+            // $rowShape = $tableShape->createRow();
+            // $rowShape->setHeight(25);
+            // $value = [$data['high'], $data['medium'], $data['low']];
+            // foreach ($value as $key => $v) {
+            //     $cell = $rowShape->nextCell();
+            //     $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            //     $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            //     $cell->createTextRun($v);
+            // }
 
             //row value
             $rowShape = $tableShape->createRow();
@@ -146,67 +147,6 @@ class PPTController extends Controller
             //set tempat box selanjutnya
             $offsetx = $offsetx + 200;
         }
-
-        // Tambahkan baris dan isi sel tabel
-        // for ($row = 0; $row < 4; $row++) {
-        //     $rowShape = $tableShape->createRow();
-        //     for ($col = 0; $col < 3; $col++) {
-        //         $cell = $rowShape->nextCell();
-        //         $cell->createTextRun("Row $row, Cell $col");
-        //         $cell->getBorders()->getBottom()->setLineWidth(1)->setColor(new Color('FF000000'));
-        //         $cell->getBorders()->getTop()->setLineWidth(1)->setColor(new Color('FF000000'));
-        //         $cell->getBorders()->getLeft()->setLineWidth(1)->setColor(new Color('FF000000'));
-        //         $cell->getBorders()->getRight()->setLineWidth(1)->setColor(new Color('FF000000'));
-        //         $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        //     }
-        // }
-        // $offsetx = 50;
-        // $offsety = 100;
-        // foreach ($total as $key => $value) {
-        //     // Create shape (Table)
-        //     $tableShape = $currentSlide->createTableShape(3);
-        //     $tableShape->setHeight(200);
-        //     $tableShape->setWidth(150);
-        //     $tableShape->setOffsetX($offsetx);
-        //     $tableShape->setOffsetY($offsety);
-        //     // Create a row for the title
-        //     $row = $tableShape->createRow();
-        //     $row->setHeight(50);
-        //     $cell = $row->nextCell();
-        //     $cell->setColSpan(3);
-        //     $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        //     $str = strval($value['total']) . ' ' . $value['problem'];
-        //     $str = nl2br(strval($value['total']) . " " . $value['problem']);
-        //     $textRun = $cell->createTextRun($str);
-        //     $textRun->getFont()->setBold(true);
-        //     $textRun->getFont()->setSize(14);
-
-        //     // Create a row for headers
-        //     $row = $tableShape->createRow();
-        //     $row->setHeight(30);
-        //     $headers = ['High', 'Med', 'Low'];
-        //     foreach ($headers as $header) {
-        //         $cell = $row->nextCell();
-        //         $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        //         $textRun = $cell->createTextRun($header);
-        //         $textRun->getFont()->setBold(true);
-        //         $textRun->getFont()->setSize(14);
-        //     }
-
-        //     // Create a row for data
-        //     $row = $tableShape->createRow();
-        //     $row->setHeight(30);
-        //     $data = [$value['high'], $value['medium'], $value['low']];
-        //     foreach ($data as $value) {
-        //         $cell = $row->nextCell();
-        //         $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        //         $textRun = $cell->createTextRun($value);
-        //         $textRun->getFont()->setSize(14);
-        //     }
-
-        //     $offsetx = $offsetx + 200;
-        // }
-
 
         //set data chart 1
         $datachart = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
