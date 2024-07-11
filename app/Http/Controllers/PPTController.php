@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Data;
+use DateTime;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpPresentation\PhpPresentation;
 use PhpOffice\PhpPresentation\IOFactory;
@@ -18,15 +19,64 @@ class PPTController extends Controller
     public function generateppt()
     {
         $objPHPPresentation = new PhpPresentation();
-        $currentSlide = $objPHPPresentation->getActiveSlide();
+        //Slide 1
+        $slide1 = $objPHPPresentation->getActiveSlide();
 
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(350);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(50); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(50); // Posisi vertikal gambar
+        $slide1->addShape($pictureShape);
+
+        //Text
+        $shape = $slide1->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(700)
+            ->setOffsetX(50)
+            ->setOffsetY(300);
+        $textRun = $shape->createTextRun('Report Monthly IT Problem');
+        $textRun->getFont()->setBold(true)
+            ->setSize(32);
+
+        //Divider
+        $lineShape1 = $slide1->createLineShape(50, 370, 1150, 370);
+        $lineShape1->getBorder()->setColor(new Color('FF000000'));
+        $lineShape1->getBorder()->setLineWidth(2);
+
+
+        //Text
+        $shape = $slide1->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1150)
+            ->setOffsetX(50)
+            ->setOffsetY(380);
+        $textRun1 = $shape->createTextRun('Information Technology Infrastructure & Operations No ');
+        $textRun1->getFont()->setBold(true)
+            ->setSize(24);
+        $textRun2 = $shape->createTextRun('002/ITIO-DOC/XI/2023');
+        $textRun2->getFont()->setBold(true)
+            ->setSize(24)->setColor(new Color('FFFF0000'));
+
+        //Text
+        $shape = $slide1->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(280)
+            ->setOffsetX(980)
+            ->setOffsetY(640);
+        $textRun = $shape->createTextRun('PT Allo Bank Indonesia');
+        $textRun->getFont()->setSize(20);
+
+        //Slide 2
+        $slide2 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
         $backgroundImage->setPath($backgroundImagePath);
         $backgroundImage->setWidth(1280);
         $backgroundImage->setOffsetX(0);
         $backgroundImage->setOffsetY(0);
-        $currentSlide->addShape($backgroundImage);
+        $slide2->addShape($backgroundImage);
 
 
         $imagePath = storage_path('image/allobank.png');
@@ -35,14 +85,14 @@ class PPTController extends Controller
         $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
         $pictureShape->setOffsetX(1050); // Posisi horizontal gambar
         $pictureShape->setOffsetY(20); // Posisi vertikal gambar
-        $currentSlide->addShape($pictureShape);
+        $slide2->addShape($pictureShape);
 
         $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
             ->setCX(1280, DocumentLayout::UNIT_PIXEL)
             ->setCY(700, DocumentLayout::UNIT_PIXEL);
 
         // Tambahkan teks judul slide
-        $shape = $currentSlide->createRichTextShape()
+        $shape = $slide2->createRichTextShape()
             ->setHeight(50)
             ->setWidth(400)
             ->setOffsetX(50)
@@ -51,7 +101,7 @@ class PPTController extends Controller
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
-        $shape = $currentSlide->createRichTextShape()
+        $shape = $slide2->createRichTextShape()
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(50)
@@ -92,7 +142,7 @@ class PPTController extends Controller
         //loop category data
         foreach ($total as $key => $data) {
             // Tambahkan tabel dengan 4 baris dan 3 kolom
-            $tableShape = $currentSlide->createTableShape(3);
+            $tableShape = $slide2->createTableShape(3);
             $tableShape->setHeight(100);
             $tableShape->setWidth(150);
             $tableShape->setOffsetX($offsetx);
@@ -122,7 +172,7 @@ class PPTController extends Controller
             }
 
             //row value //dibatalin karna munculin bulanan aja 
-            
+
             // $rowShape = $tableShape->createRow();
             // $rowShape->setHeight(25);
             // $value = [$data['high'], $data['medium'], $data['low']];
@@ -164,7 +214,7 @@ class PPTController extends Controller
         }
 
         // Chart 1 
-        $chartShape = $currentSlide->createChartShape();
+        $chartShape = $slide2->createChartShape();
         $chartShape->setHeight(400)
             ->setWidth(600)
             ->setOffsetX(20)
@@ -191,7 +241,7 @@ class PPTController extends Controller
         $wip2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Work In Progress')->get()->count();
 
         // Chart 2
-        $chartShape = $currentSlide->createChartShape();
+        $chartShape = $slide2->createChartShape();
         $chartShape->setHeight(400)
             ->setWidth(600)
             ->setOffsetX(650)
@@ -206,14 +256,14 @@ class PPTController extends Controller
         $total = new Series('Total', ['2024' =>  $total2024, '2023' => $total2023]);
         $closed = new Series('Closed', ['2024' =>  $closed2024, '2023' => $closed2023]);
         $pending = new Series('Pending', ['2024' =>  $pending2024, '2023' => $pending2023]);
-        $wik = new Series('Work In Progress', [ '2024' =>  $wip2024, '2023' => $wip2023]);
+        $wik = new Series('Work In Progress', ['2024' =>  $wip2024, '2023' => $wip2023]);
         $chartType->addSeries($total);
         $chartType->addSeries($closed);
         $chartType->addSeries($pending);
         $chartType->addSeries($wik);
 
         // Simpan presentasi ke dalam file
-        $filename = 'presentation_' . time() . '.pptx';
+        $filename = 'Report IT Problem ' . date('d F Y') . '.pptx';
         $savePath = storage_path($filename);
         $writer = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
         $writer->save($savePath);
