@@ -47,9 +47,15 @@ Route::get('/monthly/chartcategory', 'MonthlyController@chartcategory')->name('m
 Route::get('/monthly/chartyearly', 'MonthlyController@chartyearly')->name('monthly.chartyearly');
 Route::post('/monthly/export', 'MonthlyController@export')->name('monthly.export');
 
+
+// Page Jiras
+Route::get('/jira', 'JiraController@index')->name('jira.index');
+Route::post('jira/import', 'JiraController@import')->name('jira.import');
+Route::post('/jira/delete', 'JiraController@delete')->name('jira.delete');
+
+// Page Service Request
+Route::get('/service', 'ServiceController@index')->name('service.index');
+Route::post('/service/import', 'ServiceController@import')->name('service.import');
+
 //Generate PPT
 Route::get('/ppt/download', 'PPTController@generateppt')->name('ppt.download');
-
-Route::get('/about', function () {
-    return view('about');
-})->name('about');

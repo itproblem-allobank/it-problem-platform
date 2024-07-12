@@ -67,16 +67,24 @@
                 </a>
             </li>
 
-            <!-- Nav Item - Data -->
-            <!-- <li class="nav-item {{ Nav::isRoute('data') }}">
-                <a class="nav-link" href="{{ route('data') }}">
-                    <i class="fas fa-fw fa-database"></i>
-                    <span>{{ __('Report Weekly') }}</span>
+            <!-- Nav Item - Jira -->
+            <li class="nav-item {{ Nav::isRoute('jira.index') }}">
+                <a class="nav-link" href="{{ route('jira.index') }}">
+                    <i class="fas fa-fw fa-ticket"></i>
+                    <span>{{ __('Ticket Jira') }}</span>
                 </a>
-            </li> -->
+            </li>
+
+            <!-- Nav Item - Service -->
+            <li class="nav-item {{ Nav::isRoute('service.index') }}">
+                <a class="nav-link" href="{{ route('service.index') }}">
+                    <i class="fas fa-fw fa-envelope-square"></i>
+                    <span>{{ __('Service Request') }}</span>
+                </a>
+            </li>
 
 
-            <!-- Nav Item - Data -->
+            <!-- Nav Item - Generate PPT -->
             <li class="nav-item {{ Nav::isRoute('monthly') }}">
                 <a class="nav-link" href="{{ route('monthly') }}">
                     <i class="fas fa-fw fa-chart-area"></i>
