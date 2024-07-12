@@ -21,17 +21,14 @@ class DataImports implements ToModel, WithStartRow
     }
     public function model(array $row)
     {
-
-        // $row14 = ($row[14] - 25569) * 86400;
-        // $created = gmdate("Y-m-d H:i:s", $row14);
-        // $row15 = ($row[15] - 25569) * 86400;
-        // $updated = gmdate("Y-m-d H:i:s", $row15);
+        // dd($row[14]);
+        $row14 = ($row[14] - 25569) * 86400;
+        $created = gmdate("Y-m-d H:i:s", $row14);
+        $row15 = ($row[15] - 25569) * 86400;
+        $updated = gmdate("Y-m-d H:i:s", $row15);
 
         $str = $row[2];
         $ctr = explode(" - ", $str);
-        
-        $created = Carbon::createFromFormat('d/m/Y H:i', $row[14]);
-        $updated = Carbon::createFromFormat('d/m/Y H:i', $row[15]);
 
         $data = [
             'code_jira'         => $row[0],

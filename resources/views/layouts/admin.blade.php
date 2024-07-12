@@ -68,12 +68,12 @@
             </li>
 
             <!-- Nav Item - Data -->
-            <li class="nav-item {{ Nav::isRoute('data') }}">
+            <!-- <li class="nav-item {{ Nav::isRoute('data') }}">
                 <a class="nav-link" href="{{ route('data') }}">
                     <i class="fas fa-fw fa-database"></i>
                     <span>{{ __('Report Weekly') }}</span>
                 </a>
-            </li>
+            </li> -->
 
 
             <!-- Nav Item - Data -->

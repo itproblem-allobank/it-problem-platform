@@ -42,7 +42,7 @@
     </div>
 
     
-    @if($data == '[]')
+    <!-- @if($data == '[]')
     <br>
     @else
     <div class="card shadow p-4 mb-2">
@@ -78,7 +78,7 @@
             <div class="col-6" id="ticket_yearly"></div>
         </div>
     </div>
-    @endif
+    @endif -->
 
     <!-- <div id="container_chart" class="card shadow p-4 mb-2">
         <div class="row">
