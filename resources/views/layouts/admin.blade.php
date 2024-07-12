@@ -83,14 +83,22 @@
                 </a>
             </li>
 
+            <!-- Nav Item - Generate -->
+            <li class="nav-item {{ Nav::isRoute('generate.index') }}">
+                <a class="nav-link" href="{{ route('generate.index') }}">
+                    <i class="fas fa-fw fa-file-powerpoint"></i>
+                    <span>{{ __('Generate Powerpoint') }}</span>
+                </a>
+            </li>
+
 
             <!-- Nav Item - Generate PPT -->
-            <li class="nav-item {{ Nav::isRoute('monthly') }}">
+            <!-- <li class="nav-item {{ Nav::isRoute('monthly') }}">
                 <a class="nav-link" href="{{ route('monthly') }}">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>{{ __('Report Monthly') }}</span>
                 </a>
-            </li>
+            </li> -->
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">

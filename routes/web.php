@@ -56,6 +56,10 @@ Route::post('/jira/delete', 'JiraController@delete')->name('jira.delete');
 // Page Service Request
 Route::get('/service', 'ServiceController@index')->name('service.index');
 Route::post('/service/import', 'ServiceController@import')->name('service.import');
+Route::post('/service/delete', 'ServiceController@delete')->name('service.delete');
+
+// Page Generate Powerpoint
+Route::get('/generate', 'GenerateController@index')->name('generate.index');
 
 //Generate PPT
 Route::get('/ppt/download', 'PPTController@generateppt')->name('ppt.download');

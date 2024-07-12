@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Data;
 use Illuminate\Support\Carbon;
-use DateTime;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpPresentation\PhpPresentation;
 use PhpOffice\PhpPresentation\IOFactory;
@@ -18,8 +18,11 @@ use PhpOffice\PhpPresentation\Style\Fill;
 
 class PPTController extends Controller
 {
-    public function generateppt()
+    public function generateppt(Request $request)
     {
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        // dd($request->end_date);
         $objPHPPresentation = new PhpPresentation();
         //Slide 1
         $slide1 = $objPHPPresentation->getActiveSlide();

@@ -46,4 +46,10 @@ class ServiceController extends Controller
             return redirect()->route('service.index')->with(['error' => 'Data Gagal Diimport!']);
         }
     }
+
+    public function delete()
+    {
+        Service::truncate();
+        return redirect()->route('service.index')->with(['success' => 'Data Berhasil Dihapus!']);
+    }
 }
