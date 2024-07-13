@@ -135,13 +135,13 @@ class GenerateController extends Controller
         $cell = $row->nextCell();
         setCellText($row, $cell, 'Version', 15);
         $cell = $row->nextCell();
-        setCellText($row, $cell, 'Oktober 2023', 15);
+        setCellText($row, $cell, Carbon::parse($end_date)->format('F Y'), 15);
 
         $row = $tableShape->createRow();
         $cell = $row->nextCell();
         setCellText($row, $cell, 'Review date', 15);
         $cell = $row->nextCell();
-        setCellText($row, $cell, '30 Oktober 2023', 15);
+        setCellText($row, $cell, Carbon::parse($end_date)->format('d F Y'), 15);
 
         //Text Shape 1
         $textShape1 = $slide2->createRichTextShape();
@@ -152,7 +152,8 @@ class GenerateController extends Controller
         $textShape1->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         // Create the text run for the left-aligned text
-        $textRun2 = $textShape1->createTextRun("Jakarta, 11 Desember 2023\n\nDisetujui oleh,\n\n\n\n\n");
+        $date = Carbon::parse($end_date)->format('d F Y');
+        $textRun2 = $textShape1->createTextRun("Jakarta, " . $date . "\n\nDisetujui oleh,\n\n\n\n\n");
         $textRun2->getFont()->setSize(15);
         $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
 
@@ -231,35 +232,30 @@ class GenerateController extends Controller
             ->setWidth(400)
             ->setOffsetX(50)
             ->setOffsetY(75);
-        $date = date('d F Y');
+        $date = Carbon::parse($end_date)->format('d F Y');
         $textRun = $shape->createTextRun('As of ' . $date);
         $textRun->getFont()->setSize(14);
 
         //data container category
-        $problem = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        $problem = Data::whereBetween('created', [$start_date, $end_date])->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        // dd($problem);
         $total = [];
         foreach ($problem as $key => $value) {
-            $highest = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Highest')->get()->count();
-            $high = Data::where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
-            $medium = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
-            $low = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
-            $lowest = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Lowest')->get()->count();
-            $highestmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Highest')->where('created', '>', now()->subDays(30))->get()->count();
-            $highmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'High')->where('created', '>', now()->subDays(30))->get()->count();
-            $mediummonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->where('created', '>', now()->subDays(30))->get()->count();
-            $lowmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Low')->where('created', '>', now()->subDays(30))->get()->count();
-            $lowestmonthly = Data::where('problem', '=', $value->problem)->where('priority', '=', 'Lowest')->where('created', '>', now()->subDays(30))->get()->count();
+            $highest = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Highest')->get()->count();
+            $high = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
+            $medium = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
+            $low = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
+            $lowest = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Lowest')->get()->count();
             $total[] = [
                 'problem' => $value->problem,
                 'total' => $value->count,
                 'high' => $highest + $high,
                 'medium' => $medium,
                 'low' => $low + $lowest,
-                'highmonthly' => $highestmonthly + $highmonthly,
-                'mediummonthly' => $mediummonthly,
-                'lowmonthly' => $lowmonthly + $lowestmonthly
             ];
         }
+
+        // dd($total);
 
         //set tempat
         $offsetx = 50;
@@ -296,22 +292,9 @@ class GenerateController extends Controller
                 $textRun->getFont()->setBold(true);
             }
 
-            //row value //dibatalin karna munculin bulanan aja 
-
-            // $rowShape = $tableShape->createRow();
-            // $rowShape->setHeight(25);
-            // $value = [$data['high'], $data['medium'], $data['low']];
-            // foreach ($value as $key => $v) {
-            //     $cell = $rowShape->nextCell();
-            //     $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            //     $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            //     $cell->createTextRun($v);
-            // }
-
-            //row value
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(25);
-            $value = [$data['highmonthly'], $data['mediummonthly'], $data['lowmonthly']];
+            $value = [$data['high'], $data['medium'], $data['low']];
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -324,11 +307,11 @@ class GenerateController extends Controller
         }
 
         //set data chart 1
-        $data_chart1 = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        $data_chart1 = Data::where('created', '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
-            $status_closed = Data::where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
-            $status_pending = Data::where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
+            $status_closed = Data::where('created', '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
+            $status_pending = Data::where('created', '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
             $resultdata_chart1[] =
                 [
                     'problem' => $value->problem,
@@ -356,13 +339,13 @@ class GenerateController extends Controller
         }
 
         // set Data Chart 2
-        $data_chart2 = Data::select(DB::raw('MONTH(created) as month'), DB::raw('count(*) as count'))
+        $data_chart2 = Data::whereBetween('created', [Carbon::parse($start_date)->subMonths(3), $end_date])->select(DB::raw('MONTH(created) as month'), DB::raw('count(*) as count'))
             ->groupBy(DB::raw('MONTH(created)'))
             ->get();
         $resultdata_chart2 = [];
         foreach ($data_chart2 as $key => $value) {
-            $closed = Data::where('status', '=', 'Closed')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
-            $pending = Data::where('status', '=', 'Pending')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
+            $closed = Data::whereBetween('created', [Carbon::parse($start_date)->subMonths(3), $end_date])->where('status', '=', 'Closed')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
+            $pending = Data::whereBetween('created', [Carbon::parse($start_date)->subMonths(3), $end_date])->where('status', '=', 'Pending')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
             $resultdata_chart2[] = [
                 'month' => Carbon::create()->month($value->month)->format('F'),
                 'count' => $value->count,
@@ -397,44 +380,6 @@ class GenerateController extends Controller
         $series2 = new Series('Pending', $datapending);
         $chartType->addSeries($series);
         $chartType->addSeries($series2);
-
-        // foreach ($resultdata_chart2 as $key => $value) {
-        //     $series = new Series($value['month'], ['Closed' =>  $value['closed'], 'Pending' => $value['pending']]);
-        //     $chartType->addSeries($series);
-        // }
-
-
-        // //set data chart 2
-        // $total2024 = Data::where('created', 'like', '%2024%')->get()->count();
-        // $closed2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Closed')->get()->count();
-        // $pending2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Pending')->get()->count();
-        // $wip2024 = Data::where('created', 'like', '%2024%')->where('status', '=', 'Work In Progress')->get()->count();
-        // $total2023 = Data::where('created', 'like', '%2023%')->get()->count();
-        // $closed2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Closed')->get()->count();
-        // $pending2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Pending')->get()->count();
-        // $wip2023 = Data::where('created', 'like', '%2023%')->where('status', '=', 'Work In Progress')->get()->count();
-
-        // // Chart 2
-        // $chartShape = $slide3->createChartShape();
-        // $chartShape->setHeight(400)
-        //     ->setWidth(600)
-        //     ->setOffsetX(650)
-        //     ->setOffsetY(250);
-        // // Define tipe chart
-        // $chartType = new Bar();
-        // $chartShape->getPlotArea()->setType($chartType);
-
-        // // Set judul chart
-        // $chartShape->getTitle()->setText('Ticket by Yearly');
-        // // Tambahkan seri data ke chart  
-        // $total = new Series('Total', ['2024' =>  $total2024, '2023' => $total2023]);
-        // $closed = new Series('Closed', ['2024' =>  $closed2024, '2023' => $closed2023]);
-        // $pending = new Series('Pending', ['2024' =>  $pending2024, '2023' => $pending2023]);
-        // $wik = new Series('Work In Progress', ['2024' =>  $wip2024, '2023' => $wip2023]);
-        // $chartType->addSeries($total);
-        // $chartType->addSeries($closed);
-        // $chartType->addSeries($pending);
-        // $chartType->addSeries($wik);
 
 
         //Slide 4
