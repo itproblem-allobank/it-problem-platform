@@ -386,7 +386,7 @@ class GenerateController extends Controller
 
         // Chart 3
         $data_chart3 = Service::whereBetween('created', [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))->groupBy('issue_type')->get();
-        $resultdata_chart4 = [];
+        $resultdata_chart3 = [];
         foreach ($data_chart3 as $key => $value) {
             $status_closed = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Closed')->get()->count();
             $status_pending = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Pending')->get()->count();
@@ -532,11 +532,11 @@ class GenerateController extends Controller
         // Posisi awal untuk timeline
         $offsetX = 100;
         $offsetY = 400;
-        $boxWidth = 150;
+        $boxWidth = 200;
         $boxHeight = 50;
-        $descWidth = 150;
+        $descWidth = 200;
         $descHeight = 150;
-        $stepX = 200; // Jarak antar kotak di sumbu X
+        $stepX = 250; // Jarak antar kotak di sumbu X
         $lineThickness = 3;
 
         foreach ($timeline as $index => $item) {
