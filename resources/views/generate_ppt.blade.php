@@ -23,7 +23,7 @@
 @endif
 
 <div class="card shadow p-4 mb-2">
-    <form method="GET" action="{{ route('ppt.download') }}">
+    <form method="GET" action="{{ route('generate.download') }}">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <div class="pl-lg-4">
             <div class="row">

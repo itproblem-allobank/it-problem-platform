@@ -25,6 +25,7 @@ class RouteServiceProvider extends ServiceProvider
      * @var string
      */
     public const DATA = '/data';
+    public const JIRA = '/jira';
 
     /**
      * Define your route model bindings, pattern filters, etc.

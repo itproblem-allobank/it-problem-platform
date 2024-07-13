@@ -60,6 +60,4 @@ Route::post('/service/delete', 'ServiceController@delete')->name('service.delete
 
 // Page Generate Powerpoint
 Route::get('/generate', 'GenerateController@index')->name('generate.index');
-
-//Generate PPT
-Route::get('/ppt/download', 'PPTController@generateppt')->name('ppt.download');
+Route::get('/generate/download', 'GenerateController@generateppt')->name('generate.download');

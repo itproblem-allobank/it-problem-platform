@@ -26,7 +26,7 @@ class ResetPasswordController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = RouteServiceProvider::DATA;
+    protected $redirectTo = RouteServiceProvider::JIRA;
 
     /**
      * Set the user's password.
