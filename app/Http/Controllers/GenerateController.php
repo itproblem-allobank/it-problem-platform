@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Data;
+use App\Models\Service;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,8 @@ use PhpOffice\PhpPresentation\DocumentLayout;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Bar;
 use PhpOffice\PhpPresentation\Shape\Chart\Series;
 use PhpOffice\PhpPresentation\Shape\Drawing\File;
+use PhpOffice\PhpPresentation\Style\Border;
+use PhpOffice\PhpPresentation\Style\Fill;
 
 use Exception;
 
@@ -324,7 +327,7 @@ class GenerateController extends Controller
         // Chart 1 
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(400)
-            ->setWidth(600)
+            ->setWidth(400)
             ->setOffsetX(20)
             ->setOffsetY(250);
         // Define tipe chart
@@ -334,7 +337,7 @@ class GenerateController extends Controller
         $chartShape->getTitle()->setText('Ticket by Category');
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
-            $series = new Series($value['problem'], ['Closed' =>  $value['count_closed'], 'Pending' => $value['count_pending']]);
+            $series = new Series($value['problem'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
             $chartType->addSeries($series);
         }
 
@@ -357,8 +360,8 @@ class GenerateController extends Controller
         // Chart 2
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(400)
-            ->setWidth(600)
-            ->setOffsetX(650)
+            ->setWidth(400)
+            ->setOffsetX(440)
             ->setOffsetY(250);
         // Define tipe chart
         $chartType = new Bar();
@@ -381,63 +384,139 @@ class GenerateController extends Controller
         $chartType->addSeries($series);
         $chartType->addSeries($series2);
 
+        // Chart 3
+        $data_chart3 = Service::whereBetween('created', [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))->groupBy('issue_type')->get();
+        $resultdata_chart4 = [];
+        foreach ($data_chart3 as $key => $value) {
+            $status_closed = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Closed')->get()->count();
+            $status_pending = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Pending')->get()->count();
+            $resultdata_chart3[] =
+                [
+                    'issue_type' => $value->issue_type,
+                    'total' => $value->count,
+                    'count_closed' => $status_closed,
+                    'count_pending' => $status_pending,
+                ];
+        }
+
+        // Set Size Chart
+        $chartShape = $slide3->createChartShape();
+        $chartShape->setHeight(400)
+            ->setWidth(400)
+            ->setOffsetX(860)
+            ->setOffsetY(250);
+        // Define tipe chart
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Ticket Jira Service Request');
+        // Tambahkan seri data ke chart
+        foreach ($resultdata_chart3 as $key => $value) {
+            $series = new Series($value['issue_type'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
+            $chartType->addSeries($series);
+        }
 
         //Slide 4
         $slide4 = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide4->addShape($backgroundImage);
 
-        // Contoh data timeline
-        $timelineData = [
-            ['date' => '2023-01', 'event' => 'Event 1'],
-            ['date' => '2023-02', 'event' => 'Event 2'],
-            ['date' => '2023-03', 'event' => 'Event 3'],
-            ['date' => '2023-04', 'event' => 'Event 4'],
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(1050); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(20); // Posisi vertikal gambar
+        $slide4->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        // Tambahkan teks judul slide
+        $shape = $slide4->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(700)
+            ->setOffsetX(50)
+            ->setOffsetY(25);
+        $textRun = $shape->createTextRun('Achievement IT Problem by Week');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slide4->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(50)
+            ->setOffsetY(75);
+        $date = Carbon::parse($end_date)->format('d F Y');
+        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun->getFont()->setSize(14);
+
+
+        // Data Timeline
+        $timeline = [
+            ['week' => 'Week 1', 'description' => "1. Splicing FO.\n2. Restart the ETP service and try logging in again and the scheduler for Begin Of Day ETP has been moved forward to 07:00, previously it was at 05:00."],
+            ['week' => 'Week 2', 'description' => "1. Splicing FO.\n2. Restart the ETP service and try logging in again and the scheduler for Begin Of Day ETP has been moved forward to 07:00, previously it was at 05:00."],
+            ['week' => 'Week 3', 'description' => "1. Splicing FO.\n2. Restart the ETP service and try logging in again and the scheduler for Begin Of Day ETP has been moved forward to 07:00, previously it was at 05:00."],
+            ['week' => 'Week 4', 'description' => "1. Splicing FO.\n2. Restart the ETP service and try logging in again and the scheduler for Begin Of Day ETP has been moved forward to 07:00, previously it was at 05:00."],
         ];
 
-        // Set posisi awal untuk timeline
-        $x = 100;
-        $y = 50;
+        // Posisi awal untuk timeline
+        $offsetX = 100;
+        $offsetY = 300;
+        $boxWidth = 70;
+        $boxHeight = 30;
+        $descWidth = 80;
+        $descHeight = 70;
+        $stepX = 100; // Jarak antar kotak di sumbu X
+        $lineThickness = 2;
 
-        // Tambahkan garis horizontal sebagai garis waktu
-        $timelineLine = $slide4->createLineShape($x, $y + 20, $x + 400, $y + 20);
-        $timelineLine->getBorder()->setLineWidth(2)->setColor(new Color('FF000000'));
+        foreach ($timeline as $index => $item) {
+            // Membuat kotak untuk deskripsi
+            $descShape = $slide4->createRichTextShape()
+                ->setHeight($descHeight)
+                ->setWidth($descWidth)
+                ->setOffsetX($offsetX + $index * $stepX - 25)
+                ->setOffsetY($offsetY - $descHeight - 10);
+            $descShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            $descShape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
+            $descShape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+            $descParagraph = $descShape->createParagraph();
+            $descParagraph->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            $descText = $descParagraph->createTextRun($item['description']);
+            $descText->getFont()->setSize(8)->setColor(new Color('FF000000'));
 
-        // Tambahkan item timeline
-        foreach ($timelineData as $data) {
-            // Tambahkan lingkaran untuk titik waktu
-            // $circle = $slide4->createShape(Circle::class)
-            //     ->setHeight(20)
-            //     ->setWidth(20)
-            //     ->setOffsetX($x)
-            //     ->setOffsetY($y + 10);
-            // $circle->getBorder()->setLineWidth(2)->setColor(new Color('FF000000'));
-
-            // Tambahkan shape kotak untuk tanggal
+            // Membuat kotak untuk minggu
             $shape = $slide4->createRichTextShape()
-                ->setHeight(50)
-                ->setWidth(100)
-                ->setOffsetX($x - 40)
-                ->setOffsetY($y - 40);
+                ->setHeight($boxHeight)
+                ->setWidth($boxWidth)
+                ->setOffsetX($offsetX + $index * $stepX)
+                ->setOffsetY($offsetY);
             $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $textRun = $shape->createTextRun($data['date']);
+            $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
+            $shape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+            $textRun = $shape->createTextRun($item['week']);
             $textRun->getFont()->setBold(true)
-                ->setSize(12)
+                ->setSize(10)
                 ->setColor(new Color('FF000000'));
 
-            // Tambahkan shape kotak untuk event
-            $shape = $slide4->createRichTextShape()
-                ->setHeight(50)
-                ->setWidth(200)
-                ->setOffsetX($x - 40)
-                ->setOffsetY($y + 40);
-            $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $textRun = $shape->createTextRun($data['event']);
-            $textRun->getFont()->setSize(12)
-                ->setColor(new Color('FF000000'));
-
-            // Update posisi X untuk item berikutnya
-            $x += 100;
+            // Menambahkan garis horizontal antar kotak
+            if ($index > 0) {
+                $line = $slide4->createLineShape(
+                    $offsetX + ($index - 1) * $stepX + $boxWidth,
+                    $offsetY + $boxHeight / 2,
+                    $offsetX + $index * $stepX,
+                    $offsetY + $boxHeight / 2
+                );
+                $line->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'))->setLineWidth($lineThickness);
+            }
         }
-
 
         //Slide 5
         $slide5 = $objPHPPresentation->createSlide();
