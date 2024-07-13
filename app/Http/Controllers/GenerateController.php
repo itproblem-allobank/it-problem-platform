@@ -384,15 +384,72 @@ class GenerateController extends Controller
 
         //Slide 4
         $slide4 = $objPHPPresentation->createSlide();
+
+        // Contoh data timeline
+        $timelineData = [
+            ['date' => '2023-01', 'event' => 'Event 1'],
+            ['date' => '2023-02', 'event' => 'Event 2'],
+            ['date' => '2023-03', 'event' => 'Event 3'],
+            ['date' => '2023-04', 'event' => 'Event 4'],
+        ];
+
+        // Set posisi awal untuk timeline
+        $x = 100;
+        $y = 50;
+
+        // Tambahkan garis horizontal sebagai garis waktu
+        $timelineLine = $slide4->createLineShape($x, $y + 20, $x + 400, $y + 20);
+        $timelineLine->getBorder()->setLineWidth(2)->setColor(new Color('FF000000'));
+
+        // Tambahkan item timeline
+        foreach ($timelineData as $data) {
+            // Tambahkan lingkaran untuk titik waktu
+            // $circle = $slide4->createShape(Circle::class)
+            //     ->setHeight(20)
+            //     ->setWidth(20)
+            //     ->setOffsetX($x)
+            //     ->setOffsetY($y + 10);
+            // $circle->getBorder()->setLineWidth(2)->setColor(new Color('FF000000'));
+
+            // Tambahkan shape kotak untuk tanggal
+            $shape = $slide4->createRichTextShape()
+                ->setHeight(50)
+                ->setWidth(100)
+                ->setOffsetX($x - 40)
+                ->setOffsetY($y - 40);
+            $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $textRun = $shape->createTextRun($data['date']);
+            $textRun->getFont()->setBold(true)
+                ->setSize(12)
+                ->setColor(new Color('FF000000'));
+
+            // Tambahkan shape kotak untuk event
+            $shape = $slide4->createRichTextShape()
+                ->setHeight(50)
+                ->setWidth(200)
+                ->setOffsetX($x - 40)
+                ->setOffsetY($y + 40);
+            $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $textRun = $shape->createTextRun($data['event']);
+            $textRun->getFont()->setSize(12)
+                ->setColor(new Color('FF000000'));
+
+            // Update posisi X untuk item berikutnya
+            $x += 100;
+        }
+
+
+        //Slide 5
+        $slide5 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background_end.png');
         $backgroundImage = new File();
         $backgroundImage->setPath($backgroundImagePath);
         $backgroundImage->setWidth(1280);
         $backgroundImage->setOffsetX(0);
         $backgroundImage->setOffsetY(0);
-        $slide4->addShape($backgroundImage);
+        $slide5->addShape($backgroundImage);
 
-        $shape = $slide4->createRichTextShape()
+        $shape = $slide5->createRichTextShape()
             ->setHeight(100)
             ->setWidth(400)
             ->setOffsetX(120)
