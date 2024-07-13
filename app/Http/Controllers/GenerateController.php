@@ -235,7 +235,7 @@ class GenerateController extends Controller
             ->setWidth(400)
             ->setOffsetX(50)
             ->setOffsetY(75);
-        $date = Carbon::parse($end_date)->format('d F Y');
+        $date = Carbon::parse($end_date)->format('F Y');
         $textRun = $shape->createTextRun('As of ' . $date);
         $textRun->getFont()->setSize(14);
 
@@ -454,42 +454,102 @@ class GenerateController extends Controller
             ->setWidth(400)
             ->setOffsetX(50)
             ->setOffsetY(75);
-        $date = Carbon::parse($end_date)->format('d F Y');
+        $date = Carbon::parse($end_date)->format('F Y');
         $textRun = $shape->createTextRun('As of ' . $date);
         $textRun->getFont()->setSize(14);
+
+        $week4 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(7), $end_date])->get();
+        $week3 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(14), Carbon::parse($end_date)->subDays(7)])->get();
+        $week2 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(21), Carbon::parse($end_date)->subDays(14)])->get();
+        $week1 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(28), Carbon::parse($end_date)->subDays(21)])->get();
+
+        //Set DATA TIMELINE
+        $datatimeline1 = [
+            'week' => 'Week 1',
+            'description' => '',
+        ]; 
+        $workaround1 = null;
+        $index = 1;
+        foreach ($week1 as $key => $value) {
+            $workaround1[] = 
+             $index . ". " . $value->work_around . "\n";
+                $index++;
+        }
+        $newworkaround1 = implode($workaround1);
+        $datatimeline1['description'] = $newworkaround1;
+
+        $datatimeline2 = [
+            'week' => 'Week 2',
+            'description' => '',
+        ];
+        $workaround2 = null;
+        $index = 1;
+        foreach ($week2 as $key => $value) {
+            $workaround2[] = 
+             $index . ". " . $value->work_around . "\n";
+                $index++;
+        }
+        $newworkaround2 = implode($workaround2);
+        $datatimeline2['description'] = $newworkaround2;
+
+        $datatimeline3 = [
+            'week' => 'Week 3',
+            'description' => '',
+        ];
+        $workaround3 = null;
+        $index = 1;
+        foreach ($week3 as $key => $value) {
+            $workaround3[] = 
+             $index . ". " . $value->work_around . "\n";
+                $index++;
+        }
+        $newworkaround3 = implode($workaround3);
+        $datatimeline3['description'] = $newworkaround3;
+
+        $datatimeline4 = [
+            'week' => 'Week 4',
+            'description' => '',
+        ];
+        $workaround4 = null;
+        $index = 1;
+        foreach ($week4 as $key => $value) {
+            $workaround4[] = 
+             $index . ". " . $value->work_around . "\n";
+                $index++;
+        }
+        $newworkaround4 = implode($workaround4);
+        $datatimeline4['description'] = $newworkaround4;
 
 
         // Data Timeline
         $timeline = [
-            ['week' => 'Week 1', 'description' => "1. Splicing FO.\n2. Restart the ETP service and try logging in again and the scheduler for Begin Of Day ETP has been moved forward to 07:00, previously it was at 05:00."],
-            ['week' => 'Week 2', 'description' => "1. Splicing FO.\n2. Restart the ETP service and try logging in again and the scheduler for Begin Of Day ETP has been moved forward to 07:00, previously it was at 05:00."],
-            ['week' => 'Week 3', 'description' => "1. Splicing FO.\n2. Restart the ETP service and try logging in again and the scheduler for Begin Of Day ETP has been moved forward to 07:00, previously it was at 05:00."],
-            ['week' => 'Week 4', 'description' => "1. Splicing FO.\n2. Restart the ETP service and try logging in again and the scheduler for Begin Of Day ETP has been moved forward to 07:00, previously it was at 05:00."],
+            $datatimeline1,
+            $datatimeline2,
+            $datatimeline3,
+            $datatimeline4
         ];
 
         // Posisi awal untuk timeline
         $offsetX = 100;
-        $offsetY = 300;
+        $offsetY = 400;
         $boxWidth = 150;
-        $boxHeight = 30;
+        $boxHeight = 50;
         $descWidth = 150;
-        $descHeight = 70;
+        $descHeight = 150;
         $stepX = 200; // Jarak antar kotak di sumbu X
-        $lineThickness = 2;
+        $lineThickness = 3;
 
         foreach ($timeline as $index => $item) {
             // Membuat kotak untuk deskripsi
             $descShape = $slide4->createRichTextShape()
                 ->setHeight($descHeight)
                 ->setWidth($descWidth)
-                ->setOffsetX($offsetX + $index * $stepX - 25)
+                ->setOffsetX($offsetX + $index * $stepX)
                 ->setOffsetY($offsetY - $descHeight - 10);
             $descShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
             $descShape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
             $descShape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-            $descParagraph = $descShape->createParagraph();
-            $descParagraph->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $descText = $descParagraph->createTextRun($item['description']);
+            $descText = $descShape->createTextRun($item['description']);
             $descText->getFont()->setSize(8)->setColor(new Color('FF000000'));
 
             // Membuat kotak untuk minggu
@@ -499,6 +559,7 @@ class GenerateController extends Controller
                 ->setOffsetX($offsetX + $index * $stepX)
                 ->setOffsetY($offsetY);
             $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $shape->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
             $shape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
             $textRun = $shape->createTextRun($item['week']);
