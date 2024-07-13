@@ -365,7 +365,7 @@ class GenerateController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
 
         // Set judul chart
-        $chartShape->getTitle()->setText('Ticket by 3 Months');
+        $chartShape->getTitle()->setText('Ticket by Last 3 Months');
 
         $dataclosed = [];
         foreach ($resultdata_chart2 as $key => $value) {
