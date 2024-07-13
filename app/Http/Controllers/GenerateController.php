@@ -470,11 +470,11 @@ class GenerateController extends Controller
         // Posisi awal untuk timeline
         $offsetX = 100;
         $offsetY = 300;
-        $boxWidth = 70;
+        $boxWidth = 150;
         $boxHeight = 30;
-        $descWidth = 80;
+        $descWidth = 150;
         $descHeight = 70;
-        $stepX = 100; // Jarak antar kotak di sumbu X
+        $stepX = 200; // Jarak antar kotak di sumbu X
         $lineThickness = 2;
 
         foreach ($timeline as $index => $item) {
