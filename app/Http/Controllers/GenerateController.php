@@ -17,6 +17,7 @@ use PhpOffice\PhpPresentation\Shape\Chart\Series;
 use PhpOffice\PhpPresentation\Shape\Drawing\File;
 use PhpOffice\PhpPresentation\Style\Border;
 use PhpOffice\PhpPresentation\Style\Fill;
+use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie;
 
 use Exception;
 
@@ -324,9 +325,9 @@ class GenerateController extends Controller
                 ];
         }
 
-        // Chart 1 
+        // Chart 1 Ticket by Category
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(280)
+        $chartShape->setHeight(250)
             ->setWidth(400)
             ->setOffsetX(25)
             ->setOffsetY(200);
@@ -347,7 +348,7 @@ class GenerateController extends Controller
             $chartType->addSeries($series);
         }
 
-        // set Data Chart 2
+        // set Data Chart 2 Ticket by  3 Last month
         $data_chart2 = Data::whereBetween('created', [Carbon::parse($start_date)->subMonths(3), $end_date])->select(DB::raw('MONTH(created) as month'), DB::raw('count(*) as count'))
             ->groupBy(DB::raw('MONTH(created)'))
             ->get();
@@ -365,7 +366,7 @@ class GenerateController extends Controller
 
         // Chart 2
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(280)
+        $chartShape->setHeight(250)
             ->setWidth(400)
             ->setOffsetX(440)
             ->setOffsetY(200);
@@ -375,7 +376,7 @@ class GenerateController extends Controller
 
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket by Last 3 Months');
-        
+
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
@@ -395,7 +396,7 @@ class GenerateController extends Controller
         $chartType->addSeries($series);
         $chartType->addSeries($series2);
 
-        // Chart 3
+        // Chart 3 Ticket Service Request Jira
         $data_chart3 = Service::whereBetween('created', [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))->groupBy('issue_type')->get();
         $resultdata_chart3 = [];
         foreach ($data_chart3 as $key => $value) {
@@ -412,7 +413,7 @@ class GenerateController extends Controller
 
         // Set Size Chart
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(280)
+        $chartShape->setHeight(250)
             ->setWidth(400)
             ->setOffsetX(855)
             ->setOffsetY(200);
@@ -421,17 +422,120 @@ class GenerateController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket Jira Service Request');
-        
+
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
         $chartShape->getBorder()->setLineWidth(1);
-        
+
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart3 as $key => $value) {
             $series = new Series($value['issue_type'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
             $chartType->addSeries($series);
         }
+
+        //Chart 4 Problem by Status
+        $data_chart4 = Data::whereBetween('created', [$start_date, $end_date])->select('status', DB::raw('count(*) as count'))->groupBy('status')->get();
+        $resultdata_chart4 = [];
+        foreach ($data_chart4 as $key => $value) {
+            $resultdata_chart4[$value->status] = $value->count;
+        }
+        $chartShape = $slide3->createChartShape();
+        $chartShape->setHeight(230)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(460);
+        // Define tipe chart
+        $chartType = new Pie();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Problem By Status');
+        $series = new Series('Data', $resultdata_chart4);
+        $chartType->addSeries($series);
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+
+        //Chart 5 Problem by Assignee & Status
+        $data_chart5 = Data::whereBetween('created', [$start_date, $end_date])->select('assignee_to', DB::raw('count(*) as count'))->groupBy('assignee_to')->get();
+        $resultdata_chart5 = [];
+        foreach ($data_chart5 as $key => $value) {
+            $closed = Data::whereBetween('created', [$start_date, $end_date])->where('assignee_to', '=', $value->assignee_to)->where('status', '=', 'Closed')->get()->count();
+            $pending = Data::whereBetween('created', [$start_date, $end_date])->where('assignee_to', '=', $value->assignee_to)->where('status', '=', 'Pending')->get()->count();
+            $resultdata_chart5[] = [
+                'assignee_to' => $value->assignee_to,
+                'count' => $value->count,
+                'closed' => $closed,
+                'pending' => $pending
+            ];
+        }
+        $data_closed = [];
+        foreach ($resultdata_chart5 as $key => $value) {
+            $data_closed[$value['assignee_to']] = $value['closed'];
+        }
+        $data_pending = [];
+        foreach ($resultdata_chart5 as $key => $value) {
+            $data_pending[$value['assignee_to']] = $value['pending'];
+        }
+        $chartShape = $slide3->createChartShape();
+        $chartShape->setHeight(230)
+            ->setWidth(400)
+            ->setOffsetX(440)
+            ->setOffsetY(460);
+        // Define tipe chartsss
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Problem By Assignee & Status');
+        $series1 = new Series('Closed', $data_closed);
+        $series2 = new Series('Pending', $data_pending);
+        $chartType->addSeries($series1);
+        $chartType->addSeries($series2);
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+
+
+        //Chart 6 Container
+        $shape = $slide3->createRichTextShape()
+            ->setHeight(230)
+            ->setWidth(195)
+            ->setOffsetX(855)
+            ->setOffsetY(460);
+        $shape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFF'));
+        $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
+
+        // Menambahkan teks ke kotak pertama
+        $percentage = $shape->createTextRun("▲ 0.64%");
+        $percentage->getFont()->setBold(true)->setSize(28)->setColor(new Color('FFFF0000'));
+        $title = $shape->createTextRun("\nIssues Created");
+        $title->getFont()->setBold(true)->setSize(20)->setColor(new Color('FFFF0000'));
+        $c_month = $shape->createTextRun("\n\n\nCurrent Month : " . "150");
+        $c_month->getFont()->setBold(true)->setSize(12);
+        $p_month = $shape->createTextRun("\nPrevious Month : " . "175");
+        $p_month->getFont()->setBold(true)->setSize(12);
+
+        // Menambahkan kotak kedua untuk "Issues Closed"
+        $shape2 = $slide3->createRichTextShape()
+            ->setHeight(230)
+            ->setWidth(195)
+            ->setOffsetX(1060)
+            ->setOffsetY(460);
+        $shape2->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFF'));
+        $shape2->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
+
+        // Menambahkan teks ke kotak kedua
+        $percentage2 = $shape2->createTextRun("▲ 0.64%");
+        $percentage2->getFont()->setBold(true)->setSize(28)->setColor(new Color('FF00FF00'));
+        $title2 = $shape2->createTextRun("\nIssues Closed");
+        $title2->getFont()->setBold(true)->setSize(20)->setColor(new Color('FF00FF00'));
+        $c_month2 = $shape2->createTextRun("\n\n\nCurrent Month : " . "150");
+        $c_month2->getFont()->setBold(true)->setSize(12);
+        $p_month2 = $shape2->createTextRun("\nPrevious Month : " . "175");
+        $p_month2->getFont()->setBold(true)->setSize(12);
+
 
         //Slide 4
         $slide4 = $objPHPPresentation->createSlide();
