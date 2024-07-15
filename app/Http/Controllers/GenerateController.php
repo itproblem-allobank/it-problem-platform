@@ -224,8 +224,8 @@ class GenerateController extends Controller
         $shape = $slide3->createRichTextShape()
             ->setHeight(50)
             ->setWidth(400)
-            ->setOffsetX(50)
-            ->setOffsetY(25);
+            ->setOffsetX(25)
+            ->setOffsetY(15);
         $textRun = $shape->createTextRun('Report IT Problem');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
@@ -233,8 +233,8 @@ class GenerateController extends Controller
         $shape = $slide3->createRichTextShape()
             ->setHeight(25)
             ->setWidth(400)
-            ->setOffsetX(50)
-            ->setOffsetY(75);
+            ->setOffsetX(25)
+            ->setOffsetY(60);
         $date = Carbon::parse($end_date)->format('F Y');
         $textRun = $shape->createTextRun('As of ' . $date);
         $textRun->getFont()->setSize(14);
@@ -261,8 +261,8 @@ class GenerateController extends Controller
         // dd($total);
 
         //set tempat
-        $offsetx = 50;
-        $offsety = 120;
+        $offsetx = 25;
+        $offsety = 100;
         //loop category data
         foreach ($total as $key => $data) {
             // Tambahkan tabel dengan 4 baris dan 3 kolom
@@ -326,15 +326,21 @@ class GenerateController extends Controller
 
         // Chart 1 
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(400)
+        $chartShape->setHeight(280)
             ->setWidth(400)
-            ->setOffsetX(20)
-            ->setOffsetY(250);
+            ->setOffsetX(25)
+            ->setOffsetY(200);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket by Category');
+
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
             $series = new Series($value['problem'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
@@ -359,16 +365,21 @@ class GenerateController extends Controller
 
         // Chart 2
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(400)
+        $chartShape->setHeight(280)
             ->setWidth(400)
             ->setOffsetX(440)
-            ->setOffsetY(250);
+            ->setOffsetY(200);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
 
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket by Last 3 Months');
+        
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
 
         $dataclosed = [];
         foreach ($resultdata_chart2 as $key => $value) {
@@ -401,15 +412,21 @@ class GenerateController extends Controller
 
         // Set Size Chart
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(400)
+        $chartShape->setHeight(280)
             ->setWidth(400)
-            ->setOffsetX(860)
-            ->setOffsetY(250);
+            ->setOffsetX(855)
+            ->setOffsetY(200);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket Jira Service Request');
+        
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+        
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart3 as $key => $value) {
             $series = new Series($value['issue_type'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
@@ -467,13 +484,13 @@ class GenerateController extends Controller
         $datatimeline1 = [
             'week' => 'Week 1',
             'description' => '',
-        ]; 
+        ];
         $workaround1 = null;
         $index = 1;
         foreach ($week1 as $key => $value) {
-            $workaround1[] = 
-             $index . ". " . $value->work_around . "\n";
-                $index++;
+            $workaround1[] =
+                $index . ". " . $value->work_around . "\n";
+            $index++;
         }
         $newworkaround1 = implode($workaround1);
         $datatimeline1['description'] = $newworkaround1;
@@ -485,9 +502,9 @@ class GenerateController extends Controller
         $workaround2 = null;
         $index = 1;
         foreach ($week2 as $key => $value) {
-            $workaround2[] = 
-             $index . ". " . $value->work_around . "\n";
-                $index++;
+            $workaround2[] =
+                $index . ". " . $value->work_around . "\n";
+            $index++;
         }
         $newworkaround2 = implode($workaround2);
         $datatimeline2['description'] = $newworkaround2;
@@ -499,9 +516,9 @@ class GenerateController extends Controller
         $workaround3 = null;
         $index = 1;
         foreach ($week3 as $key => $value) {
-            $workaround3[] = 
-             $index . ". " . $value->work_around . "\n";
-                $index++;
+            $workaround3[] =
+                $index . ". " . $value->work_around . "\n";
+            $index++;
         }
         $newworkaround3 = implode($workaround3);
         $datatimeline3['description'] = $newworkaround3;
@@ -513,9 +530,9 @@ class GenerateController extends Controller
         $workaround4 = null;
         $index = 1;
         foreach ($week4 as $key => $value) {
-            $workaround4[] = 
-             $index . ". " . $value->work_around . "\n";
-                $index++;
+            $workaround4[] =
+                $index . ". " . $value->work_around . "\n";
+            $index++;
         }
         $newworkaround4 = implode($workaround4);
         $datatimeline4['description'] = $newworkaround4;
