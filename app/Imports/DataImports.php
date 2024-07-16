@@ -26,6 +26,8 @@ class DataImports implements ToModel, WithStartRow
         $created = gmdate("Y-m-d H:i:s", $row14);
         $row15 = ($row[15] - 25569) * 86400;
         $updated = gmdate("Y-m-d H:i:s", $row15);
+        $row16 = ($row[16] - 25569) * 86400;
+        $changed = gmdate("Y-m-d H:i:s", $row16);
 
         $str = $row[2];
         $ctr = explode(" - ", $str);
@@ -48,8 +50,10 @@ class DataImports implements ToModel, WithStartRow
             'assignee_to'       => $row[13],
             'created'           => $created,
             'updated'           => $updated,
+            'changed_at'        => $changed,
         ];
 
+        // dd($data);
         // if ($ctr[0] == 'QRIS' || $ctr[0] == 'Transfer' || $ctr[0] == 'Topup Incoming' || $ctr[0] == 'Tabungan' || $ctr[0] == 'Cashout' || $ctr[0] == 'Balance' || $ctr[0] == 'Virtual Debit Card') {
         //     $data = array_merge($data, [
         //         'problem' => 'Transaction',
