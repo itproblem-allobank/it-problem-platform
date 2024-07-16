@@ -241,25 +241,33 @@ class GenerateController extends Controller
         $textRun->getFont()->setSize(14);
 
         //data container category
-        $problem = Data::whereBetween('created', [$start_date, $end_date])->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        $problem = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
         // dd($problem);
         $total = [];
         foreach ($problem as $key => $value) {
-            $highest = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Highest')->get()->count();
             $high = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
             $medium = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
             $low = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
-            $lowest = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Lowest')->get()->count();
+            $countdata = $high + $medium + $low;
             $total[] = [
                 'problem' => $value->problem,
-                'total' => $value->count,
-                'high' => $highest + $high,
+                'total' => $countdata,
+                'high' =>  $high,
                 'medium' => $medium,
-                'low' => $low + $lowest,
+                'low' => $low,
             ];
         }
 
         // dd($total);
+
+        function truncateString($string, $limit = 18)
+        {
+            if (strlen($string) > $limit) {
+                return substr($string, 0, $limit) . '...';
+            } else {
+                return $string;
+            }
+        }
 
         //set tempat
         $offsetx = 25;
@@ -269,7 +277,7 @@ class GenerateController extends Controller
             // Tambahkan tabel dengan 4 baris dan 3 kolom
             $tableShape = $slide3->createTableShape(3);
             $tableShape->setHeight(100);
-            $tableShape->setWidth(135);
+            $tableShape->setWidth(140);
             $tableShape->setOffsetX($offsetx);
             $tableShape->setOffsetY($offsety);
 
@@ -280,7 +288,7 @@ class GenerateController extends Controller
             $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $cell->setColSpan(3);
-            $textRun = $cell->createTextRun($data['problem'] . ' ' . $data['total']);
+            $textRun = $cell->createTextRun(truncateString($data["problem"]) . "\n" . $data["total"]);
             $textRun->getFont()->setBold(true);
             $textRun->getFont()->setSize(12);
 
@@ -307,7 +315,7 @@ class GenerateController extends Controller
             }
 
             //set tempat box selanjutnya
-            $offsetx = $offsetx + 145;
+            $offsetx = $offsetx + 153;
         }
 
         //set data chart 1
@@ -413,10 +421,10 @@ class GenerateController extends Controller
 
         // Set Size Chart
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(250)
+        $chartShape->setHeight(230)
             ->setWidth(400)
             ->setOffsetX(855)
-            ->setOffsetY(200);
+            ->setOffsetY(460);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -500,41 +508,58 @@ class GenerateController extends Controller
 
         //Chart 6 Container
         $shape = $slide3->createRichTextShape()
-            ->setHeight(230)
+            ->setHeight(250)
             ->setWidth(195)
             ->setOffsetX(855)
-            ->setOffsetY(460);
+            ->setOffsetY(200);
         $shape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFF'));
         $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
 
+        // Set Data
+        $curr_created = Data::where('created', '<=', $end_date)->get()->count();
+        $prev_created = Data::where('created', '<', $start_date)->get()->count();
+        $curr_closed = Data::where('created', '<=', $end_date)->where('status', '=', 'Closed')->get()->count();
+        $prev_closed = Data::where('created', '<', $start_date)->where('status', '=', 'Closed')->get()->count();
+        // dd($curr_created, $prev_created, $curr_closed, $prev_closed);
+        $percen_created = ($curr_created - $prev_created) / $prev_created * 100;
+        $percen_closed = ($curr_closed - $prev_closed) / $prev_closed * 100;
+
         // Menambahkan teks ke kotak pertama
-        $percentage = $shape->createTextRun("▲ 0.64%");
-        $percentage->getFont()->setBold(true)->setSize(28)->setColor(new Color('FFFF0000'));
+        $percentage = $shape->createTextRun("▲ " . number_format($percen_created, 2) . "%");
+        $percentage->getFont()->setBold(true)->setSize(28)->setColor(new Color('FFC00000'));
         $title = $shape->createTextRun("\nIssues Created");
-        $title->getFont()->setBold(true)->setSize(20)->setColor(new Color('FFFF0000'));
-        $c_month = $shape->createTextRun("\n\n\nCurrent Month : " . "150");
+        $title->getFont()->setBold(true)->setSize(20)->setColor(new Color('FFC00000'));
+        $c_month = $shape->createTextRun("\n\n\nCurrent Month : ");
         $c_month->getFont()->setBold(true)->setSize(12);
-        $p_month = $shape->createTextRun("\nPrevious Month : " . "175");
+        $vc_month = $shape->createTextRun("\n" . $curr_created);
+        $vc_month->getFont()->setBold(true)->setSize(18);
+        $p_month = $shape->createTextRun("\nPrevious Month : ");
         $p_month->getFont()->setBold(true)->setSize(12);
+        $vp_month = $shape->createTextRun("\n" . $prev_created);
+        $vp_month->getFont()->setBold(true)->setSize(18);
 
         // Menambahkan kotak kedua untuk "Issues Closed"
         $shape2 = $slide3->createRichTextShape()
-            ->setHeight(230)
+            ->setHeight(250)
             ->setWidth(195)
             ->setOffsetX(1060)
-            ->setOffsetY(460);
+            ->setOffsetY(200);
         $shape2->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFF'));
         $shape2->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
 
         // Menambahkan teks ke kotak kedua
-        $percentage2 = $shape2->createTextRun("▲ 0.64%");
-        $percentage2->getFont()->setBold(true)->setSize(28)->setColor(new Color('FF00FF00'));
+        $percentage2 = $shape2->createTextRun("▲ " . number_format($percen_closed, 2) . "%");
+        $percentage2->getFont()->setBold(true)->setSize(28)->setColor(new Color('FF00C000'));
         $title2 = $shape2->createTextRun("\nIssues Closed");
-        $title2->getFont()->setBold(true)->setSize(20)->setColor(new Color('FF00FF00'));
-        $c_month2 = $shape2->createTextRun("\n\n\nCurrent Month : " . "150");
+        $title2->getFont()->setBold(true)->setSize(20)->setColor(new Color('FF00C000'));
+        $c_month2 = $shape2->createTextRun("\n\n\nCurrent Month : ");
         $c_month2->getFont()->setBold(true)->setSize(12);
-        $p_month2 = $shape2->createTextRun("\nPrevious Month : " . "175");
+        $vc_month2 = $shape2->createTextRun("\n" . $curr_closed);
+        $vc_month2->getFont()->setBold(true)->setSize(18);
+        $p_month2 = $shape2->createTextRun("\nPrevious Month : ");
         $p_month2->getFont()->setBold(true)->setSize(12);
+        $vp_month2 = $shape2->createTextRun("\n" . $prev_closed);
+        $vp_month2->getFont()->setBold(true)->setSize(18);
 
 
         //Slide 4
