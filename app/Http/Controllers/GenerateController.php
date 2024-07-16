@@ -277,7 +277,7 @@ class GenerateController extends Controller
             // Tambahkan tabel dengan 4 baris dan 3 kolom
             $tableShape = $slide3->createTableShape(3);
             $tableShape->setHeight(100);
-            $tableShape->setWidth(140);
+            $tableShape->setWidth(144);
             $tableShape->setOffsetX($offsetx);
             $tableShape->setOffsetY($offsety);
 
@@ -315,7 +315,7 @@ class GenerateController extends Controller
             }
 
             //set tempat box selanjutnya
-            $offsetx = $offsetx + 153;
+            $offsetx = $offsetx + 155;
         }
 
         //set data chart 1
