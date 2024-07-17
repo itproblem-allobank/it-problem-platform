@@ -18,6 +18,7 @@ use PhpOffice\PhpPresentation\Shape\Drawing\File;
 use PhpOffice\PhpPresentation\Style\Border;
 use PhpOffice\PhpPresentation\Style\Fill;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie;
+use PhpOffice\PhpPresentation\Shape\Chart\Type\Line;
 
 use Exception;
 
@@ -442,28 +443,28 @@ class GenerateController extends Controller
             $chartType->addSeries($series);
         }
 
-        //Chart 4 Problem by Status
-        $data_chart4 = Data::whereBetween('created', [$start_date, $end_date])->select('status', DB::raw('count(*) as count'))->groupBy('status')->get();
-        $resultdata_chart4 = [];
-        foreach ($data_chart4 as $key => $value) {
-            $resultdata_chart4[$value->status] = $value->count;
-        }
-        $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(230)
-            ->setWidth(400)
-            ->setOffsetX(25)
-            ->setOffsetY(460);
-        // Define tipe chart
-        $chartType = new Pie();
-        $chartShape->getPlotArea()->setType($chartType);
-        // Set judul chart
-        $chartShape->getTitle()->setText('Problem By Status');
-        $series = new Series('Data', $resultdata_chart4);
-        $chartType->addSeries($series);
-        // Chart Bordered
-        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
-        $chartShape->getBorder()->setLineWidth(1);
+        // //Chart 4 Problem by Status
+        // $data_chart4 = Data::whereBetween('created', [$start_date, $end_date])->select('status', DB::raw('count(*) as count'))->groupBy('status')->get();
+        // $resultdata_chart4 = [];
+        // foreach ($data_chart4 as $key => $value) {
+        //     $resultdata_chart4[$value->status] = $value->count;
+        // }
+        // $chartShape = $slide3->createChartShape();
+        // $chartShape->setHeight(230)
+        //     ->setWidth(400)
+        //     ->setOffsetX(25)
+        //     ->setOffsetY(460);
+        // // Define tipe chart
+        // $chartType = new Pie();
+        // $chartShape->getPlotArea()->setType($chartType);
+        // // Set judul chart
+        // $chartShape->getTitle()->setText('Problem By Status');
+        // $series = new Series('Data', $resultdata_chart4);
+        // $chartType->addSeries($series);
+        // // Chart Bordered
+        // $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        // $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        // $chartShape->getBorder()->setLineWidth(1);
 
         //Chart 5 Problem by Assignee & Status
         $data_chart5 = Data::whereBetween('created', [$start_date, $end_date])->select('assignee_to', DB::raw('count(*) as count'))->groupBy('assignee_to')->get();
@@ -560,6 +561,49 @@ class GenerateController extends Controller
         $p_month2->getFont()->setBold(true)->setSize(12);
         $vp_month2 = $shape2->createTextRun("\n" . $prev_closed);
         $vp_month2->getFont()->setBold(true)->setSize(18);
+
+        // Chart 4 - Chart Line Created vs Closed
+        //convert data per week
+        $w1 = Carbon::parse($start_date)->addDays(7);
+        $w2 = Carbon::parse($start_date)->addDays(14);
+        $w3 = Carbon::parse($start_date)->addDays(21);
+
+        //created data
+        $totalcr = Data::whereBetween('created', [$start_date, $end_date])->get()->count();
+        $cr1 = Data::whereBetween('created', [$start_date, $w1])->get()->count();
+        $cr2 = Data::whereBetween('created', [$w1, $w2])->get()->count();
+        $cr3 = Data::whereBetween('created', [$w2, $w3])->get()->count();
+        $cr4 = Data::whereBetween('created', [$w3, $end_date])->get()->count();
+
+        //closed data
+        $totalcl = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$start_date, $end_date])->get()->count();
+        $cl1 = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$start_date, $w1])->get()->count();
+        $cl2 = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$w1, $w2])->get()->count();
+        $cl3 = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$w2, $w3])->get()->count();
+        $cl4 = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$w3, $end_date])->get()->count();
+
+        // Set Size Chart
+        $chartShape = $slide3->createChartShape();
+        $chartShape->setHeight(230)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(460);
+        // Define tipe chart
+        $chartType = new Line();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Ticket Created vs Closed');
+
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+
+        // Tambahkan seri data ke chart
+        $created = new Series('Created', ['Week1' => $cr1, 'Week2' => $cr2, 'Week3' => $cr3, 'Week4' => $cr4]);
+        $chartType->addSeries($created);
+        $closed = new Series('Closed', ['Week1' => $cl1, 'Week2' => $cl2, 'Week3' => $cl3, 'Week4' => $cl4]);
+        $chartType->addSeries($closed);
 
 
         //Slide 4
