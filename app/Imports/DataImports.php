@@ -36,7 +36,6 @@ class DataImports implements ToModel, WithStartRow
             'code_jira'         => $row[0],
             'environment'       => $row[1],
             'problem'           => $row[2],
-            // 'category'          => $row[2],
             'summary'           => $row[3],
             'zentao_link'       => $row[4],
             'priority'          => $row[5],
@@ -53,6 +52,40 @@ class DataImports implements ToModel, WithStartRow
             'changed_at'        => $changed,
         ];
 
+        $assignee_too = $row[13];
+        if ($assignee_too == 'Ahmad Syauqi') {
+            $data = array_merge($data, [
+                'nickname' => 'Syauqi',
+            ]);
+        } else if ($assignee_too == 'Daffa Ramadhan') {
+            $data = array_merge($data, [
+                'nickname' => 'Daffa',
+            ]);
+        } else if ($assignee_too == 'Nanda Mahdiaritama Basuki') {
+            $data = array_merge($data, [
+                'nickname' => 'Nanda',
+            ]);
+        } else if ($assignee_too == 'Stefano Adrian Sambora') {
+            $data = array_merge($data, [
+                'nickname' => 'Stefano',
+            ]);
+        } else if ($assignee_too == 'Ian Daniel Adinata') {
+            $data = array_merge($data, [
+                'nickname' => 'Daniel',
+            ]);
+        } else if ($assignee_too == 'Rizki Febrian Aziz') {
+            $data = array_merge($data, [
+                'nickname' => 'Rizki',
+            ]);
+        } else if ($assignee_too == 'Tri Intan Siska Permatasari') {
+            $data = array_merge($data, [
+                'nickname' => 'Intan',
+            ]);
+        } else if ($assignee_too == 'Alexander Lucas') {
+            $data = array_merge($data, [
+                'nickname' => 'Lucas',
+            ]);
+        }
         // dd($data);
         // if ($ctr[0] == 'QRIS' || $ctr[0] == 'Transfer' || $ctr[0] == 'Topup Incoming' || $ctr[0] == 'Tabungan' || $ctr[0] == 'Cashout' || $ctr[0] == 'Balance' || $ctr[0] == 'Virtual Debit Card') {
         //     $data = array_merge($data, [

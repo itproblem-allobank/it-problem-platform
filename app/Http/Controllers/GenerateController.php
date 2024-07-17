@@ -467,13 +467,13 @@ class GenerateController extends Controller
         // $chartShape->getBorder()->setLineWidth(1);
 
         //Chart 5 Problem by Assignee & Status
-        $data_chart5 = Data::whereBetween('created', [$start_date, $end_date])->select('assignee_to', DB::raw('count(*) as count'))->groupBy('assignee_to')->get();
+        $data_chart5 = Data::whereBetween('created', [$start_date, $end_date])->select('nickname', DB::raw('count(*) as count'))->groupBy('nickname')->get();
         $resultdata_chart5 = [];
         foreach ($data_chart5 as $key => $value) {
-            $closed = Data::whereBetween('created', [$start_date, $end_date])->where('assignee_to', '=', $value->assignee_to)->where('status', '=', 'Closed')->get()->count();
-            $pending = Data::whereBetween('created', [$start_date, $end_date])->where('assignee_to', '=', $value->assignee_to)->where('status', '=', 'Pending')->get()->count();
+            $closed = Data::whereBetween('created', [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Closed')->get()->count();
+            $pending = Data::whereBetween('created', [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Pending')->get()->count();
             $resultdata_chart5[] = [
-                'assignee_to' => $value->assignee_to,
+                'nickname' => $value->nickname,
                 'count' => $value->count,
                 'closed' => $closed,
                 'pending' => $pending
@@ -481,11 +481,11 @@ class GenerateController extends Controller
         }
         $data_closed = [];
         foreach ($resultdata_chart5 as $key => $value) {
-            $data_closed[$value['assignee_to']] = $value['closed'];
+            $data_closed[$value['nickname']] = $value['closed'];
         }
         $data_pending = [];
         foreach ($resultdata_chart5 as $key => $value) {
-            $data_pending[$value['assignee_to']] = $value['pending'];
+            $data_pending[$value['nickname']] = $value['pending'];
         }
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(230)
