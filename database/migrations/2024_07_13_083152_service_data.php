@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('assignee');
             $table->string('reporter');
             $table->string('status');
-            $table->string('created');
-            $table->string('updated');
+            $table->timestamp('created');
+            $table->timestamp('updated');
             $table->string('priority');
             $table->string('sub_category');
             $table->string('ticket_number');

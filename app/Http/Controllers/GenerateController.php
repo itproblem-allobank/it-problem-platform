@@ -665,8 +665,11 @@ class GenerateController extends Controller
                 $index . ". " . $value->work_around . "\n";
             $index++;
         }
+        
+        if($workaround1 != null) {
         $newworkaround1 = implode($workaround1);
         $datatimeline1['description'] = $newworkaround1;
+        }
 
         $datatimeline2 = [
             'week' => 'Week 2',
@@ -679,8 +682,11 @@ class GenerateController extends Controller
                 $index . ". " . $value->work_around . "\n";
             $index++;
         }
+        
+        if($workaround2 != null) {
         $newworkaround2 = implode($workaround2);
         $datatimeline2['description'] = $newworkaround2;
+        }
 
         $datatimeline3 = [
             'week' => 'Week 3',
@@ -693,8 +699,11 @@ class GenerateController extends Controller
                 $index . ". " . $value->work_around . "\n";
             $index++;
         }
+        
+        if($workaround3 != null) {
         $newworkaround3 = implode($workaround3);
         $datatimeline3['description'] = $newworkaround3;
+        }
 
         $datatimeline4 = [
             'week' => 'Week 4',
@@ -707,8 +716,11 @@ class GenerateController extends Controller
                 $index . ". " . $value->work_around . "\n";
             $index++;
         }
-        $newworkaround4 = implode($workaround4);
-        $datatimeline4['description'] = $newworkaround4;
+
+        if($workaround4 != null) {
+            $newworkaround4 = implode($workaround4);
+            $datatimeline4['description'] = $newworkaround4;
+        }
 
 
         // Data Timeline
