@@ -802,7 +802,7 @@ class GenerateController extends Controller
 
 
         // Simpan presentasi ke dalam file
-        $filename = 'Report IT Problem ' . date('d F Y') . '.pptx';
+        $filename = 'Report IT Problem ' . Carbon::parse($end_date)->format('F Y') . '.pptx';
         $savePath = storage_path($filename);
         $writer = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
         $writer->save($savePath);
