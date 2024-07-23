@@ -809,4 +809,5 @@ class GenerateController extends Controller
         // Return file sebagai response download
         return response()->download($savePath)->deleteFileAfterSend(true);
     }
+    //
 }
