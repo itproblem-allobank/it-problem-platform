@@ -5,18 +5,18 @@ on:
 name: automation-report
 jobs:
   web-deploy:
-    name: automation-report
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
     steps:
-name: 🚚 Get latest code
-    uses: actions/checkout@v4
-name: 🔨 Build Project
-    run: |
-      npm install
-name: 📂 Sync files
-uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-with:
-  server: ftp.allo-automationreport.my.id
-  username: syauqiueo@allo-automationreport.my.id
-  password: P@ssw0rd@123
-  server-dir: ./
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+    - name: 🔨 Build Project
+      run: |
+        npm install
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ftp.allo-automationreport.my.id
+        username: syauqiueo@allo-automationreport.my.id
+        password: P@ssw0rd@123
+        server-dir: ./
