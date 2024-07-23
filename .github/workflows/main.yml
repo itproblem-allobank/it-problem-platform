@@ -1,0 +1,22 @@
+on: 
+  push:
+    branches: 
+      - main
+name: automation-report
+jobs:
+  web-deploy:
+    name: automation-report
+    runs-on: ubuntu-latest
+    steps:
+name: 🚚 Get latest code
+    uses: actions/checkout@v3
+name: 🔨 Build Project
+    run: |
+      npm install
+name: 📂 Sync files
+uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+with:
+  server: ftp.allo-automationreport.my.id
+  username: syauqiueo@allo-automationreport.my.id
+  password: P@ssw0rd@123
+  server-dir: ./
