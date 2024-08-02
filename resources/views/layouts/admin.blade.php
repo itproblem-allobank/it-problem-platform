@@ -42,16 +42,6 @@
             </a>
 
             <!-- Divider -->
-            <!-- <hr class="sidebar-divider my-0"> -->
-
-            <!-- Nav Item - Dashboard -->
-            <!-- <li class="nav-item {{ Nav::isRoute('home') }}">
-            <a class="nav-link" href="{{ route('home') }}">
-                <i class="fas fa-fw fa-tachometer-alt"></i>
-                <span>{{ __('Dashboard') }}</span></a>
-        </li> -->
-
-            <!-- Divider -->
             <hr class="sidebar-divider">
 
             <!-- Heading -->
@@ -90,15 +80,6 @@
                     <span>{{ __('Generate Powerpoint') }}</span>
                 </a>
             </li>
-
-
-            <!-- Nav Item - Generate PPT -->
-            <!-- <li class="nav-item {{ Nav::isRoute('monthly') }}">
-                <a class="nav-link" href="{{ route('monthly') }}">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>{{ __('Report Monthly') }}</span>
-                </a>
-            </li> -->
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">

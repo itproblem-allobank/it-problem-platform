@@ -157,7 +157,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('jira.delete') }}" method="POST">
+            <form action="{{ route('service.delete') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
