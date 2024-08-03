@@ -289,7 +289,7 @@ class WeeklyController extends Controller
             $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $cell->setColSpan(3);
-            $textRun = $cell->createTextRun(truncateString($data["problem"]) . "\n" . $data["total"]);
+            $textRun = $cell->createTextRun($data["total"] . "\n" . truncateString($data["problem"]));
             $textRun->getFont()->setBold(true);
             $textRun->getFont()->setSize(12);
 
@@ -665,10 +665,10 @@ class WeeklyController extends Controller
                 $index . ". " . $value->work_around . "\n";
             $index++;
         }
-        
-        if($workaround1 != null) {
-        $newworkaround1 = implode($workaround1);
-        $datatimeline1['description'] = $newworkaround1;
+
+        if ($workaround1 != null) {
+            $newworkaround1 = implode($workaround1);
+            $datatimeline1['description'] = $newworkaround1;
         }
 
         $datatimeline2 = [
@@ -682,10 +682,10 @@ class WeeklyController extends Controller
                 $index . ". " . $value->work_around . "\n";
             $index++;
         }
-        
-        if($workaround2 != null) {
-        $newworkaround2 = implode($workaround2);
-        $datatimeline2['description'] = $newworkaround2;
+
+        if ($workaround2 != null) {
+            $newworkaround2 = implode($workaround2);
+            $datatimeline2['description'] = $newworkaround2;
         }
 
         $datatimeline3 = [
@@ -699,10 +699,10 @@ class WeeklyController extends Controller
                 $index . ". " . $value->work_around . "\n";
             $index++;
         }
-        
-        if($workaround3 != null) {
-        $newworkaround3 = implode($workaround3);
-        $datatimeline3['description'] = $newworkaround3;
+
+        if ($workaround3 != null) {
+            $newworkaround3 = implode($workaround3);
+            $datatimeline3['description'] = $newworkaround3;
         }
 
         $datatimeline4 = [
@@ -717,7 +717,7 @@ class WeeklyController extends Controller
             $index++;
         }
 
-        if($workaround4 != null) {
+        if ($workaround4 != null) {
             $newworkaround4 = implode($workaround4);
             $datatimeline4['description'] = $newworkaround4;
         }
