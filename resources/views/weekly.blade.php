@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('main-content')
 <!-- Page Heading -->
-<h1 class="h3 ml-4 mb-4 text-gray-800">{{ __('Generate Powerpoint') }}</h1>
+<h1 class="h3 ml-4 mb-4 text-gray-800">{{ __('Weekly Report') }}</h1>
 
 @if (session('success'))
 <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
@@ -23,7 +23,7 @@
 @endif
 
 <div class="card shadow p-4 mb-2">
-    <form method="GET" action="{{ route('generate.download') }}">
+    <form method="GET" action="{{ route('weekly.download') }}">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <div class="pl-lg-4">
             <div class="row">
@@ -48,7 +48,7 @@
         <div class="pl-lg-4">
             <div class="row">
                 <div class="col-lg-3">
-                    <button type="submit" class="btn btn-primary">Generate Powerpoint</button>
+                    <button type="submit" class="btn btn-primary">Generate</button>
                 </div>
             </div>
         </div>

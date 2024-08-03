@@ -33,6 +33,10 @@ Route::get('/service', 'ServiceController@index')->name('service.index');
 Route::post('/service/import', 'ServiceController@import')->name('service.import');
 Route::post('/service/delete', 'ServiceController@delete')->name('service.delete');
 
-// Page Generate Powerpoint
-Route::get('/generate', 'GenerateController@index')->name('generate.index');
-Route::get('/generate/download', 'GenerateController@generateppt')->name('generate.download');
+// Page monthly Powerpoint
+Route::get('/monthly', 'MonthlyController@index')->name('monthly.index');
+Route::get('/monthly/download', 'MonthlyController@download')->name('monthly.download');
+
+// Page weekly Powerpoint
+Route::get('/weekly', 'WeeklyController@index')->name('weekly.index');
+Route::get('/weekly/download', 'WeeklyController@download')->name('weekly.download');

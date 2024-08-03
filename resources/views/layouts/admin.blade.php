@@ -74,10 +74,18 @@
             </li>
 
             <!-- Nav Item - Generate -->
-            <li class="nav-item {{ Nav::isRoute('generate.index') }}">
-                <a class="nav-link" href="{{ route('generate.index') }}">
+            <li class="nav-item {{ Nav::isRoute('weekly.index') }}">
+                <a class="nav-link" href="{{ route('weekly.index') }}">
                     <i class="fas fa-fw fa-file-powerpoint"></i>
-                    <span>{{ __('Generate Powerpoint') }}</span>
+                    <span>{{ __('Weekly Report') }}</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Generate -->
+            <li class="nav-item {{ Nav::isRoute('monthly.index') }}">
+                <a class="nav-link" href="{{ route('monthly.index') }}">
+                    <i class="fas fa-fw fa-file-powerpoint"></i>
+                    <span>{{ __('Monthly Report') }}</span>
                 </a>
             </li>
 

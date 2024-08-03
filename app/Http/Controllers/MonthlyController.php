@@ -22,7 +22,7 @@ use PhpOffice\PhpPresentation\Shape\Chart\Type\Line;
 
 use Exception;
 
-class GenerateController extends Controller
+class MonthlyController extends Controller
 {
     public function __construct()
     {
@@ -32,10 +32,10 @@ class GenerateController extends Controller
     public function index()
     {
 
-        return view('generate_ppt');
+        return view('monthly');
     }
 
-    public function generateppt(Request $request)
+    public function download(Request $request)
     {
         $start_date = $request->start_date;
         $end_date = $request->end_date;
