@@ -25,7 +25,7 @@ class JiraController extends Controller
         if (request()->ajax()) {
             return DataTables::make(Data::all())->make(true);
         }
-        return view('ticket_jira', compact('data'));
+        return view('jira', compact('data'));
     }
 
     public function import(Request $request)
