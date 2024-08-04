@@ -468,6 +468,49 @@ class WeeklyController extends Controller
 
 
 
+        //Chart Customer Care
+        $data_chart4 = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
+        $resultdata_chart4 = [];
+        foreach ($data_chart4 as $key => $value) {
+            $total = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
+            $status_closed = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
+            $status_declined = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
+            $resultdata_chart4[] =
+                [
+                    'sub_category' => $value->sub_category,
+                    'total' => $total,
+                    'count_closed' => $status_closed,
+                    'count_declined' => $status_declined,
+                ];
+        }
+
+        // Set Size Chart
+        $chartShape = $slide3->createChartShape();
+        $chartShape->setHeight(250)
+            ->setWidth(410)
+            ->setOffsetX(845)
+            ->setOffsetY(500);
+        // Define tipe chart
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Ticket Service Customer Care');
+
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+
+        // Tambahkan seri data ke chart
+        foreach ($resultdata_chart4 as $key => $value) {
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'],]);
+            $chartType->addSeries($series);
+        }
+
+
+
+
+
         //SLIDE 4
         $slide4 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
