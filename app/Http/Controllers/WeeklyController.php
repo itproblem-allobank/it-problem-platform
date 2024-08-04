@@ -246,21 +246,35 @@ class WeeklyController extends Controller
         // dd($problem);
         $total = [];
         foreach ($problem as $key => $value) {
-            $high = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
-            $medium = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
-            $low = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
-            $countdata = $high + $medium + $low;
+            $high_existing = Data::where('created', '<' , $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
+            $medium_existing = Data::where('created', '<' , $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
+            $low_existing = Data::where('created', '<' , $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
+            $high_now = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
+            $medium_now = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
+            $low_now = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
+            $highclosed = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'High')->get()->count();
+            $mediumclosed = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Medium')->get()->count();
+            $lowclosed = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Low')->get()->count();
+            $high_total = $high_existing + $high_now - $highclosed;
+            $medium_total = $medium_existing + $medium_now - $mediumclosed;
+            $low_total = $low_existing + $low_now - $lowclosed;
+            $countdata = $high_total + $medium_total + $low_total;
             $total[] = [
                 'problem' => $value->problem,
                 'total' => $countdata,
-                'high' =>  $high,
-                'medium' => $medium,
-                'low' => $low,
+                'high_existing' => $high_existing,
+                'medium_existing' => $medium_existing,
+                'low_existing' => $low_existing,
+                'high' =>  $high_now,
+                'medium' => $medium_now,
+                'low' => $low_now,
+                'highclosed' => $highclosed,
+                'mediumclosed' => $mediumclosed,
+                'lowclosed' => $lowclosed
             ];
         }
 
         // dd($total);
-
         function truncateString($string, $limit = 18)
         {
             if (strlen($string) > $limit) {
@@ -295,7 +309,7 @@ class WeeklyController extends Controller
 
             //row title
             $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(25);
+            $rowShape->setHeight(20);
             $value = ['High', 'Med', 'Low'];
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
@@ -306,8 +320,28 @@ class WeeklyController extends Controller
             }
 
             $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(25);
+            $rowShape->setHeight(20);
+            $value = [$data['high_existing'], $data['medium_existing'], $data['low_existing']];
+            foreach ($value as $key => $v) {
+                $cell = $rowShape->nextCell();
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->createTextRun($v);
+            }
+
+            $rowShape = $tableShape->createRow();
+            $rowShape->setHeight(20);
             $value = [$data['high'], $data['medium'], $data['low']];
+            foreach ($value as $key => $v) {
+                $cell = $rowShape->nextCell();
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->createTextRun($v);
+            }
+
+            $rowShape = $tableShape->createRow();
+            $rowShape->setHeight(20);
+            $value = [$data['highclosed'], $data['mediumclosed'], $data['lowclosed']];
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -337,9 +371,9 @@ class WeeklyController extends Controller
         // Chart 1 Ticket by Category
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(250)
-            ->setWidth(400)
+            ->setWidth(410)
             ->setOffsetX(25)
-            ->setOffsetY(200);
+            ->setOffsetY(225);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -357,80 +391,66 @@ class WeeklyController extends Controller
             $chartType->addSeries($series);
         }
 
-        // set Data Chart 2 Ticket by  3 Last month
-        $data_chart2 = Data::whereBetween('created', [Carbon::parse($start_date)->subMonths(3), $end_date])->select(DB::raw('MONTH(created) as month'), DB::raw('count(*) as count'))
-            ->groupBy(DB::raw('MONTH(created)'))
-            ->get();
-        $resultdata_chart2 = [];
-        foreach ($data_chart2 as $key => $value) {
-            $closed = Data::whereBetween('created', [Carbon::parse($start_date)->subMonths(3), $end_date])->where('status', '=', 'Closed')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
-            $pending = Data::whereBetween('created', [Carbon::parse($start_date)->subMonths(3), $end_date])->where('status', '=', 'Pending')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
-            $resultdata_chart2[] = [
-                'month' => Carbon::create()->month($value->month)->format('F'),
-                'count' => $value->count,
-                'closed' => $closed,
-                'pending' => $pending
-            ];
-        }
+        // set Data Chart 2 Ticket by  3 Last Weeks
+        $closed_lastweek = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(7), $start_date])->where('status', '=', 'Closed')->get()->count();
+        $closed_2weeksago = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(14), Carbon::parse($start_date)->subDays(7)])->where('status', '=', 'Closed')->get()->count();
+        $closed_3weeksago = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(21), Carbon::parse($start_date)->subDays(14)])->where('status', '=', 'Closed')->get()->count();
+
+        $pending_lastweek = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(7), $start_date])->where('status', '=', 'Pending')->get()->count();
+        $pending_2weeksago = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(14), Carbon::parse($start_date)->subDays(7)])->where('status', '=', 'Pending')->get()->count();
+        $pending3weeksago = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(21), Carbon::parse($start_date)->subDays(14)])->where('status', '=', 'Pending')->get()->count();
 
         // Chart 2
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(250)
-            ->setWidth(400)
-            ->setOffsetX(440)
-            ->setOffsetY(200);
+            ->setWidth(410)
+            ->setOffsetX(435)
+            ->setOffsetY(225);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
 
         // Set judul chart
-        $chartShape->getTitle()->setText('Ticket by Last 3 Months');
+        $chartShape->getTitle()->setText('Ticket by Last 3 Weeks');
 
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
         $chartShape->getBorder()->setLineWidth(1);
 
-        $dataclosed = [];
-        foreach ($resultdata_chart2 as $key => $value) {
-            $dataclosed[$value['month']] = $value['closed'];
-        }
-        $datapending = [];
-        foreach ($resultdata_chart2 as $key => $value) {
-            $datapending[$value['month']] = $value['pending'];
-        }
-
-        $series = new Series('Closed', $dataclosed);
-        $series2 = new Series('Pending', $datapending);
+        $series = new Series('Closed', ['3 Weeks Ago' => $closed_3weeksago, '2 Weeks Ago' => $closed_2weeksago, 'Last Weeks' => $closed_lastweek]);
+        $series2 = new Series('Pending', ['3 Weeks Ago' => $pending3weeksago, '2 Weeks Ago' => $pending_2weeksago, 'Last Weeks' => $pending_lastweek]);
         $chartType->addSeries($series);
         $chartType->addSeries($series2);
 
-        // Chart 3 Ticket Service Request Jira
-        $data_chart3 = Service::whereBetween('created', [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))->groupBy('issue_type')->get();
+        // Chart 3 Ticket Service Request Nasabah
+        // $data_chart3 = Service::whereBetween('created', [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))->groupBy('issue_type')->get();
+        $data_chart3 = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', '[JSM] Allo Care Service Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
         $resultdata_chart3 = [];
         foreach ($data_chart3 as $key => $value) {
-            $status_closed = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Closed')->get()->count();
-            $status_pending = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Pending')->get()->count();
+            $total = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
+            $status_closed = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
+            $status_declined = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
             $resultdata_chart3[] =
                 [
-                    'issue_type' => $value->issue_type,
-                    'total' => $value->count,
+                    'sub_category' => $value->sub_category,
+                    'total' => $total,
                     'count_closed' => $status_closed,
-                    'count_pending' => $status_pending,
+                    'count_declined' => $status_declined,
                 ];
         }
 
         // Set Size Chart
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(230)
-            ->setWidth(400)
-            ->setOffsetX(855)
-            ->setOffsetY(460);
+        $chartShape->setHeight(250)
+            ->setWidth(410)
+            ->setOffsetX(845)
+            ->setOffsetY(225);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
-        $chartShape->getTitle()->setText('Ticket Jira Service Request');
+        $chartShape->getTitle()->setText('Ticket Service Request Nasabah');
 
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
@@ -439,172 +459,9 @@ class WeeklyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart3 as $key => $value) {
-            $series = new Series($value['issue_type'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], ]);
             $chartType->addSeries($series);
         }
-
-        // //Chart 4 Problem by Status
-        // $data_chart4 = Data::whereBetween('created', [$start_date, $end_date])->select('status', DB::raw('count(*) as count'))->groupBy('status')->get();
-        // $resultdata_chart4 = [];
-        // foreach ($data_chart4 as $key => $value) {
-        //     $resultdata_chart4[$value->status] = $value->count;
-        // }
-        // $chartShape = $slide3->createChartShape();
-        // $chartShape->setHeight(230)
-        //     ->setWidth(400)
-        //     ->setOffsetX(25)
-        //     ->setOffsetY(460);
-        // // Define tipe chart
-        // $chartType = new Pie();
-        // $chartShape->getPlotArea()->setType($chartType);
-        // // Set judul chart
-        // $chartShape->getTitle()->setText('Problem By Status');
-        // $series = new Series('Data', $resultdata_chart4);
-        // $chartType->addSeries($series);
-        // // Chart Bordered
-        // $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        // $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
-        // $chartShape->getBorder()->setLineWidth(1);
-
-        //Chart 5 Problem by Assignee & Status
-        $data_chart5 = Data::whereBetween('created', [$start_date, $end_date])->select('nickname', DB::raw('count(*) as count'))->groupBy('nickname')->get();
-        $resultdata_chart5 = [];
-        foreach ($data_chart5 as $key => $value) {
-            $closed = Data::whereBetween('created', [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Closed')->get()->count();
-            $pending = Data::whereBetween('created', [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Pending')->get()->count();
-            $resultdata_chart5[] = [
-                'nickname' => $value->nickname,
-                'count' => $value->count,
-                'closed' => $closed,
-                'pending' => $pending
-            ];
-        }
-        $data_closed = [];
-        foreach ($resultdata_chart5 as $key => $value) {
-            $data_closed[$value['nickname']] = $value['closed'];
-        }
-        $data_pending = [];
-        foreach ($resultdata_chart5 as $key => $value) {
-            $data_pending[$value['nickname']] = $value['pending'];
-        }
-        $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(230)
-            ->setWidth(400)
-            ->setOffsetX(440)
-            ->setOffsetY(460);
-        // Define tipe chartsss
-        $chartType = new Bar();
-        $chartShape->getPlotArea()->setType($chartType);
-        // Set judul chart
-        $chartShape->getTitle()->setText('Problem By Assignee & Status');
-        $series1 = new Series('Closed', $data_closed);
-        $series2 = new Series('Pending', $data_pending);
-        $chartType->addSeries($series1);
-        $chartType->addSeries($series2);
-        // Chart Bordered
-        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
-        $chartShape->getBorder()->setLineWidth(1);
-
-
-        //Chart 6 Container
-        $shape = $slide3->createRichTextShape()
-            ->setHeight(250)
-            ->setWidth(195)
-            ->setOffsetX(855)
-            ->setOffsetY(200);
-        $shape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFF'));
-        $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
-
-        // Set Data
-        $curr_created = Data::where('created', '<=', $end_date)->get()->count();
-        $prev_created = Data::where('created', '<', $start_date)->get()->count();
-        $curr_closed = Data::where('created', '<=', $end_date)->where('status', '=', 'Closed')->get()->count();
-        $prev_closed = Data::where('created', '<', $start_date)->where('status', '=', 'Closed')->get()->count();
-        // dd($curr_created, $prev_created, $curr_closed, $prev_closed);
-        $percen_created = ($curr_created - $prev_created) / $prev_created * 100;
-        $percen_closed = ($curr_closed - $prev_closed) / $prev_closed * 100;
-
-        // Menambahkan teks ke kotak pertama
-        $percentage = $shape->createTextRun("▲ " . number_format($percen_created, 2) . "%");
-        $percentage->getFont()->setBold(true)->setSize(28)->setColor(new Color('FFC00000'));
-        $title = $shape->createTextRun("\nIssues Created");
-        $title->getFont()->setBold(true)->setSize(20)->setColor(new Color('FFC00000'));
-        $c_month = $shape->createTextRun("\n\n\nCurrent Month : ");
-        $c_month->getFont()->setBold(true)->setSize(12);
-        $vc_month = $shape->createTextRun("\n" . $curr_created);
-        $vc_month->getFont()->setBold(true)->setSize(18);
-        $p_month = $shape->createTextRun("\nPrevious Month : ");
-        $p_month->getFont()->setBold(true)->setSize(12);
-        $vp_month = $shape->createTextRun("\n" . $prev_created);
-        $vp_month->getFont()->setBold(true)->setSize(18);
-
-        // Menambahkan kotak kedua untuk "Issues Closed"
-        $shape2 = $slide3->createRichTextShape()
-            ->setHeight(250)
-            ->setWidth(195)
-            ->setOffsetX(1060)
-            ->setOffsetY(200);
-        $shape2->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFF'));
-        $shape2->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
-
-        // Menambahkan teks ke kotak kedua
-        $percentage2 = $shape2->createTextRun("▲ " . number_format($percen_closed, 2) . "%");
-        $percentage2->getFont()->setBold(true)->setSize(28)->setColor(new Color('FF00C000'));
-        $title2 = $shape2->createTextRun("\nIssues Closed");
-        $title2->getFont()->setBold(true)->setSize(20)->setColor(new Color('FF00C000'));
-        $c_month2 = $shape2->createTextRun("\n\n\nCurrent Month : ");
-        $c_month2->getFont()->setBold(true)->setSize(12);
-        $vc_month2 = $shape2->createTextRun("\n" . $curr_closed);
-        $vc_month2->getFont()->setBold(true)->setSize(18);
-        $p_month2 = $shape2->createTextRun("\nPrevious Month : ");
-        $p_month2->getFont()->setBold(true)->setSize(12);
-        $vp_month2 = $shape2->createTextRun("\n" . $prev_closed);
-        $vp_month2->getFont()->setBold(true)->setSize(18);
-
-        // Chart 4 - Chart Line Created vs Closed
-        //convert data per week
-        $w1 = Carbon::parse($start_date)->addDays(7);
-        $w2 = Carbon::parse($start_date)->addDays(14);
-        $w3 = Carbon::parse($start_date)->addDays(21);
-
-        //created data
-        $totalcr = Data::whereBetween('created', [$start_date, $end_date])->get()->count();
-        $cr1 = Data::whereBetween('created', [$start_date, $w1])->get()->count();
-        $cr2 = Data::whereBetween('created', [$w1, $w2])->get()->count();
-        $cr3 = Data::whereBetween('created', [$w2, $w3])->get()->count();
-        $cr4 = Data::whereBetween('created', [$w3, $end_date])->get()->count();
-
-        //closed data
-        $totalcl = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$start_date, $end_date])->get()->count();
-        $cl1 = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$start_date, $w1])->get()->count();
-        $cl2 = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$w1, $w2])->get()->count();
-        $cl3 = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$w2, $w3])->get()->count();
-        $cl4 = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$w3, $end_date])->get()->count();
-
-        // Set Size Chart
-        $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(230)
-            ->setWidth(400)
-            ->setOffsetX(25)
-            ->setOffsetY(460);
-        // Define tipe chart
-        $chartType = new Line();
-        $chartShape->getPlotArea()->setType($chartType);
-        // Set judul chart
-        $chartShape->getTitle()->setText('Ticket Created vs Closed');
-
-        // Chart Bordered
-        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
-        $chartShape->getBorder()->setLineWidth(1);
-
-        // Tambahkan seri data ke chart
-        $created = new Series('Created', ['Week1' => $cr1, 'Week2' => $cr2, 'Week3' => $cr3, 'Week4' => $cr4]);
-        $chartType->addSeries($created);
-        $closed = new Series('Closed', ['Week1' => $cl1, 'Week2' => $cl2, 'Week3' => $cl3, 'Week4' => $cl4]);
-        $chartType->addSeries($closed);
-
 
         //Slide 4
         $slide4 = $objPHPPresentation->createSlide();
