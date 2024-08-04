@@ -17,10 +17,6 @@ use PhpOffice\PhpPresentation\Shape\Chart\Series;
 use PhpOffice\PhpPresentation\Shape\Drawing\File;
 use PhpOffice\PhpPresentation\Style\Border;
 use PhpOffice\PhpPresentation\Style\Fill;
-use PhpOffice\PhpPresentation\Shape\Table;
-use PhpOffice\PhpPresentation\Shape\Table\Row;
-use PhpOffice\PhpPresentation\Shape\Table\Cell;
-
 use Exception;
 
 class WeeklyController extends Controller
@@ -238,8 +234,9 @@ class WeeklyController extends Controller
             ->setWidth(400)
             ->setOffsetX(25)
             ->setOffsetY(60);
-        $date = Carbon::parse($end_date)->format('F Y');
-        $textRun = $shape->createTextRun('As of ' . $date);
+        $startdate = Carbon::parse($start_date)->format('d F Y');
+        $enddate = Carbon::parse($end_date)->format('d F Y');
+        $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
         $textRun->getFont()->setSize(14);
 
         //data container category
@@ -380,11 +377,18 @@ class WeeklyController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket by Category');
-
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
         $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
@@ -410,14 +414,21 @@ class WeeklyController extends Controller
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
-
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket by Last 3 Weeks');
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
 
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
         $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
         $series = new Series('Closed', ['3 Weeks Ago' => $closed_3weeksago, '2 Weeks Ago' => $closed_2weeksago, 'Last Weeks' => $closed_lastweek]);
         $series2 = new Series('Pending', ['3 Weeks Ago' => $pending3weeksago, '2 Weeks Ago' => $pending_2weeksago, 'Last Weeks' => $pending_lastweek]);
@@ -452,21 +463,25 @@ class WeeklyController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket Service Request Nasabah');
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
 
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
         $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart3 as $key => $value) {
             $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'],]);
             $chartType->addSeries($series);
         }
-
-
-
-
 
         //Chart Customer Care
         $data_chart4 = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
@@ -483,208 +498,95 @@ class WeeklyController extends Controller
                     'count_declined' => $status_declined,
                 ];
         }
-
         // Set Size Chart
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(250)
+        $chartShape->setHeight(210)
             ->setWidth(410)
             ->setOffsetX(845)
-            ->setOffsetY(500);
+            ->setOffsetY(475);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket Service Customer Care');
 
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
         $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart4 as $key => $value) {
-            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'],]);
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined']]);
             $chartType->addSeries($series);
         }
 
+        // Define table properties
+        $columns = 2; // Number of columns
+        $tableShape = $slide3->createTableShape($columns);
+        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
+        // Set the table's position and size
+        $tableShape->setHeight(210);
+        $tableShape->setWidth(820);
+        $tableShape->setOffsetX(25);
+        $tableShape->setOffsetY(475);
 
-
-
-        //SLIDE 4
-        $slide4 = $objPHPPresentation->createSlide();
-        $backgroundImagePath = storage_path('image/background.png');
-        $backgroundImage = new File();
-        $backgroundImage->setPath($backgroundImagePath);
-        $backgroundImage->setWidth(1280);
-        $backgroundImage->setOffsetX(0);
-        $backgroundImage->setOffsetY(0);
-        $slide4->addShape($backgroundImage);
-
-
-        $imagePath = storage_path('image/allobank.png');
-        $pictureShape = new File();
-        $pictureShape->setPath($imagePath);
-        $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
-        $pictureShape->setOffsetX(1050); // Posisi horizontal gambar
-        $pictureShape->setOffsetY(20); // Posisi vertikal gambar
-        $slide4->addShape($pictureShape);
-
-        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
-            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
-            ->setCY(700, DocumentLayout::UNIT_PIXEL);
-
-        // Tambahkan teks judul slide
-        $shape = $slide4->createRichTextShape()
-            ->setHeight(50)
-            ->setWidth(700)
-            ->setOffsetX(50)
-            ->setOffsetY(25);
-        $textRun = $shape->createTextRun('Achievement IT Problem by Week');
-        $textRun->getFont()->setBold(true)
-            ->setSize(30);
-
-        $shape = $slide4->createRichTextShape()
-            ->setHeight(25)
-            ->setWidth(400)
-            ->setOffsetX(50)
-            ->setOffsetY(75);
-        $date = Carbon::parse($end_date)->format('F Y');
-        $textRun = $shape->createTextRun('As of ' . $date);
-        $textRun->getFont()->setSize(14);
-
-        $week4 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(7), $end_date])->get();
-        $week3 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(14), Carbon::parse($end_date)->subDays(7)])->get();
-        $week2 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(21), Carbon::parse($end_date)->subDays(14)])->get();
-        $week1 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(28), Carbon::parse($end_date)->subDays(21)])->get();
-
-        //Set DATA TIMELINE
-        $datatimeline1 = [
-            'week' => 'Week 1',
-            'description' => '',
+        // Define the data for the table
+        $datacreated = Data::whereBetween('created', [$start_date, $end_date])->select('summary', 'status', 'changed_at')->get();
+        $dataclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('status', '=', 'Closed')->select('summary', 'status', 'changed_at')->get();
+        $tempdata = [
+            ['Problem', 'Status'],
         ];
-        $workaround1 = null;
-        $index = 1;
-        foreach ($week1 as $key => $value) {
-            $workaround1[] =
-                $index . ". " . $value->work_around . "\n";
-            $index++;
+        foreach ($datacreated as $key => $value) {
+            $status = $value->status . ' - ' . Carbon::parse($value->changed_at)->format('d F Y');
+            $tempdata[] = [$value->summary,  $status];
         }
-
-        if ($workaround1 != null) {
-            $newworkaround1 = implode($workaround1);
-            $datatimeline1['description'] = $newworkaround1;
+        foreach ($dataclosed as $key => $value) {
+            $status = $value->status . ' - ' . Carbon::parse($value->changed_at)->format('d F Y');
+            $tempdata[] = [$value->summary,  $status];
         }
+        $tempdata[] = ['',  ''];
 
-        $datatimeline2 = [
-            'week' => 'Week 2',
-            'description' => '',
-        ];
-        $workaround2 = null;
-        $index = 1;
-        foreach ($week2 as $key => $value) {
-            $workaround2[] =
-                $index . ". " . $value->work_around . "\n";
-            $index++;
-        }
-
-        if ($workaround2 != null) {
-            $newworkaround2 = implode($workaround2);
-            $datatimeline2['description'] = $newworkaround2;
-        }
-
-        $datatimeline3 = [
-            'week' => 'Week 3',
-            'description' => '',
-        ];
-        $workaround3 = null;
-        $index = 1;
-        foreach ($week3 as $key => $value) {
-            $workaround3[] =
-                $index . ". " . $value->work_around . "\n";
-            $index++;
-        }
-
-        if ($workaround3 != null) {
-            $newworkaround3 = implode($workaround3);
-            $datatimeline3['description'] = $newworkaround3;
-        }
-
-        $datatimeline4 = [
-            'week' => 'Week 4',
-            'description' => '',
-        ];
-        $workaround4 = null;
-        $index = 1;
-        foreach ($week4 as $key => $value) {
-            $workaround4[] =
-                $index . ". " . $value->work_around . "\n";
-            $index++;
-        }
-
-        if ($workaround4 != null) {
-            $newworkaround4 = implode($workaround4);
-            $datatimeline4['description'] = $newworkaround4;
-        }
-
-
-        // Data Timeline
-        $timeline = [
-            $datatimeline1,
-            $datatimeline2,
-            $datatimeline3,
-            $datatimeline4
-        ];
-
-        // Posisi awal untuk timeline
-        $offsetX = 100;
-        $offsetY = 400;
-        $boxWidth = 200;
-        $boxHeight = 50;
-        $descWidth = 200;
-        $descHeight = 150;
-        $stepX = 250; // Jarak antar kotak di sumbu X
-        $lineThickness = 3;
-
-        foreach ($timeline as $index => $item) {
-            // Membuat kotak untuk deskripsi
-            $descShape = $slide4->createRichTextShape()
-                ->setHeight($descHeight)
-                ->setWidth($descWidth)
-                ->setOffsetX($offsetX + $index * $stepX)
-                ->setOffsetY($offsetY - $descHeight - 10);
-            $descShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $descShape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
-            $descShape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-            $descText = $descShape->createTextRun($item['description']);
-            $descText->getFont()->setSize(8)->setColor(new Color('FF000000'));
-
-            // Membuat kotak untuk minggu
-            $shape = $slide4->createRichTextShape()
-                ->setHeight($boxHeight)
-                ->setWidth($boxWidth)
-                ->setOffsetX($offsetX + $index * $stepX)
-                ->setOffsetY($offsetY);
-            $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $shape->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
-            $shape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-            $textRun = $shape->createTextRun($item['week']);
-            $textRun->getFont()->setBold(true)
-                ->setSize(10)
-                ->setColor(new Color('FF000000'));
-
-            // Menambahkan garis horizontal antar kotak
-            if ($index > 0) {
-                $line = $slide4->createLineShape(
-                    $offsetX + ($index - 1) * $stepX + $boxWidth,
-                    $offsetY + $boxHeight / 2,
-                    $offsetX + $index * $stepX,
-                    $offsetY + $boxHeight / 2
-                );
-                $line->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'))->setLineWidth($lineThickness);
+        foreach ($tempdata as $rowIndex => $row) {
+            $tableRow = $tableShape->createRow();
+            $tableRow->setHeight(25); // Set the height of the row
+            foreach ($row as $cellIndex => $cellText) {
+                //coloring sesuai status
+                $status = explode(' - ', $row[1]);
+                $firstStatus = $status[0];
+                //
+                $cell = $tableRow->nextCell();
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } elseif ($firstStatus == 'Pending') {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_YELLOW));
+                } elseif ($firstStatus == 'Closed') {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_GREEN));
+                } else {
+                    $cell->getFill()->setFillType(Fill::FILL_NONE);
+                }
             }
         }
+
+
+
 
         //Slide 5
         $slide5 = $objPHPPresentation->createSlide();
