@@ -396,14 +396,19 @@ class WeeklyController extends Controller
             $chartType->addSeries($series);
         }
 
-        // set Data Chart 2 Ticket by  3 Last Weeks
-        $closed_lastweek = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(7), $start_date])->where('status', '=', 'Closed')->get()->count();
-        $closed_2weeksago = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(14), Carbon::parse($start_date)->subDays(7)])->where('status', '=', 'Closed')->get()->count();
-        $closed_3weeksago = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(21), Carbon::parse($start_date)->subDays(14)])->where('status', '=', 'Closed')->get()->count();
+        $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
+        $twoweeksago = [Carbon::parse($start_date)->subDays(14), Carbon::parse($start_date)->subDays(8)];
+        $threeweeksago = [Carbon::parse($start_date)->subDays(21), Carbon::parse($start_date)->subDays(15)];
+        // dd($lastweek, $twoweeksago, $threeweeksago);
 
-        $pending_lastweek = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(7), $start_date])->where('status', '=', 'Pending')->get()->count();
-        $pending_2weeksago = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(14), Carbon::parse($start_date)->subDays(7)])->where('status', '=', 'Pending')->get()->count();
-        $pending3weeksago = Data::whereBetween('created', [Carbon::parse($start_date)->subDays(21), Carbon::parse($start_date)->subDays(14)])->where('status', '=', 'Pending')->get()->count();
+        // set Data Chart 2 Ticket by  3 Last Weeks
+        $closed_lastweek = Data::whereBetween('created', $lastweek)->where('status', '=', 'Closed')->get()->count();
+        $closed_2weeksago = Data::whereBetween('created', $twoweeksago)->where('status', '=', 'Closed')->get()->count();
+        $closed_3weeksago = Data::whereBetween('created', $threeweeksago)->where('status', '=', 'Closed')->get()->count();
+
+        $pending_lastweek = Data::whereBetween('created', $lastweek)->where('status', '=', 'Pending')->get()->count();
+        $pending_2weeksago = Data::whereBetween('created', $twoweeksago)->where('status', '=', 'Pending')->get()->count();
+        $pending3weeksago = Data::whereBetween('created', $threeweeksago)->where('status', '=', 'Pending')->get()->count();
 
         // Chart 2
         $chartShape = $slide3->createChartShape();
