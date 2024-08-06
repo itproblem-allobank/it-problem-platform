@@ -638,15 +638,15 @@ class WeeklyController extends Controller
 
         //Data
         $data_hpriority = Data::where('priority', '=', 'High')->where('status', '=', 'Pending')->get();
-        $table = [['Problem', 'priority', 'Status']];
+        $table = [];
 
         foreach ($data_hpriority as $key => $value) {
             $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d F Y');
             $table[] = [$value->summary,  $value->priority, $status];
         }
 
-        $table1 = array_slice($table, 0, 18);
-        $table2 = array_slice($table, 19, 35);
+        $table1 = array_slice($table, 0, 17);
+        $table2 = array_slice($table, 17, 35);
 
         //Table 1
         $columns = 3;
@@ -656,6 +656,28 @@ class WeeklyController extends Controller
         $tableShape->setWidth(600);
         $tableShape->setOffsetX(25);
         $tableShape->setOffsetY(100);
+        $rowHeader = $tableShape->createRow();
+        $rowHeader->setHeight(25);
+       //header 
+        $header = ['Problem', 'Priority', 'Status'];
+        foreach ($header as $cellIndex => $cellText) {
+            $cell = $rowHeader->nextCell();
+            if ($cellIndex == 0) {
+                $cell->setWidth(400);
+            } else if ($cellIndex == 1) {
+                $cell->setWidth(70);
+            } else if ($cellIndex == 2) {
+                $cell->setWidth(130);
+            }
+            $textRun = $cell->createTextRun($cellText);
+            $textRun->getFont()->setBold(true);
+            $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+            $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+            $cell->getFill()->setFillType(Fill::FILL_SOLID);
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        }
+        //data
         foreach ($table1 as $rowIndex => $row) {
             $tableRow = $tableShape->createRow();
             $tableRow->setHeight(25);
@@ -669,16 +691,8 @@ class WeeklyController extends Controller
                     $cell->setWidth(130);
                 }
                 $textRun = $cell->createTextRun($cellText);
-                $textRun->getFont()->setBold($rowIndex == 0);
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                if ($rowIndex == 0) {
-                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
-                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-                } else {
-                    $cell->getFill()->setFillType(Fill::FILL_NONE);
-                }
             }
         }
 
@@ -690,6 +704,28 @@ class WeeklyController extends Controller
         $tableShape->setWidth(600);
         $tableShape->setOffsetX(635);
         $tableShape->setOffsetY(100);
+        $rowHeader = $tableShape->createRow();
+        $rowHeader->setHeight(25);
+       //header 
+        $header = ['Problem', 'Priority', 'Status'];
+        foreach ($header as $cellIndex => $cellText) {
+            $cell = $rowHeader->nextCell();
+            if ($cellIndex == 0) {
+                $cell->setWidth(400);
+            } else if ($cellIndex == 1) {
+                $cell->setWidth(70);
+            } else if ($cellIndex == 2) {
+                $cell->setWidth(130);
+            }
+            $textRun = $cell->createTextRun($cellText);
+            $textRun->getFont()->setBold(true);
+            $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+            $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+            $cell->getFill()->setFillType(Fill::FILL_SOLID);
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        }
+        //data
         foreach ($table2 as $rowIndex => $row) {
             $tableRow = $tableShape->createRow();
             $tableRow->setHeight(25);
@@ -703,19 +739,10 @@ class WeeklyController extends Controller
                     $cell->setWidth(130);
                 }
                 $textRun = $cell->createTextRun($cellText);
-                $textRun->getFont()->setBold($rowIndex == 0);
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                if ($rowIndex == 0) {
-                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
-                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-                } else {
-                    $cell->getFill()->setFillType(Fill::FILL_NONE);
-                }
             }
         }
-
 
 
 
