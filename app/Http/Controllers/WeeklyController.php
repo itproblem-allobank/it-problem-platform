@@ -591,6 +591,135 @@ class WeeklyController extends Controller
         }
 
 
+        //Slide 4
+        $slide4 = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide4->addShape($backgroundImage);
+
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(1050); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(20); // Posisi vertikal gambar
+        $slide4->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        // Tambahkan teks judul slide
+        $shape = $slide4->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(800)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('All Ticket Pending - Priority High');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slide4->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(60);
+        $startdate = Carbon::parse($start_date)->format('d F Y');
+        $enddate = Carbon::parse($end_date)->format('d F Y');
+        $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
+        $textRun->getFont()->setSize(14);
+
+        //Table Ticket Pending - Priority HIGH
+
+        //Data
+        $data_hpriority = Data::where('priority', '=', 'High')->where('status', '=', 'Pending')->get();
+        $table = [['Problem', 'priority', 'Status']];
+
+        foreach ($data_hpriority as $key => $value) {
+            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d F Y');
+            $table[] = [$value->summary,  $value->priority, $status];
+        }
+
+        $table1 = array_slice($table, 0, 18);
+        $table2 = array_slice($table, 19, 35);
+
+        //Table 1
+        $columns = 3;
+        $tableShape = $slide4->createTableShape($columns);
+        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $tableShape->setHeight(300);
+        $tableShape->setWidth(600);
+        $tableShape->setOffsetX(25);
+        $tableShape->setOffsetY(100);
+        foreach ($table1 as $rowIndex => $row) {
+            $tableRow = $tableShape->createRow();
+            $tableRow->setHeight(25);
+            foreach ($row as $cellIndex => $cellText) {
+                $cell = $tableRow->nextCell();
+                if ($cellIndex == 0) {
+                    $cell->setWidth(400);
+                } else if ($cellIndex == 1) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(130);
+                }
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } else {
+                    $cell->getFill()->setFillType(Fill::FILL_NONE);
+                }
+            }
+        }
+
+        //Table 2
+        $columns = 3;
+        $tableShape = $slide4->createTableShape($columns);
+        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $tableShape->setHeight(300);
+        $tableShape->setWidth(600);
+        $tableShape->setOffsetX(635);
+        $tableShape->setOffsetY(100);
+        foreach ($table2 as $rowIndex => $row) {
+            $tableRow = $tableShape->createRow();
+            $tableRow->setHeight(25);
+            foreach ($row as $cellIndex => $cellText) {
+                $cell = $tableRow->nextCell();
+                if ($cellIndex == 0) {
+                    $cell->setWidth(400);
+                } else if ($cellIndex == 1) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(130);
+                }
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } else {
+                    $cell->getFill()->setFillType(Fill::FILL_NONE);
+                }
+            }
+        }
+
+
+
+
+
 
 
         //Slide 5
