@@ -396,21 +396,111 @@ class WeeklyController extends Controller
             $chartType->addSeries($series);
         }
 
+        
+        //Declare DAY
         $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
         $twoweeksago = [Carbon::parse($start_date)->subDays(14), Carbon::parse($start_date)->subDays(8)];
         $threeweeksago = [Carbon::parse($start_date)->subDays(21), Carbon::parse($start_date)->subDays(15)];
-        // dd($lastweek, $twoweeksago, $threeweeksago);
+        //
+        $changed_closed_lweek = Data::whereBetween('changed_at', $lastweek)->where('status', '=', 'Closed')->get();
+        $changed_closed_2week = Data::whereBetween('changed_at', $twoweeksago)->where('status', '=', 'Closed')->get();
+        $changed_closed_3week = Data::whereBetween('changed_at', $threeweeksago)->where('status', '=', 'Closed')->get();
 
-        // set Data Chart 2 Ticket by  3 Last Weeks
-        $closed_lastweek = Data::whereBetween('created', $lastweek)->where('status', '=', 'Closed')->get()->count();
-        $closed_2weeksago = Data::whereBetween('created', $twoweeksago)->where('status', '=', 'Closed')->get()->count();
-        $closed_3weeksago = Data::whereBetween('created', $threeweeksago)->where('status', '=', 'Closed')->get()->count();
+        $created_closed_lweek = Data::whereBetween('created', $lastweek)->where('status', '=', 'Closed')->get();
+        $created_closed_2week = Data::whereBetween('created', $twoweeksago)->where('status', '=', 'Closed')->get();
+        $created_closed_3week = Data::whereBetween('created', $threeweeksago)->where('status', '=', 'Closed')->get();
 
-        $pending_lastweek = Data::whereBetween('created', $lastweek)->where('status', '=', 'Pending')->get()->count();
-        $pending_2weeksago = Data::whereBetween('created', $twoweeksago)->where('status', '=', 'Pending')->get()->count();
-        $pending3weeksago = Data::whereBetween('created', $threeweeksago)->where('status', '=', 'Pending')->get()->count();
+        $created_pending_lweek = Data::whereBetween('created', $lastweek)->where('status', '=', 'Pending')->get()->count();
+        $created_pending_2week = Data::whereBetween('created', $twoweeksago)->where('status', '=', 'Pending')->get()->count();
+        $created_pending_3week = Data::whereBetween('created', $threeweeksago)->where('status', '=', 'Pending')->get()->count();
 
-        // Chart 2
+        $closedlweek = [];
+        $closed2week = [];
+        $closed3week = [];
+
+        $temp1week = []; // Array sementara untuk menyimpan elemen unik
+        $temp2week = [];
+        $temp3week = [];
+
+        function createUniqueKey($value)
+        {
+            return serialize([
+                'problem' => $value->summary,
+                'created' => $value->created,
+                'status' => $value->status
+            ]);
+        }
+        //gabung lastweek
+        foreach ($changed_closed_lweek as $key => $value) {
+            $uniqueKey = createUniqueKey($value);
+            if (!in_array($uniqueKey, $temp1week)) {
+                $temp1week[] = $uniqueKey;
+                $closedlweek[] = [
+                    'problem' => $value->summary,
+                    'created' => $value->created,
+                    'status' => $value->status
+                ];
+            }
+        }
+        foreach ($created_closed_lweek as $key => $value) {
+            $uniqueKey = createUniqueKey($value);
+            if (!in_array($uniqueKey, $temp1week)) {
+                $temp1week[] = $uniqueKey;
+                $closedlweek[] = [
+                    'problem' => $value->summary,
+                    'created' => $value->created,
+                    'status' => $value->status
+                ];
+            }
+        }
+        //gabung 2 week
+        foreach ($changed_closed_2week as $key => $value) {
+            $uniqueKey = createUniqueKey($value);
+            if (!in_array($uniqueKey, $temp2week)) {
+                $temp2week[] = $uniqueKey;
+                $closed2week[] = [
+                    'problem' => $value->summary,
+                    'created' => $value->created,
+                    'status' => $value->status
+                ];
+            }
+        }
+        foreach ($created_closed_2week as $key => $value) {
+            $uniqueKey = createUniqueKey($value);
+            if (!in_array($uniqueKey, $temp2week)) {
+                $temp2week[] = $uniqueKey;
+                $closed2week[] = [
+                    'problem' => $value->summary,
+                    'created' => $value->created,
+                    'status' => $value->status
+                ];
+            }
+        }
+        //gabung 3 week
+        foreach ($changed_closed_3week as $key => $value) {
+            $uniqueKey = createUniqueKey($value);
+            if (!in_array($uniqueKey, $temp3week)) {
+                $temp3week[] = $uniqueKey;
+                $closed3week[] = [
+                    'problem' => $value->summary,
+                    'created' => $value->created,
+                    'status' => $value->status
+                ];
+            }
+        }
+        foreach ($created_closed_3week as $key => $value) {
+            $uniqueKey = createUniqueKey($value);
+            if (!in_array($uniqueKey, $temp3week)) {
+                $temp3week[] = $uniqueKey;
+                $closed3week[] = [
+                    'problem' => $value->summary,
+                    'created' => $value->created,
+                    'status' => $value->status
+                ];
+            }
+        }
+
+        // Chart 2, 
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(250)
             ->setWidth(410)
@@ -435,8 +525,8 @@ class WeeklyController extends Controller
         $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
         $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
-        $series = new Series('Closed', ['3 Weeks Ago' => $closed_3weeksago, '2 Weeks Ago' => $closed_2weeksago, 'Last Weeks' => $closed_lastweek]);
-        $series2 = new Series('Pending', ['3 Weeks Ago' => $pending3weeksago, '2 Weeks Ago' => $pending_2weeksago, 'Last Weeks' => $pending_lastweek]);
+        $series = new Series('Closed', ['3 Weeks Ago' => count($closed3week), '2 Weeks Ago' => count($closed2week), 'Last Weeks' => count($closedlweek)]);
+        $series2 = new Series('Pending', ['3 Weeks Ago' => $created_pending_3week, '2 Weeks Ago' => $created_pending_2week, 'Last Weeks' => $created_pending_lweek]);
         $chartType->addSeries($series);
         $chartType->addSeries($series2);
 
