@@ -641,15 +641,15 @@ class WeeklyController extends Controller
         $table = [];
 
         foreach ($data_hpriority as $key => $value) {
-            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d F Y');
-            $table[] = [$value->summary,  $value->priority, $status];
+            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d/m/Y');
+            $table[] = [$value->problem, $value->summary,  $value->priority, $status];
         }
 
         $table1 = array_slice($table, 0, 17);
         $table2 = array_slice($table, 17, 35);
 
         //Table 1
-        $columns = 3;
+        $columns = 4;
         $tableShape = $slide4->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $tableShape->setHeight(300);
@@ -658,16 +658,18 @@ class WeeklyController extends Controller
         $tableShape->setOffsetY(100);
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
-       //header 
-        $header = ['Problem', 'Priority', 'Status'];
+        //header 
+        $header = ['Problem', 'Summary', 'Priority', 'Status'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
-                $cell->setWidth(400);
+                $cell->setWidth(120);
             } else if ($cellIndex == 1) {
-                $cell->setWidth(70);
+                $cell->setWidth(300);
             } else if ($cellIndex == 2) {
-                $cell->setWidth(130);
+                $cell->setWidth(70);
+            } else if ($cellIndex == 3) {
+                $cell->setWidth(110);
             }
             $textRun = $cell->createTextRun($cellText);
             $textRun->getFont()->setBold(true);
@@ -684,11 +686,13 @@ class WeeklyController extends Controller
             foreach ($row as $cellIndex => $cellText) {
                 $cell = $tableRow->nextCell();
                 if ($cellIndex == 0) {
-                    $cell->setWidth(400);
+                    $cell->setWidth(120);
                 } else if ($cellIndex == 1) {
-                    $cell->setWidth(70);
+                    $cell->setWidth(300);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(130);
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(110);
                 }
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -697,7 +701,7 @@ class WeeklyController extends Controller
         }
 
         //Table 2
-        $columns = 3;
+        $columns = 4;
         $tableShape = $slide4->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $tableShape->setHeight(300);
@@ -706,16 +710,18 @@ class WeeklyController extends Controller
         $tableShape->setOffsetY(100);
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
-       //header 
-        $header = ['Problem', 'Priority', 'Status'];
+        //header 
+        $header = ['Problem', 'Summary', 'Priority', 'Status'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
-                $cell->setWidth(400);
+                $cell->setWidth(120);
             } else if ($cellIndex == 1) {
-                $cell->setWidth(70);
+                $cell->setWidth(300);
             } else if ($cellIndex == 2) {
-                $cell->setWidth(130);
+                $cell->setWidth(70);
+            } else if ($cellIndex == 3) {
+                $cell->setWidth(110);
             }
             $textRun = $cell->createTextRun($cellText);
             $textRun->getFont()->setBold(true);
@@ -732,11 +738,13 @@ class WeeklyController extends Controller
             foreach ($row as $cellIndex => $cellText) {
                 $cell = $tableRow->nextCell();
                 if ($cellIndex == 0) {
-                    $cell->setWidth(400);
+                    $cell->setWidth(120);
                 } else if ($cellIndex == 1) {
-                    $cell->setWidth(70);
+                    $cell->setWidth(300);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(130);
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(110);
                 }
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
