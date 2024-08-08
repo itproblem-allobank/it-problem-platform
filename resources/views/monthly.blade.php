@@ -30,7 +30,7 @@
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label class="form-control-label">Start Date</label>
-                        <input type="date" id="start_date" class="form-control" name="start_date" required>
+                        <input type="date" id="start_date" class="form-control" name="start_date" onchange="setEndDate()" required>
                     </div>
                 </div>
             </div>
@@ -54,5 +54,23 @@
         </div>
     </form>
 </div>
+
+<script>
+    function setEndDate() {
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        if (startDateInput.value) {
+            const startDate = new Date(startDateInput.value);
+            const startDay = startDate.getDate();
+
+            // Check if the start date is the first day of the month
+            if (startDay === 1) {
+                const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
+                endDateInput.value = endDate.toISOString().split('T')[0];
+            }
+        }
+    }
+</script>
 
 @endsection

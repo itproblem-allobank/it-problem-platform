@@ -30,7 +30,7 @@
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label class="form-control-label">Start Date</label>
-                        <input type="date" id="start_date" class="form-control" name="start_date" required>
+                        <input type="date" id="start_date" class="form-control" name="start_date" onchange="setEndDate()" required>
                     </div>
                 </div>
             </div>
@@ -38,7 +38,7 @@
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label class="form-control-label">End Date</label>
-                        <input type="date" id="end_date" class="form-control" name="end_date"required>
+                        <input type="date" id="end_date" class="form-control" name="end_date" onchange="setStartDate()" required>
                     </div>
                 </div>
             </div>
@@ -54,5 +54,33 @@
         </div>
     </form>
 </div>
+
+<script>
+    function setEndDate() {
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        if (startDateInput.value) {
+            const startDate = new Date(startDateInput.value);
+            startDate.setDate(startDate.getDate() + 7);
+            endDateInput.value = startDate.toISOString().split('T')[0];
+        } else {
+            endDateInput.value = '';
+        }
+    }
+
+    function setStartDate() {
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        if (endDateInput.value) {
+            const endDate = new Date(endDateInput.value);
+            endDate.setDate(endDate.getDate() - 7);
+            startDateInput.value = endDate.toISOString().split('T')[0];
+        } else {
+            startDateInput.value = '';
+        }
+    }
+</script>
 
 @endsection
