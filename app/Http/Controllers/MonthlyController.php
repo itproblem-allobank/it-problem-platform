@@ -19,6 +19,7 @@ use PhpOffice\PhpPresentation\Style\Border;
 use PhpOffice\PhpPresentation\Style\Fill;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Line;
+use PhpOffice\PhpPresentation\Point;
 
 use Exception;
 
@@ -531,6 +532,7 @@ class MonthlyController extends Controller
         $title = $shape->createTextRun("\nIssues Created");
         $title->getFont()->setBold(true)->setSize(20)->setColor(new Color('FFC00000'));
         $c_month = $shape->createTextRun("\n\n\nCurrent Month : ");
+        $percentage->getFont()->setBold(true)->setSize(28)->setColor(new Color('FFC00000'));
         $c_month->getFont()->setBold(true)->setSize(12);
         $vc_month = $shape->createTextRun("\n" . $curr_created);
         $vc_month->getFont()->setBold(true)->setSize(18);
@@ -639,145 +641,80 @@ class MonthlyController extends Controller
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
-        $shape = $slide4->createRichTextShape()
-            ->setHeight(25)
-            ->setWidth(400)
-            ->setOffsetX(50)
-            ->setOffsetY(75);
-        $date = Carbon::parse($end_date)->format('F Y');
-        $textRun = $shape->createTextRun('As of ' . $date);
-        $textRun->getFont()->setSize(14);
 
-        $week4 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(7), $end_date])->get();
-        $week3 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(14), Carbon::parse($end_date)->subDays(7)])->get();
-        $week2 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(21), Carbon::parse($end_date)->subDays(14)])->get();
-        $week1 = Data::select('created', 'work_around')->whereBetween('created', [Carbon::parse($end_date)->subDays(28), Carbon::parse($end_date)->subDays(21)])->get();
+        // Data untuk timeline
+        $week4 = Data::select('created', 'summary')->whereBetween('created', [Carbon::parse($end_date)->subDays(7), $end_date])->get();
+        $week3 = Data::select('created', 'summary')->whereBetween('created', [Carbon::parse($end_date)->subDays(14), Carbon::parse($end_date)->subDays(7)])->get();
+        $week2 = Data::select('created', 'summary')->whereBetween('created', [Carbon::parse($end_date)->subDays(21), Carbon::parse($end_date)->subDays(14)])->get();
+        $week1 = Data::select('created', 'summary')->whereBetween('created', [Carbon::parse($end_date)->subDays(28), Carbon::parse($end_date)->subDays(21)])->get();
 
-        //Set DATA TIMELINE
-        $datatimeline1 = [
-            'week' => 'Week 1',
-            'description' => '',
-        ];
-        $workaround1 = null;
-        $index = 1;
+        $data_week1 = [];
+        $data_week2 = [];
+        $data_week3 = [];
+        $data_week4 = [];
+
+        $index1 = 1;
         foreach ($week1 as $key => $value) {
-            $workaround1[] =
-                $index . ". " . $value->work_around . "\n";
-            $index++;
+            $data_week1[$key] = $index1 . ". " . $value->summary . "\n\n";
+            $index1++;
         }
-        
-        if($workaround1 != null) {
-        $newworkaround1 = implode($workaround1);
-        $datatimeline1['description'] = $newworkaround1;
-        }
-
-        $datatimeline2 = [
-            'week' => 'Week 2',
-            'description' => '',
-        ];
-        $workaround2 = null;
-        $index = 1;
+        $index2 = 1;
         foreach ($week2 as $key => $value) {
-            $workaround2[] =
-                $index . ". " . $value->work_around . "\n";
-            $index++;
+            $data_week2[$key] = $index2 . ". " . $value->summary . "\n\n";
+            $index2++;
         }
-        
-        if($workaround2 != null) {
-        $newworkaround2 = implode($workaround2);
-        $datatimeline2['description'] = $newworkaround2;
-        }
-
-        $datatimeline3 = [
-            'week' => 'Week 3',
-            'description' => '',
-        ];
-        $workaround3 = null;
-        $index = 1;
+        $index3 = 1;
         foreach ($week3 as $key => $value) {
-            $workaround3[] =
-                $index . ". " . $value->work_around . "\n";
-            $index++;
+            $data_week3[$key] = $index3 . ". " . $value->summary . "\n\n";
+            $index3++;
         }
-        
-        if($workaround3 != null) {
-        $newworkaround3 = implode($workaround3);
-        $datatimeline3['description'] = $newworkaround3;
-        }
-
-        $datatimeline4 = [
-            'week' => 'Week 4',
-            'description' => '',
-        ];
-        $workaround4 = null;
-        $index = 1;
+        $index4 = 1;
         foreach ($week4 as $key => $value) {
-            $workaround4[] =
-                $index . ". " . $value->work_around . "\n";
-            $index++;
+            $data_week4[$key] = $index4 . ". " . $value->summary . "\n\n";
+            $index4++;
         }
 
-        if($workaround4 != null) {
-            $newworkaround4 = implode($workaround4);
-            $datatimeline4['description'] = $newworkaround4;
-        }
+        $implodeweek1 = implode($data_week1);
+        $implodeweek2 = implode($data_week2);
+        $implodeweek3 = implode($data_week3);
+        $implodeweek4 = implode($data_week4);
 
+        $week = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+        $descriptions = [$implodeweek1, $implodeweek2, $implodeweek3, $implodeweek4];
+        $positions = [100, 400, 700, 1000]; // X positions for the timeline elements
 
-        // Data Timeline
-        $timeline = [
-            $datatimeline1,
-            $datatimeline2,
-            $datatimeline3,
-            $datatimeline4
-        ];
-
-        // Posisi awal untuk timeline
-        $offsetX = 100;
-        $offsetY = 400;
-        $boxWidth = 200;
-        $boxHeight = 50;
-        $descWidth = 200;
-        $descHeight = 150;
-        $stepX = 250; // Jarak antar kotak di sumbu X
-        $lineThickness = 3;
-
-        foreach ($timeline as $index => $item) {
-            // Membuat kotak untuk deskripsi
-            $descShape = $slide4->createRichTextShape()
-                ->setHeight($descHeight)
-                ->setWidth($descWidth)
-                ->setOffsetX($offsetX + $index * $stepX)
-                ->setOffsetY($offsetY - $descHeight - 10);
-            $descShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $descShape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
-            $descShape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-            $descText = $descShape->createTextRun($item['description']);
-            $descText->getFont()->setSize(8)->setColor(new Color('FF000000'));
-
-            // Membuat kotak untuk minggu
-            $shape = $slide4->createRichTextShape()
-                ->setHeight($boxHeight)
-                ->setWidth($boxWidth)
-                ->setOffsetX($offsetX + $index * $stepX)
-                ->setOffsetY($offsetY);
+        // Buat timeline
+        foreach ($week as $index => $week) {
+            // Menambahkan tahun
+            $shape = $slide4->createRichTextShape();
+            $shape->setHeight(50)
+                ->setWidth(120)
+                ->setOffsetX($positions[$index])
+                ->setOffsetY(150);
             $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $shape->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
-            $shape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-            $textRun = $shape->createTextRun($item['week']);
-            $textRun->getFont()->setBold(true)
-                ->setSize(10)
-                ->setColor(new Color('FF000000'));
 
-            // Menambahkan garis horizontal antar kotak
-            if ($index > 0) {
-                $line = $slide4->createLineShape(
-                    $offsetX + ($index - 1) * $stepX + $boxWidth,
-                    $offsetY + $boxHeight / 2,
-                    $offsetX + $index * $stepX,
-                    $offsetY + $boxHeight / 2
-                );
-                $line->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'))->setLineWidth($lineThickness);
+            $textRun = $shape->createTextRun($week);
+            $textRun->getFont()->setBold(true)->setSize(20)->setColor(new Color('FFFFB003'));
+
+            // Menambahkan deskripsi
+            $descShape = $slide4->createRichTextShape();
+            $descShape->setHeight(450)
+                ->setWidth(250)
+                ->setOffsetX($positions[$index] - 65)
+                ->setOffsetY(200);
+            $descShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            $descShape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('CCCCCC'));
+            $descShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+            $descTextRun = $descShape->createTextRun($descriptions[$index]);
+            $descTextRun->getFont()->setSize(12)->setColor(new Color(Color::COLOR_BLACK));
+
+            // Tambahkan garis penghubung jika bukan elemen terakhir
+            $position = [285, 585, 885];
+            if ($index < 3) {
+                $lineShape = $slide4->createLineShape($position[$index], 420, $position[$index] + 50, 420);
+                $lineShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+                $lineShape->getBorder()->setLineWidth(2);
             }
         }
 
