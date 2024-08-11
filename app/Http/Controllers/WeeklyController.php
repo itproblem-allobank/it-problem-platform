@@ -388,12 +388,33 @@ class WeeklyController extends Controller
         foreach ($data_chart1 as $key => $value) {
             $status_closed = Data::where('created', '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
             $status_pending = Data::where('created', '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
+            $color = '';
+            if ($value->problem == 'Core System & Surrounding Apps') {
+                $color = 'ff89a64e';
+            } else if ($value->problem == 'Ekosistem MPC') {
+                $color = 'ff93aacf';
+            } else if ($value->problem == 'Loan') {
+                $color = 'ffa6a6a6';
+            } else if ($value->problem == 'Onboarding') {
+                $color = 'fff79646';
+            } else if ($value->problem == 'Online Payment') {
+                $color = 'ff4f81bd';
+            } else if ($value->problem == 'Third Party') {
+                $color = 'ffee52e1';
+            } else if ($value->problem == 'Transaction') {
+                $color = 'ffffc000';
+            } else if ($value->problem == 'Wholesale Banking') {
+                $color = 'ff8064a2';
+            } else {
+                $color = 'ffffffff';
+            }
             $resultdata_chart1[] =
                 [
                     'problem' => $value->problem,
                     'total' => $value->count,
                     'count_closed' => $status_closed,
                     'count_pending' => $status_pending,
+                    'color' => $color
                 ];
         }
 
@@ -424,10 +445,11 @@ class WeeklyController extends Controller
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
             $series = new Series($value['problem'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
+            $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($value['color'])); // Blue
             $chartType->addSeries($series);
         }
 
-        
+
         //Declare DAY
         $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
         $twoweeksago = [Carbon::parse($start_date)->subDays(14), Carbon::parse($start_date)->subDays(8)];
