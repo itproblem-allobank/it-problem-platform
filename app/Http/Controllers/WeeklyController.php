@@ -244,6 +244,7 @@ class WeeklyController extends Controller
         // dd($problem);
         $total = [];
         foreach ($problem as $key => $value) {
+            //declaredata priority
             $high_existing = Data::where('created', '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
             $medium_existing = Data::where('created', '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
             $low_existing = Data::where('created', '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
@@ -253,10 +254,34 @@ class WeeklyController extends Controller
             $highclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'High')->get()->count();
             $mediumclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Medium')->get()->count();
             $lowclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Low')->get()->count();
+            //set total data by priority
             $high_total = $high_existing + $high_now - $highclosed;
             $medium_total = $medium_existing + $medium_now - $mediumclosed;
             $low_total = $low_existing + $low_now - $lowclosed;
+            //count data priority
             $countdata = $high_total + $medium_total + $low_total;
+            //set color by problem
+            $color = '';
+            if ($value->problem == 'Core System & Surrounding Apps') {
+                $color = 'ff89a64e';
+            } else if ($value->problem == 'Ekosistem MPC') {
+                $color = 'ff93aacf';
+            } else if ($value->problem == 'Loan') {
+                $color = 'ffa6a6a6';
+            } else if ($value->problem == 'Onboarding') {
+                $color = 'fff79646';
+            } else if ($value->problem == 'Online Payment') {
+                $color = 'ff4f81bd';
+            } else if ($value->problem == 'Third Party') {
+                $color = 'ffee52e1';
+            } else if ($value->problem == 'Transaction') {
+                $color = 'ffffc000';
+            } else if ($value->problem == 'Wholesale Banking') {
+                $color = 'ff8064a2';
+            } else {
+                $color = 'ffffffff';
+            }
+            //inject data to array
             $total[] = [
                 'problem' => $value->problem,
                 'total' => $countdata,
@@ -268,7 +293,8 @@ class WeeklyController extends Controller
                 'low' => $low_now,
                 'highclosed' => $highclosed,
                 'mediumclosed' => $mediumclosed,
-                'lowclosed' => $lowclosed
+                'lowclosed' => $lowclosed,
+                'color' => $color
             ];
         }
 
@@ -298,6 +324,7 @@ class WeeklyController extends Controller
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(40);
             $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
             $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $cell->setColSpan(3);
@@ -308,12 +335,13 @@ class WeeklyController extends Controller
             //row title
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(20);
-            $value = ['High', 'Med', 'Low'];
-            foreach ($value as $key => $v) {
+            $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'FFDCFF00'], ['status' => 'Low', 'color' => 'FF00B050']];
+            foreach ($val as $key => $v) {
                 $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $textRun = $cell->createTextRun($v);
+                $textRun = $cell->createTextRun($v['status']);
                 $textRun->getFont()->setBold(true);
             }
 
@@ -322,6 +350,7 @@ class WeeklyController extends Controller
             $value = [$data['high_existing'], $data['medium_existing'], $data['low_existing']];
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $cell->createTextRun($v);
@@ -332,6 +361,7 @@ class WeeklyController extends Controller
             $value = [$data['high'], $data['medium'], $data['low']];
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $cell->createTextRun($v);
@@ -342,6 +372,7 @@ class WeeklyController extends Controller
             $value = [$data['highclosed'], $data['mediumclosed'], $data['lowclosed']];
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $cell->createTextRun($v);

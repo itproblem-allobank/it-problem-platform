@@ -250,6 +250,28 @@ class MonthlyController extends Controller
             $high = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
             $medium = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
             $low = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
+            //set color by problem
+            $color = '';
+            if ($value->problem == 'Core System & Surrounding Apps') {
+                $color = 'ff89a64e';
+            } else if ($value->problem == 'Ekosistem MPC') {
+                $color = 'ff93aacf';
+            } else if ($value->problem == 'Loan') {
+                $color = 'ffa6a6a6';
+            } else if ($value->problem == 'Onboarding') {
+                $color = 'fff79646';
+            } else if ($value->problem == 'Online Payment') {
+                $color = 'ff4f81bd';
+            } else if ($value->problem == 'Third Party') {
+                $color = 'ffee52e1';
+            } else if ($value->problem == 'Transaction') {
+                $color = 'ffffc000';
+            } else if ($value->problem == 'Wholesale Banking') {
+                $color = 'ff8064a2';
+            } else {
+                $color = 'ffffffff';
+            }
+            //total data
             $countdata = $high + $medium + $low;
             $total[] = [
                 'problem' => $value->problem,
@@ -257,6 +279,7 @@ class MonthlyController extends Controller
                 'high' =>  $high,
                 'medium' => $medium,
                 'low' => $low,
+                'color' => $color
             ];
         }
 
@@ -287,6 +310,7 @@ class MonthlyController extends Controller
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(40);
             $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
             $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $cell->setColSpan(3);
@@ -297,12 +321,13 @@ class MonthlyController extends Controller
             //row title
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(25);
-            $value = ['High', 'Med', 'Low'];
-            foreach ($value as $key => $v) {
+            $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'FFDCFF00'], ['status' => 'Low', 'color' => 'FF00B050']];
+            foreach ($val as $key => $v) {
                 $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v["color"]));
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $textRun = $cell->createTextRun($v);
+                $textRun = $cell->createTextRun($v["status"]);
                 $textRun->getFont()->setBold(true);
             }
 
@@ -311,6 +336,7 @@ class MonthlyController extends Controller
             $value = [$data['high'], $data['medium'], $data['low']];
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $cell->createTextRun($v);
