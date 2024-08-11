@@ -36,7 +36,8 @@
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url('/home') }}">
                 <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
+                    {{-- <i class="fas fa-laugh-wink"></i> --}}
+                    {{-- <i class="fa-solid fa-mosquito"></i> --}}
                 </div>
                 <div class="sidebar-brand-text mx-3">IT Problem</div>
             </a>
@@ -95,7 +96,7 @@
             <!-- Logout -->
             <li class="nav-item">
                 <a class="nav-link" href="#" data-toggle="modal" data-target="#logoutModal">
-                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                    <i class="fas fa-sign-out-alt"></i>
                     <span>{{ __('Logout') }}</span>
                 </a>
             </li>

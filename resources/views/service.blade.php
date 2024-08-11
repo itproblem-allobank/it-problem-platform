@@ -30,7 +30,7 @@
         @if($data == '[]')
 
         @else
-        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#delete">Delete Data</button>
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete">Delete Data</button>
         @endif
     </div>
 
