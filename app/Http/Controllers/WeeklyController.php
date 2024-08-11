@@ -692,45 +692,66 @@ class WeeklyController extends Controller
         $tableShape->setOffsetY(475);
 
         // Define the data for the table
-        $datacreated = Data::whereBetween('created', [$start_date, $end_date])->select('summary', 'status', 'changed_at')->get();
-        $dataclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('status', '=', 'Closed')->select('summary', 'status', 'changed_at')->get();
+        $datacreated = Data::whereBetween('created', [$start_date, $end_date])->select('problem', 'summary', 'status', 'changed_at')->get();
+        $dataclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('status', '=', 'Closed')->select('problem', 'summary', 'status', 'changed_at')->get();
         $tempdata = [
-            ['Problem', 'Status'],
+            ['', 'Problem', 'Status'],
         ];
         foreach ($datacreated as $key => $value) {
             $status = $value->status . ' - ' . Carbon::parse($value->changed_at)->format('d F Y');
-            $tempdata[] = [$value->summary,  $status];
+            $tempdata[] = [$value->problem, $value->summary,  $status];
         }
         foreach ($dataclosed as $key => $value) {
             $status = $value->status . ' - ' . Carbon::parse($value->changed_at)->format('d F Y');
-            $tempdata[] = [$value->summary,  $status];
+            $tempdata[] = [$value->problem, $value->summary,  $status];
         }
-        $tempdata[] = ['',  ''];
+        $tempdata[] = ['', '',  ''];
 
         foreach ($tempdata as $rowIndex => $row) {
             $tableRow = $tableShape->createRow();
             $tableRow->setHeight(25); // Set the height of the row
             foreach ($row as $cellIndex => $cellText) {
-                //coloring sesuai status
-                $status = explode(' - ', $row[1]);
+                if ($cellIndex == 0) {
+                    continue; // Lewati kolom yang disembunyikan
+                }
+                //set status
+                $problem = $row[0];
+                $status = explode(' - ', $row[2]);
                 $firstStatus = $status[0];
-                //
                 $cell = $tableRow->nextCell();
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                //
                 if ($rowIndex == 0) {
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-
-                    if ($cellIndex == 0) {
-                        $cell->getFill()->setStartColor(new Color(Color::COLOR_WHITE));
-                    }
-
                     if ($cellIndex == 1) {
+                        //coloring by problem
+                        if ($problem == 'Core System & Surrounding Apps') {
+                            $cell->getFill()->setStartColor(new Color('ff89a64e'));
+                        } else if ($problem == 'Ekosistem MPC') {
+                            $cell->getFill()->setStartColor(new Color('ff93aacf'));
+                        } else if ($problem == 'Loan') {
+                            $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
+                        } else if ($problem == 'Onboarding') {
+                            $cell->getFill()->setStartColor(new Color('fff79646'));
+                        } else if ($problem == 'Online Payment') {
+                            $cell->getFill()->setStartColor(new Color('ff4f81bd'));
+                        } else if ($problem == 'Third Party') {
+                            $cell->getFill()->setStartColor(new Color('ffee52e1'));
+                        } else if ($problem == 'Transaction') {
+                            $cell->getFill()->setStartColor(new Color('ffffc000'));
+                        } else if ($problem == 'Wholesale Banking') {
+                            $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                        } else {
+                            $cell->getFill()->setStartColor(new Color('ffffffff'));
+                        }
+                    } else if ($cellIndex == 2) {
+                        //coloring by status
                         if ($firstStatus == 'Pending') {
                             $cell->getFill()->setStartColor(new Color('fff6f610'));
                         } elseif ($firstStatus == 'Closed') {
@@ -740,16 +761,6 @@ class WeeklyController extends Controller
                         }
                     }
                 }
-                // if ($rowIndex == 0) {
-                //     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
-                //     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-                // } elseif ($firstStatus == 'Pending') {
-                //     $cell->getFill()->setStartColor(new Color(Color::COLOR_YELLOW));
-                // } elseif ($firstStatus == 'Closed') {
-                //     $cell->getFill()->setStartColor(new Color(Color::COLOR_GREEN));
-                // } else {
-                //     $cell->getFill()->setFillType(Fill::FILL_NONE);
-                // }
             }
         }
 
@@ -931,7 +942,7 @@ class WeeklyController extends Controller
                 }
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER); 
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 //coloring by problem
                 if ($row[0] == 'Core System & Surrounding Apps') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
