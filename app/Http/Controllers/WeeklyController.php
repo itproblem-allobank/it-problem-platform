@@ -860,6 +860,26 @@ class WeeklyController extends Controller
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                //coloring by problem
+                if ($row[0] == 'Core System & Surrounding Apps') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
+                } else if ($row[0] == 'Ekosistem MPC') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff93aacf'));
+                } else if ($row[0] == 'Loan') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
+                } else if ($row[0] == 'Onboarding') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff79646'));
+                } else if ($row[0] == 'Online Payment') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4f81bd'));
+                } else if ($row[0] == 'Third Party') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
+                } else if ($row[0] == 'Transaction') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffc000'));
+                } else if ($row[0] == 'Wholesale Banking') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
+                } else {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
+                }
             }
         }
 
@@ -911,7 +931,27 @@ class WeeklyController extends Controller
                 }
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER); 
+                //coloring by problem
+                if ($row[0] == 'Core System & Surrounding Apps') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
+                } else if ($row[0] == 'Ekosistem MPC') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff93aacf'));
+                } else if ($row[0] == 'Loan') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
+                } else if ($row[0] == 'Onboarding') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff79646'));
+                } else if ($row[0] == 'Online Payment') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4f81bd'));
+                } else if ($row[0] == 'Third Party') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
+                } else if ($row[0] == 'Transaction') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffc000'));
+                } else if ($row[0] == 'Wholesale Banking') {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
+                } else {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
+                }
             }
         }
 
