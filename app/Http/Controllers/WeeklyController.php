@@ -679,6 +679,7 @@ class WeeklyController extends Controller
             $chartType->addSeries($series);
         }
 
+        // TABLE PROBLEM STATUS
         // Define table properties
         $columns = 2; // Number of columns
         $tableShape = $slide3->createTableShape($columns);
@@ -723,13 +724,32 @@ class WeeklyController extends Controller
                 if ($rowIndex == 0) {
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-                } elseif ($firstStatus == 'Pending') {
-                    $cell->getFill()->setStartColor(new Color(Color::COLOR_YELLOW));
-                } elseif ($firstStatus == 'Closed') {
-                    $cell->getFill()->setStartColor(new Color(Color::COLOR_GREEN));
                 } else {
-                    $cell->getFill()->setFillType(Fill::FILL_NONE);
+
+                    if ($cellIndex == 0) {
+                        $cell->getFill()->setStartColor(new Color(Color::COLOR_WHITE));
+                    }
+
+                    if ($cellIndex == 1) {
+                        if ($firstStatus == 'Pending') {
+                            $cell->getFill()->setStartColor(new Color('fff6f610'));
+                        } elseif ($firstStatus == 'Closed') {
+                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                        } else {
+                            $cell->getFill()->setFillType(Fill::FILL_NONE);
+                        }
+                    }
                 }
+                // if ($rowIndex == 0) {
+                //     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                //     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                // } elseif ($firstStatus == 'Pending') {
+                //     $cell->getFill()->setStartColor(new Color(Color::COLOR_YELLOW));
+                // } elseif ($firstStatus == 'Closed') {
+                //     $cell->getFill()->setStartColor(new Color(Color::COLOR_GREEN));
+                // } else {
+                //     $cell->getFill()->setFillType(Fill::FILL_NONE);
+                // }
             }
         }
 
