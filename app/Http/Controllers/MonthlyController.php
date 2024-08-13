@@ -247,9 +247,9 @@ class MonthlyController extends Controller
         // dd($problem);
         $total = [];
         foreach ($problem as $key => $value) {
-            $high = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
-            $medium = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
-            $low = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
+            $high = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
+            $medium = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
+            $low = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
             //set color by problem
             $color = '';
             if ($value->problem == 'Core System & Surrounding Apps') {
@@ -347,11 +347,11 @@ class MonthlyController extends Controller
         }
 
         //set data chart 1
-        $data_chart1 = Data::where('created', '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
-            $status_closed = Data::where('created', '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
-            $status_pending = Data::where('created', '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
+            $status_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
+            $status_pending = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
             $color = '';
             if ($value->problem == 'Core System & Surrounding Apps') {
                 $color = 'ff89a64e';
@@ -407,13 +407,13 @@ class MonthlyController extends Controller
         }
 
         // set Data Chart 2 Ticket by  3 Last month
-        $data_chart2 = Data::whereBetween('created', [Carbon::parse($start_date)->subMonths(3), $end_date])->select(DB::raw('MONTH(created) as month'), DB::raw('count(*) as count'))
+        $data_chart2 = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), $end_date])->select(DB::raw('MONTH(created) as month'), DB::raw('count(*) as count'))
             ->groupBy(DB::raw('MONTH(created)'))
             ->get();
         $resultdata_chart2 = [];
         foreach ($data_chart2 as $key => $value) {
-            $closed = Data::whereBetween('created', [Carbon::parse($start_date)->subMonths(3), $end_date])->where('status', '=', 'Closed')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
-            $pending = Data::whereBetween('created', [Carbon::parse($start_date)->subMonths(3), $end_date])->where('status', '=', 'Pending')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
+            $closed = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), $end_date])->where('status', '=', 'Closed')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
+            $pending = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), $end_date])->where('status', '=', 'Pending')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
             $resultdata_chart2[] = [
                 'month' => Carbon::create()->month($value->month)->format('F'),
                 'count' => $value->count,
@@ -455,11 +455,11 @@ class MonthlyController extends Controller
         $chartType->addSeries($series2);
 
         // Chart 3 Ticket Service Request Jira
-        $data_chart3 = Service::whereBetween('created', [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))->groupBy('issue_type')->get();
+        $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))->groupBy('issue_type')->get();
         $resultdata_chart3 = [];
         foreach ($data_chart3 as $key => $value) {
-            $status_closed = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Closed')->get()->count();
-            $status_pending = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Pending')->get()->count();
+            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Closed')->get()->count();
+            $status_pending = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Pending')->get()->count();
             $resultdata_chart3[] =
                 [
                     'issue_type' => $value->issue_type,
@@ -493,7 +493,7 @@ class MonthlyController extends Controller
         }
 
         // //Chart 4 Problem by Status
-        // $data_chart4 = Data::whereBetween('created', [$start_date, $end_date])->select('status', DB::raw('count(*) as count'))->groupBy('status')->get();
+        // $data_chart4 = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('status', DB::raw('count(*) as count'))->groupBy('status')->get();
         // $resultdata_chart4 = [];
         // foreach ($data_chart4 as $key => $value) {
         //     $resultdata_chart4[$value->status] = $value->count;
@@ -516,11 +516,11 @@ class MonthlyController extends Controller
         // $chartShape->getBorder()->setLineWidth(1);
 
         //Chart 5 Problem by Assignee & Status
-        $data_chart5 = Data::whereBetween('created', [$start_date, $end_date])->select('nickname', DB::raw('count(*) as count'))->groupBy('nickname')->get();
+        $data_chart5 = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('nickname', DB::raw('count(*) as count'))->groupBy('nickname')->get();
         $resultdata_chart5 = [];
         foreach ($data_chart5 as $key => $value) {
-            $closed = Data::whereBetween('created', [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Closed')->get()->count();
-            $pending = Data::whereBetween('created', [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Pending')->get()->count();
+            $closed = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Closed')->get()->count();
+            $pending = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Pending')->get()->count();
             $resultdata_chart5[] = [
                 'nickname' => $value->nickname,
                 'count' => $value->count,
@@ -566,10 +566,10 @@ class MonthlyController extends Controller
         $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
 
         // Set Data
-        $curr_created = Data::where('created', '<=', $end_date)->get()->count();
-        $prev_created = Data::where('created', '<', $start_date)->get()->count();
-        $curr_closed = Data::where('created', '<=', $end_date)->where('status', '=', 'Closed')->get()->count();
-        $prev_closed = Data::where('created', '<', $start_date)->where('status', '=', 'Closed')->get()->count();
+        $curr_created = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->get()->count();
+        $prev_created = Data::where(DB::raw('DATE(created)'), '<', $start_date)->get()->count();
+        $curr_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('status', '=', 'Closed')->get()->count();
+        $prev_closed = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('status', '=', 'Closed')->get()->count();
         // dd($curr_created, $prev_created, $curr_closed, $prev_closed);
         $percen_created = ($curr_created - $prev_created) / $prev_created * 100;
         $percen_closed = ($curr_closed - $prev_closed) / $prev_closed * 100;
@@ -619,11 +619,11 @@ class MonthlyController extends Controller
         $w3 = Carbon::parse($start_date)->addDays(21);
 
         //created data
-        $totalcr = Data::whereBetween('created', [$start_date, $end_date])->get()->count();
-        $cr1 = Data::whereBetween('created', [$start_date, $w1])->get()->count();
-        $cr2 = Data::whereBetween('created', [$w1, $w2])->get()->count();
-        $cr3 = Data::whereBetween('created', [$w2, $w3])->get()->count();
-        $cr4 = Data::whereBetween('created', [$w3, $end_date])->get()->count();
+        $totalcr = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->get()->count();
+        $cr1 = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $w1])->get()->count();
+        $cr2 = Data::whereBetween(DB::raw('DATE(created)'), [$w1, $w2])->get()->count();
+        $cr3 = Data::whereBetween(DB::raw('DATE(created)'), [$w2, $w3])->get()->count();
+        $cr4 = Data::whereBetween(DB::raw('DATE(created)'), [$w3, $end_date])->get()->count();
 
         //closed data
         $totalcl = Data::where('status', '=', 'Closed')->whereBetween('changed_at', [$start_date, $end_date])->get()->count();
@@ -691,10 +691,10 @@ class MonthlyController extends Controller
 
 
         // Data untuk timeline
-        $week4 = Data::select('created', 'summary')->whereBetween('created', [Carbon::parse($end_date)->subDays(7), $end_date])->get();
-        $week3 = Data::select('created', 'summary')->whereBetween('created', [Carbon::parse($end_date)->subDays(14), Carbon::parse($end_date)->subDays(7)])->get();
-        $week2 = Data::select('created', 'summary')->whereBetween('created', [Carbon::parse($end_date)->subDays(21), Carbon::parse($end_date)->subDays(14)])->get();
-        $week1 = Data::select('created', 'summary')->whereBetween('created', [Carbon::parse($end_date)->subDays(28), Carbon::parse($end_date)->subDays(21)])->get();
+        $week4 = Data::select(DB::raw('DATE(created)'), 'summary')->whereBetween(DB::raw('DATE(created)'), [Carbon::parse($end_date)->subDays(7), $end_date])->get();
+        $week3 = Data::select(DB::raw('DATE(created)'), 'summary')->whereBetween(DB::raw('DATE(created)'), [Carbon::parse($end_date)->subDays(14), Carbon::parse($end_date)->subDays(7)])->get();
+        $week2 = Data::select(DB::raw('DATE(created)'), 'summary')->whereBetween(DB::raw('DATE(created)'), [Carbon::parse($end_date)->subDays(21), Carbon::parse($end_date)->subDays(14)])->get();
+        $week1 = Data::select(DB::raw('DATE(created)'), 'summary')->whereBetween(DB::raw('DATE(created)'), [Carbon::parse($end_date)->subDays(28), Carbon::parse($end_date)->subDays(21)])->get();
 
         $data_week1 = [];
         $data_week2 = [];

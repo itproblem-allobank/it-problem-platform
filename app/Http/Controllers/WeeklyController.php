@@ -18,6 +18,7 @@ use PhpOffice\PhpPresentation\Shape\Drawing\File;
 use PhpOffice\PhpPresentation\Style\Border;
 use PhpOffice\PhpPresentation\Style\Fill;
 use Exception;
+use Termwind\Components\Raw;
 
 class WeeklyController extends Controller
 {
@@ -245,12 +246,12 @@ class WeeklyController extends Controller
         $total = [];
         foreach ($problem as $key => $value) {
             //declaredata priority
-            $high_existing = Data::where('created', '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
-            $medium_existing = Data::where('created', '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
-            $low_existing = Data::where('created', '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
-            $high_now = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
-            $medium_now = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
-            $low_now = Data::whereBetween('created', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
+            $high_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
+            $medium_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
+            $low_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
+            $high_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
+            $medium_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
+            $low_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
             $highclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'High')->get()->count();
             $mediumclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Medium')->get()->count();
             $lowclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Low')->get()->count();
@@ -383,11 +384,14 @@ class WeeklyController extends Controller
         }
 
         //set data chart 1
-        $data_chart1 = Data::where('created', '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
-            $status_closed = Data::where('created', '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
-            $status_pending = Data::where('created', '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
+            $status_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
+            $status_pending = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
+            $closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
+            $count_pending = $status_pending - $closed_thisweek;
+            // dd($status_pending, $closed_thisweek, $count_pending);
             $color = '';
             if ($value->problem == 'Core System & Surrounding Apps') {
                 $color = 'ff89a64e';
@@ -413,7 +417,7 @@ class WeeklyController extends Controller
                     'problem' => $value->problem,
                     'total' => $value->count,
                     'count_closed' => $status_closed,
-                    'count_pending' => $status_pending,
+                    'count_pending' => $count_pending,
                     'color' => $color
                 ];
         }
@@ -459,13 +463,13 @@ class WeeklyController extends Controller
         $changed_closed_2week = Data::whereBetween('changed_at', $twoweeksago)->where('status', '=', 'Closed')->get();
         $changed_closed_3week = Data::whereBetween('changed_at', $threeweeksago)->where('status', '=', 'Closed')->get();
 
-        $created_closed_lweek = Data::whereBetween('created', $lastweek)->where('status', '=', 'Closed')->get();
-        $created_closed_2week = Data::whereBetween('created', $twoweeksago)->where('status', '=', 'Closed')->get();
-        $created_closed_3week = Data::whereBetween('created', $threeweeksago)->where('status', '=', 'Closed')->get();
+        $created_closed_lweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Closed')->get();
+        $created_closed_2week = Data::whereBetween(DB::raw('DATE(created)'), $twoweeksago)->where('status', '=', 'Closed')->get();
+        $created_closed_3week = Data::whereBetween(DB::raw('DATE(created)'), $threeweeksago)->where('status', '=', 'Closed')->get();
 
-        $created_pending_lweek = Data::whereBetween('created', $lastweek)->where('status', '=', 'Pending')->get()->count();
-        $created_pending_2week = Data::whereBetween('created', $twoweeksago)->where('status', '=', 'Pending')->get()->count();
-        $created_pending_3week = Data::whereBetween('created', $threeweeksago)->where('status', '=', 'Pending')->get()->count();
+        $created_pending_lweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Pending')->get()->count();
+        $created_pending_2week = Data::whereBetween(DB::raw('DATE(created)'), $twoweeksago)->where('status', '=', 'Pending')->get()->count();
+        $created_pending_3week = Data::whereBetween(DB::raw('DATE(created)'), $threeweeksago)->where('status', '=', 'Pending')->get()->count();
 
         $closedlweek = [];
         $closed2week = [];
@@ -584,13 +588,13 @@ class WeeklyController extends Controller
         $chartType->addSeries($series2);
 
         // Chart 3 Ticket Service Request Nasabah
-        // $data_chart3 = Service::whereBetween('created', [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))->groupBy('issue_type')->get();
-        $data_chart3 = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', '[JSM] Allo Care Service Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
+        // $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))->groupBy('issue_type')->get();
+        $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Allo Care Service Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
         $resultdata_chart3 = [];
         foreach ($data_chart3 as $key => $value) {
-            $total = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
-            $status_closed = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
-            $status_declined = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
+            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
+            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
+            $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
             $resultdata_chart3[] =
                 [
                     'sub_category' => $value->sub_category,
@@ -696,7 +700,7 @@ class WeeklyController extends Controller
         $tableShape->setOffsetY(475);
 
         // Define the data for the table
-        $datacreated = Data::whereBetween('created', [$start_date, $end_date])->select('problem', 'summary', 'status', 'changed_at')->get();
+        $datacreated = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('problem', 'summary', 'status', 'changed_at')->get();
         $dataclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('status', '=', 'Closed')->select('problem', 'summary', 'status', 'changed_at')->get();
         $tempdata = [
             ['', 'Problem', 'Status'],
