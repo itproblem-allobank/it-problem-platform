@@ -824,14 +824,14 @@ class WeeklyController extends Controller
 
         foreach ($data_hpriority as $key => $value) {
             $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d/m/Y');
-            $table[] = [$value->problem, $value->summary,  $value->priority, $status];
+            $table[] = [$value->problem, $value->summary, $status];
         }
 
         $table1 = array_slice($table, 0, 17);
         $table2 = array_slice($table, 17, 35);
 
         //Table 1
-        $columns = 4;
+        $columns = 3;
         $tableShape = $slide4->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $tableShape->setHeight(300);
@@ -841,16 +841,14 @@ class WeeklyController extends Controller
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
         //header 
-        $header = ['Problem', 'Summary', 'Priority', 'Status'];
+        $header = ['Problem', 'Summary', 'Status'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
                 $cell->setWidth(120);
             } else if ($cellIndex == 1) {
-                $cell->setWidth(300);
-            } else if ($cellIndex == 2) {
-                $cell->setWidth(70);
-            } else if ($cellIndex == 3) {
+                $cell->setWidth(370);
+            }  else if ($cellIndex == 2) {
                 $cell->setWidth(110);
             }
             $textRun = $cell->createTextRun($cellText);
@@ -870,10 +868,8 @@ class WeeklyController extends Controller
                 if ($cellIndex == 0) {
                     $cell->setWidth(120);
                 } else if ($cellIndex == 1) {
-                    $cell->setWidth(300);
-                } else if ($cellIndex == 2) {
-                    $cell->setWidth(70);
-                } else if ($cellIndex == 3) {
+                    $cell->setWidth(370);
+                }  else if ($cellIndex == 2) {
                     $cell->setWidth(110);
                 }
                 $textRun = $cell->createTextRun($cellText);
@@ -903,7 +899,7 @@ class WeeklyController extends Controller
         }
 
         //Table 2
-        $columns = 4;
+        $columns = 3;
         $tableShape = $slide4->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $tableShape->setHeight(300);
@@ -913,16 +909,14 @@ class WeeklyController extends Controller
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
         //header 
-        $header = ['Problem', 'Summary', 'Priority', 'Status'];
+        $header = ['Problem', 'Summary', 'Status'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
                 $cell->setWidth(120);
             } else if ($cellIndex == 1) {
-                $cell->setWidth(300);
+                $cell->setWidth(370);
             } else if ($cellIndex == 2) {
-                $cell->setWidth(70);
-            } else if ($cellIndex == 3) {
                 $cell->setWidth(110);
             }
             $textRun = $cell->createTextRun($cellText);
@@ -942,10 +936,8 @@ class WeeklyController extends Controller
                 if ($cellIndex == 0) {
                     $cell->setWidth(120);
                 } else if ($cellIndex == 1) {
-                    $cell->setWidth(300);
+                    $cell->setWidth(370);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(70);
-                } else if ($cellIndex == 3) {
                     $cell->setWidth(110);
                 }
                 $textRun = $cell->createTextRun($cellText);
