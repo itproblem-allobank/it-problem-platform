@@ -632,18 +632,22 @@ class WeeklyController extends Controller
         }
 
         //Chart Customer Care
-        $data_chart4 = Service::whereBetween('created', [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
+        $data_chart4 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
         $resultdata_chart4 = [];
         foreach ($data_chart4 as $key => $value) {
-            $total = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
-            $status_closed = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
-            $status_declined = Service::whereBetween('created', [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
+            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
+            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
+            $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
+            // $status_userconfirm = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
+            $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%'. 'Approval' .'%')->get()->count();
             $resultdata_chart4[] =
                 [
                     'sub_category' => $value->sub_category,
                     'total' => $total,
                     'count_closed' => $status_closed,
                     'count_declined' => $status_declined,
+                    // 'count_userconfirm' => $status_userconfirm,
+                    'count_approval' => $status_approval,
                 ];
         }
         // Set Size Chart
@@ -675,7 +679,7 @@ class WeeklyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart4 as $key => $value) {
-            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined']]);
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval']]);
             $chartType->addSeries($series);
         }
 
