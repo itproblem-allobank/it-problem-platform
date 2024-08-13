@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Data;
 use App\Models\Service;
+use App\Exports\DataExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpPresentation\PhpPresentation;
 use PhpOffice\PhpPresentation\IOFactory;
@@ -33,11 +37,22 @@ class WeeklyController extends Controller
         return view('weekly');
     }
 
+    public function exceldownload(Request $request)
+    {
+        // dd($request);
+
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+
+        // dd($start_date, $end_date);
+        return Excel::download(new DataExport($start_date, $end_date), 'list_problem_weekly.xlsx');
+    }
+
     public function download(Request $request)
     {
         $start_date = $request->start_date;
         $end_date = $request->end_date;
-        // dd($request->end_date);
+
         $objPHPPresentation = new PhpPresentation();
         //Slide 1
         $slide1 = $objPHPPresentation->getActiveSlide();
@@ -643,7 +658,7 @@ class WeeklyController extends Controller
             $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
             $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
             // $status_userconfirm = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
-            $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%'. 'Approval' .'%')->get()->count();
+            $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%' . 'Approval' . '%')->get()->count();
             $resultdata_chart4[] =
                 [
                     'sub_category' => $value->sub_category,
@@ -848,7 +863,7 @@ class WeeklyController extends Controller
                 $cell->setWidth(120);
             } else if ($cellIndex == 1) {
                 $cell->setWidth(370);
-            }  else if ($cellIndex == 2) {
+            } else if ($cellIndex == 2) {
                 $cell->setWidth(110);
             }
             $textRun = $cell->createTextRun($cellText);
@@ -869,7 +884,7 @@ class WeeklyController extends Controller
                     $cell->setWidth(120);
                 } else if ($cellIndex == 1) {
                     $cell->setWidth(370);
-                }  else if ($cellIndex == 2) {
+                } else if ($cellIndex == 2) {
                     $cell->setWidth(110);
                 }
                 $textRun = $cell->createTextRun($cellText);
@@ -968,9 +983,6 @@ class WeeklyController extends Controller
 
 
 
-
-
-
         //Slide 5
         $slide5 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background_end.png');
@@ -996,8 +1008,27 @@ class WeeklyController extends Controller
         $savePath = storage_path($filename);
         $writer = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
         $writer->save($savePath);
-        // Return file sebagai response download
-        return response()->download($savePath)->deleteFileAfterSend(true);
+
+        // Simpan file Excel sementara
+        $excelPath = 'exports/list_problem_weekly.xlsx';
+        Excel::store(new DataExport($start_date, $end_date), $excelPath, 'local');
+
+        // 3. Buat file ZIP yang berisi kedua file tersebut
+        $zipFilename = 'weekly_report.zip';
+        $zipFilePath = storage_path('app/exports/' . $zipFilename);
+        $zip = new ZipArchive;
+        if ($zip->open($zipFilePath, ZipArchive::CREATE) === TRUE) {
+            $zip->addFile(storage_path('app/' . $excelPath), 'list_problem_weekly.xlsx');
+            $zip->addFile($savePath, $filename);
+            $zip->close();
+        }
+
+        // 4. Hapus file sementara setelah digabungkan
+        Storage::delete([$excelPath]);
+        unlink($savePath); // Menghapus file PPT secara manual karena disimpan di luar storage facade
+
+        // 5. Unduh file ZIP dan hapus setelah diunduh
+        return response()->download($zipFilePath)->deleteFileAfterSend(true);
     }
     //
 }
