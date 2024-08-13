@@ -819,7 +819,7 @@ class WeeklyController extends Controller
         //Table Ticket Pending - Priority HIGH
 
         //Data
-        $data_hpriority = Data::where('priority', '=', 'High')->where('status', '=', 'Pending')->get();
+        $data_hpriority = Data::where('priority', '=', 'High')->where('status', '=', 'Pending')->orderBy('problem', 'asc')->get();
         $table = [];
 
         foreach ($data_hpriority as $key => $value) {
