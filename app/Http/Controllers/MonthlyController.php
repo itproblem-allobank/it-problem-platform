@@ -732,7 +732,7 @@ class MonthlyController extends Controller
         $positions = [100, 400, 700, 1000]; // X positions for the timeline elements
 
         // Buat timeline
-        foreach ($week as $index => $week) {
+        foreach ($week as $index => $w_index) {
             // Menambahkan tahun
             $shape = $slide4->createRichTextShape();
             $shape->setHeight(50)
@@ -741,7 +741,7 @@ class MonthlyController extends Controller
                 ->setOffsetY(150);
             $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-            $textRun = $shape->createTextRun($week);
+            $textRun = $shape->createTextRun($w_index);
             $textRun->getFont()->setBold(true)->setSize(20)->setColor(new Color('FFFFB003'));
 
             // Menambahkan deskripsi

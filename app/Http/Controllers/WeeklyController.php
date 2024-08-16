@@ -261,9 +261,9 @@ class WeeklyController extends Controller
         $total = [];
         foreach ($problem as $key => $value) {
             //declaredata priority
-            $high_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
-            $medium_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
-            $low_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
+            $high_existing = Data::where(DB::raw('DATE(created)'), '<=', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
+            $medium_existing = Data::where(DB::raw('DATE(created)'), '<=', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
+            $low_existing = Data::where(DB::raw('DATE(created)'), '<=', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
             $high_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
             $medium_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
             $low_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
@@ -271,9 +271,9 @@ class WeeklyController extends Controller
             $mediumclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Medium')->get()->count();
             $lowclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Low')->get()->count();
             //set total data by priority
-            $high_total = $high_existing + $high_now - $highclosed;
-            $medium_total = $medium_existing + $medium_now - $mediumclosed;
-            $low_total = $low_existing + $low_now - $lowclosed;
+            $high_total = $high_existing + $high_now;
+            $medium_total = $medium_existing + $medium_now;
+            $low_total = $low_existing + $low_now;
             //count data priority
             $countdata = $high_total + $medium_total + $low_total;
             //set color by problem
@@ -301,9 +301,9 @@ class WeeklyController extends Controller
             $total[] = [
                 'problem' => $value->problem,
                 'total' => $countdata,
-                'high_existing' => $high_existing,
-                'medium_existing' => $medium_existing,
-                'low_existing' => $low_existing,
+                'high_existing' => $high_existing + $highclosed,
+                'medium_existing' => $medium_existing + $mediumclosed,
+                'low_existing' => $low_existing + $lowclosed,
                 'high' =>  $high_now,
                 'medium' => $medium_now,
                 'low' => $low_now,
@@ -405,7 +405,6 @@ class WeeklyController extends Controller
             $status_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
             $status_pending = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
             $closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
-            $count_pending = $status_pending - $closed_thisweek;
             // dd($status_pending, $closed_thisweek, $count_pending);
             $color = '';
             if ($value->problem == 'Core System & Surrounding Apps') {
@@ -432,7 +431,7 @@ class WeeklyController extends Controller
                     'problem' => $value->problem,
                     'total' => $value->count,
                     'count_closed' => $status_closed,
-                    'count_pending' => $count_pending,
+                    'count_pending' => $status_pending,
                     'color' => $color
                 ];
         }
@@ -659,6 +658,7 @@ class WeeklyController extends Controller
             $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
             // $status_userconfirm = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
             $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%' . 'Approval' . '%')->get()->count();
+            $status_inprogress = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'In Progress')->get()->count();
             $resultdata_chart4[] =
                 [
                     'sub_category' => $value->sub_category,
@@ -667,6 +667,7 @@ class WeeklyController extends Controller
                     'count_declined' => $status_declined,
                     // 'count_userconfirm' => $status_userconfirm,
                     'count_approval' => $status_approval,
+                    'count_inprogress' => $status_inprogress,
                 ];
         }
         // Set Size Chart
@@ -698,13 +699,13 @@ class WeeklyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart4 as $key => $value) {
-            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval']]);
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'In Progress' => $value['count_inprogress']]);
             $chartType->addSeries($series);
         }
 
         // TABLE PROBLEM STATUS
         // Define table properties
-        $columns = 2; // Number of columns
+        $columns = 3; // Number of columns
         $tableShape = $slide3->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -715,20 +716,28 @@ class WeeklyController extends Controller
         $tableShape->setOffsetY(475);
 
         // Define the data for the table
-        $datacreated = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('problem', 'summary', 'status', 'changed_at')->get();
-        $dataclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('status', '=', 'Closed')->select('problem', 'summary', 'status', 'changed_at')->get();
+        $datacreated = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('problem', 'summary', 'status', 'created', 'changed_at')->get();
+        $dataclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('status', '=', 'Closed')->select('problem', 'summary', 'status', 'created', 'changed_at')->get();
         $tempdata = [
-            ['', 'Problem', 'Status'],
+            ['', 'Summary', 'Status', 'Completion Time'],
         ];
         foreach ($datacreated as $key => $value) {
             $status = $value->status . ' - ' . Carbon::parse($value->changed_at)->format('d F Y');
-            $tempdata[] = [$value->problem, $value->summary,  $status];
+            $tempdata[] = [$value->problem, $value->summary,  $status, '-'];
         }
         foreach ($dataclosed as $key => $value) {
             $status = $value->status . ' - ' . Carbon::parse($value->changed_at)->format('d F Y');
-            $tempdata[] = [$value->problem, $value->summary,  $status];
+            $created = Carbon::parse($value->created);
+            $changed_at = Carbon::parse($value->changed_at);
+
+            // $daysDifference = ($updated_at - $created_at) / (60 * 60 * 24);
+            $daysDifference = intval($created->diffInDays($changed_at));
+            $daysString = strval($daysDifference) . ' Days';
+
+            $tempdata[] = [$value->problem, $value->summary,  $status, $daysString];
         }
-        $tempdata[] = ['', '',  ''];
+        $tempdata[] = ['', '',  '', ''];
+        // dd($tempdata);
 
         foreach ($tempdata as $rowIndex => $row) {
             $tableRow = $tableShape->createRow();
@@ -782,6 +791,8 @@ class WeeklyController extends Controller
                         } else {
                             $cell->getFill()->setFillType(Fill::FILL_NONE);
                         }
+                    } else {
+                        $cell->getFill()->setFillType(Fill::FILL_NONE);
                     }
                 }
             }
@@ -839,14 +850,24 @@ class WeeklyController extends Controller
 
         foreach ($data_hpriority as $key => $value) {
             $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d/m/Y');
-            $table[] = [$value->problem, $value->summary, $status];
+            if ($value->pending_reason == null) {
+                $pending_reason = 'No Schedule Yet';
+            } else {
+                $pending_reason = $value->pending_reason;
+            }
+            if ($value->target_version == null) {
+                $target_version = 'No Schedule Yet';
+            } else {
+                $target_version = $value->target_version;
+            }
+            $table[] = [$value->problem, $value->summary, $pending_reason, $target_version, $status];
         }
 
         $table1 = array_slice($table, 0, 17);
         $table2 = array_slice($table, 17, 35);
 
         //Table 1
-        $columns = 3;
+        $columns = 5;
         $tableShape = $slide4->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $tableShape->setHeight(300);
@@ -856,15 +877,19 @@ class WeeklyController extends Controller
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
         //header 
-        $header = ['Problem', 'Summary', 'Status'];
+        $header = ['Problem', 'Summary', 'Status', 'Pending Reason', 'Target Version'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
                 $cell->setWidth(120);
             } else if ($cellIndex == 1) {
-                $cell->setWidth(370);
+                $cell->setWidth(200);
             } else if ($cellIndex == 2) {
-                $cell->setWidth(110);
+                $cell->setWidth(90);
+            } else if ($cellIndex == 3) {
+                $cell->setWidth(95);
+            } else if ($cellIndex == 4) {
+                $cell->setWidth(95);
             }
             $textRun = $cell->createTextRun($cellText);
             $textRun->getFont()->setBold(true);
@@ -883,9 +908,13 @@ class WeeklyController extends Controller
                 if ($cellIndex == 0) {
                     $cell->setWidth(120);
                 } else if ($cellIndex == 1) {
-                    $cell->setWidth(370);
+                    $cell->setWidth(200);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(110);
+                    $cell->setWidth(90);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(95);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(95);
                 }
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -914,7 +943,7 @@ class WeeklyController extends Controller
         }
 
         //Table 2
-        $columns = 3;
+        $columns = 5;
         $tableShape = $slide4->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $tableShape->setHeight(300);
@@ -924,15 +953,19 @@ class WeeklyController extends Controller
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
         //header 
-        $header = ['Problem', 'Summary', 'Status'];
+        $header = ['Problem', 'Summary', 'Status', 'Pending Reason', 'Target Version'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
                 $cell->setWidth(120);
             } else if ($cellIndex == 1) {
-                $cell->setWidth(370);
+                $cell->setWidth(200);
             } else if ($cellIndex == 2) {
-                $cell->setWidth(110);
+                $cell->setWidth(90);
+            } else if ($cellIndex == 3) {
+                $cell->setWidth(95);
+            } else if ($cellIndex == 4) {
+                $cell->setWidth(95);
             }
             $textRun = $cell->createTextRun($cellText);
             $textRun->getFont()->setBold(true);
@@ -951,9 +984,13 @@ class WeeklyController extends Controller
                 if ($cellIndex == 0) {
                     $cell->setWidth(120);
                 } else if ($cellIndex == 1) {
-                    $cell->setWidth(370);
+                    $cell->setWidth(200);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(110);
+                    $cell->setWidth(90);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(95);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(95);
                 }
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
