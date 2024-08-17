@@ -848,6 +848,7 @@ class WeeklyController extends Controller
         $data_hpriority = Data::where('priority', '=', 'High')->where('status', '=', 'Pending')->orderBy('problem', 'asc')->get();
         $table = [];
 
+        $id = 1;
         foreach ($data_hpriority as $key => $value) {
             $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d/m/Y');
             if ($value->pending_reason == null) {
@@ -860,14 +861,17 @@ class WeeklyController extends Controller
             } else {
                 $target_version = $value->target_version;
             }
-            $table[] = [$value->problem, $value->summary, $pending_reason, $target_version, $status];
+            $table[] = [$id, $value->problem, $value->summary, $pending_reason, $target_version, $status];
+            $id++;
         }
+
+        // dd($table);
 
         $table1 = array_slice($table, 0, 17);
         $table2 = array_slice($table, 17, 35);
 
         //Table 1
-        $columns = 5;
+        $columns = 6;
         $tableShape = $slide4->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $tableShape->setHeight(300);
@@ -877,19 +881,21 @@ class WeeklyController extends Controller
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
         //header 
-        $header = ['Problem', 'Summary', 'Status', 'Pending Reason', 'Target Version'];
+        $header = ['No', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Status'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
-                $cell->setWidth(120);
+                $cell->setWidth(20);
             } else if ($cellIndex == 1) {
-                $cell->setWidth(200);
+                $cell->setWidth(100);
             } else if ($cellIndex == 2) {
-                $cell->setWidth(90);
+                $cell->setWidth(200);
             } else if ($cellIndex == 3) {
                 $cell->setWidth(95);
             } else if ($cellIndex == 4) {
                 $cell->setWidth(95);
+            } else if ($cellIndex == 5) {
+                $cell->setWidth(90);
             }
             $textRun = $cell->createTextRun($cellText);
             $textRun->getFont()->setBold(true);
@@ -906,35 +912,37 @@ class WeeklyController extends Controller
             foreach ($row as $cellIndex => $cellText) {
                 $cell = $tableRow->nextCell();
                 if ($cellIndex == 0) {
-                    $cell->setWidth(120);
+                    $cell->setWidth(20);
                 } else if ($cellIndex == 1) {
-                    $cell->setWidth(200);
+                    $cell->setWidth(100);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(90);
+                    $cell->setWidth(200);
                 } else if ($cellIndex == 3) {
                     $cell->setWidth(95);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(95);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(90);
                 }
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 //coloring by problem
-                if ($row[0] == 'Core System & Surrounding Apps') {
+                if ($row[1] == 'Core System & Surrounding Apps') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
-                } else if ($row[0] == 'Ekosistem MPC') {
+                } else if ($row[1] == 'Ekosistem MPC') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff93aacf'));
-                } else if ($row[0] == 'Loan') {
+                } else if ($row[1] == 'Loan') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
-                } else if ($row[0] == 'Onboarding') {
+                } else if ($row[1] == 'Onboarding') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff79646'));
-                } else if ($row[0] == 'Online Payment') {
+                } else if ($row[1] == 'Online Payment') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4f81bd'));
-                } else if ($row[0] == 'Third Party') {
+                } else if ($row[1] == 'Third Party') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
-                } else if ($row[0] == 'Transaction') {
+                } else if ($row[1] == 'Transaction') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffc000'));
-                } else if ($row[0] == 'Wholesale Banking') {
+                } else if ($row[1] == 'Wholesale Banking') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
                 } else {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
@@ -943,7 +951,7 @@ class WeeklyController extends Controller
         }
 
         //Table 2
-        $columns = 5;
+        $columns = 6;
         $tableShape = $slide4->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $tableShape->setHeight(300);
@@ -953,19 +961,21 @@ class WeeklyController extends Controller
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
         //header 
-        $header = ['Problem', 'Summary', 'Status', 'Pending Reason', 'Target Version'];
+        $header = ['No', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Status'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
-                $cell->setWidth(120);
+                $cell->setWidth(20);
             } else if ($cellIndex == 1) {
-                $cell->setWidth(200);
+                $cell->setWidth(100);
             } else if ($cellIndex == 2) {
-                $cell->setWidth(90);
+                $cell->setWidth(200);
             } else if ($cellIndex == 3) {
                 $cell->setWidth(95);
             } else if ($cellIndex == 4) {
                 $cell->setWidth(95);
+            } else if ($cellIndex == 5) {
+                $cell->setWidth(90);
             }
             $textRun = $cell->createTextRun($cellText);
             $textRun->getFont()->setBold(true);
@@ -982,35 +992,37 @@ class WeeklyController extends Controller
             foreach ($row as $cellIndex => $cellText) {
                 $cell = $tableRow->nextCell();
                 if ($cellIndex == 0) {
-                    $cell->setWidth(120);
+                    $cell->setWidth(20);
                 } else if ($cellIndex == 1) {
-                    $cell->setWidth(200);
+                    $cell->setWidth(100);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(90);
+                    $cell->setWidth(200);
                 } else if ($cellIndex == 3) {
                     $cell->setWidth(95);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(95);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(90);
                 }
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 //coloring by problem
-                if ($row[0] == 'Core System & Surrounding Apps') {
+                if ($row[1] == 'Core System & Surrounding Apps') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
-                } else if ($row[0] == 'Ekosistem MPC') {
+                } else if ($row[1] == 'Ekosistem MPC') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff93aacf'));
-                } else if ($row[0] == 'Loan') {
+                } else if ($row[1] == 'Loan') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
-                } else if ($row[0] == 'Onboarding') {
+                } else if ($row[1] == 'Onboarding') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff79646'));
-                } else if ($row[0] == 'Online Payment') {
+                } else if ($row[1] == 'Online Payment') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4f81bd'));
-                } else if ($row[0] == 'Third Party') {
+                } else if ($row[1] == 'Third Party') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
-                } else if ($row[0] == 'Transaction') {
+                } else if ($row[1] == 'Transaction') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffc000'));
-                } else if ($row[0] == 'Wholesale Banking') {
+                } else if ($row[1] == 'Wholesale Banking') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
                 } else {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
