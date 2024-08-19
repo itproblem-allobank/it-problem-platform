@@ -247,9 +247,22 @@ class MonthlyController extends Controller
         // dd($problem);
         $total = [];
         foreach ($problem as $key => $value) {
-            $high = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
-            $medium = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
-            $low = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
+            //declaredata priority
+            $high_existing = Data::where(DB::raw('DATE(created)'), '<=', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
+            $medium_existing = Data::where(DB::raw('DATE(created)'), '<=', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
+            $low_existing = Data::where(DB::raw('DATE(created)'), '<=', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
+            $high_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
+            $medium_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
+            $low_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
+            $highclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'High')->get()->count();
+            $mediumclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Medium')->get()->count();
+            $lowclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Low')->get()->count();
+            //set total data by priority
+            $high_total = $high_existing + $high_now;
+            $medium_total = $medium_existing + $medium_now;
+            $low_total = $low_existing + $low_now;
+            //count data priority
+            $countdata = $high_total + $medium_total + $low_total;
             //set color by problem
             $color = '';
             if ($value->problem == 'Core System & Surrounding Apps') {
@@ -271,14 +284,19 @@ class MonthlyController extends Controller
             } else {
                 $color = 'ffffffff';
             }
-            //total data
-            $countdata = $high + $medium + $low;
+            //inject data to array
             $total[] = [
                 'problem' => $value->problem,
                 'total' => $countdata,
-                'high' =>  $high,
-                'medium' => $medium,
-                'low' => $low,
+                'high_existing' => $high_existing + $highclosed,
+                'medium_existing' => $medium_existing + $mediumclosed,
+                'low_existing' => $low_existing + $lowclosed,
+                'high' =>  $high_now,
+                'medium' => $medium_now,
+                'low' => $low_now,
+                'highclosed' => $highclosed,
+                'mediumclosed' => $mediumclosed,
+                'lowclosed' => $lowclosed,
                 'color' => $color
             ];
         }
@@ -314,26 +332,48 @@ class MonthlyController extends Controller
             $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $cell->setColSpan(3);
-            $textRun = $cell->createTextRun(truncateString($data["problem"]) . "\n" . $data["total"]);
+            $textRun = $cell->createTextRun($data["total"] . "\n" . truncateString($data["problem"]));
             $textRun->getFont()->setBold(true);
             $textRun->getFont()->setSize(12);
 
             //row title
             $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(25);
+            $rowShape->setHeight(20);
             $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'FFDCFF00'], ['status' => 'Low', 'color' => 'FF00B050']];
             foreach ($val as $key => $v) {
                 $cell = $rowShape->nextCell();
-                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v["color"]));
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $textRun = $cell->createTextRun($v["status"]);
+                $textRun = $cell->createTextRun($v['status']);
                 $textRun->getFont()->setBold(true);
             }
 
             $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(25);
+            $rowShape->setHeight(20);
+            $value = [$data['high_existing'], $data['medium_existing'], $data['low_existing']];
+            foreach ($value as $key => $v) {
+                $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->createTextRun($v);
+            }
+
+            $rowShape = $tableShape->createRow();
+            $rowShape->setHeight(20);
             $value = [$data['high'], $data['medium'], $data['low']];
+            foreach ($value as $key => $v) {
+                $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->createTextRun($v);
+            }
+
+            $rowShape = $tableShape->createRow();
+            $rowShape->setHeight(20);
+            $value = [$data['highclosed'], $data['mediumclosed'], $data['lowclosed']];
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
                 $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
@@ -345,13 +385,15 @@ class MonthlyController extends Controller
             //set tempat box selanjutnya
             $offsetx = $offsetx + 155;
         }
-
+        
         //set data chart 1
         $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
             $status_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
             $status_pending = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
+            $closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
+            // dd($status_pending, $closed_thisweek, $count_pending);
             $color = '';
             if ($value->problem == 'Core System & Surrounding Apps') {
                 $color = 'ff89a64e';
@@ -385,19 +427,26 @@ class MonthlyController extends Controller
         // Chart 1 Ticket by Category
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(250)
-            ->setWidth(400)
+            ->setWidth(410)
             ->setOffsetX(25)
-            ->setOffsetY(200);
+            ->setOffsetY(225);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket by Category');
-
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
         $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
@@ -434,6 +483,13 @@ class MonthlyController extends Controller
 
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket by Last 3 Months');
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
 
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
@@ -480,6 +536,13 @@ class MonthlyController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket Jira Service Request');
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
 
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
@@ -546,6 +609,14 @@ class MonthlyController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Problem By Assignee & Status');
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+        // Tambahkan seri data ke chart
         $series1 = new Series('Closed', $data_closed);
         $series2 = new Series('Pending', $data_pending);
         $chartType->addSeries($series1);
@@ -643,6 +714,13 @@ class MonthlyController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket Created vs Closed');
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
 
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
