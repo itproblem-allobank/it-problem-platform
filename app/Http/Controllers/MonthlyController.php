@@ -385,7 +385,77 @@ class MonthlyController extends Controller
             //set tempat box selanjutnya
             $offsetx = $offsetx + 155;
         }
-        
+
+        $totalexisting = 0;
+        $totalcreated = 0;
+        $totalclosed = 0;
+        foreach ($total as $key => $value) {
+            $totalexisting += $value["high_existing"] + $value["medium_existing"] + $value["low_existing"];
+            $totalcreated += $value["high"] + $value["medium"] + $value["low"];
+            $totalclosed += $value["highclosed"] + $value["mediumclosed"] + $value["lowclosed"];
+        }
+        // dd($totalcreated, $totalclosed);
+
+        // Icon +
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(-5)
+            ->setOffsetY(175);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun('+');
+        $textRun->getFont()->setBold(true)
+            ->setSize(16)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Icon -
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(-5)
+            ->setOffsetY(195);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun('-');
+        $textRun->getFont()->setBold(true)
+            ->setSize(16)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Total Existing
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(155);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($totalexisting);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        //Total Created
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(175);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($totalcreated);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        //Total Closed
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(195);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($totalclosed);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
         //set data chart 1
         $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
         $resultdata_chart1 = [];
@@ -474,9 +544,9 @@ class MonthlyController extends Controller
         // Chart 2
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(250)
-            ->setWidth(400)
-            ->setOffsetX(440)
-            ->setOffsetY(200);
+            ->setWidth(410)
+            ->setOffsetX(435)
+            ->setOffsetY(225);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -527,10 +597,10 @@ class MonthlyController extends Controller
 
         // Set Size Chart
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(230)
-            ->setWidth(400)
-            ->setOffsetX(855)
-            ->setOffsetY(460);
+        $chartShape->setHeight(215)
+            ->setWidth(410)
+            ->setOffsetX(845)
+            ->setOffsetY(475);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -555,29 +625,6 @@ class MonthlyController extends Controller
             $chartType->addSeries($series);
         }
 
-        // //Chart 4 Problem by Status
-        // $data_chart4 = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('status', DB::raw('count(*) as count'))->groupBy('status')->get();
-        // $resultdata_chart4 = [];
-        // foreach ($data_chart4 as $key => $value) {
-        //     $resultdata_chart4[$value->status] = $value->count;
-        // }
-        // $chartShape = $slide3->createChartShape();
-        // $chartShape->setHeight(230)
-        //     ->setWidth(400)
-        //     ->setOffsetX(25)
-        //     ->setOffsetY(460);
-        // // Define tipe chart
-        // $chartType = new Pie();
-        // $chartShape->getPlotArea()->setType($chartType);
-        // // Set judul chart
-        // $chartShape->getTitle()->setText('Problem By Status');
-        // $series = new Series('Data', $resultdata_chart4);
-        // $chartType->addSeries($series);
-        // // Chart Bordered
-        // $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        // $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
-        // $chartShape->getBorder()->setLineWidth(1);
-
         //Chart 5 Problem by Assignee & Status
         $data_chart5 = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('nickname', DB::raw('count(*) as count'))->groupBy('nickname')->get();
         $resultdata_chart5 = [];
@@ -600,10 +647,10 @@ class MonthlyController extends Controller
             $data_pending[$value['nickname']] = $value['pending'];
         }
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(230)
-            ->setWidth(400)
-            ->setOffsetX(440)
-            ->setOffsetY(460);
+        $chartShape->setHeight(215)
+            ->setWidth(410)
+            ->setOffsetX(435)
+            ->setOffsetY(475);
         // Define tipe chartsss
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -630,9 +677,9 @@ class MonthlyController extends Controller
         //Chart 6 Container
         $shape = $slide3->createRichTextShape()
             ->setHeight(250)
-            ->setWidth(195)
-            ->setOffsetX(855)
-            ->setOffsetY(200);
+            ->setWidth(205)
+            ->setOffsetX(845)
+            ->setOffsetY(225);
         $shape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFF'));
         $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
 
@@ -663,9 +710,9 @@ class MonthlyController extends Controller
         // Menambahkan kotak kedua untuk "Issues Closed"
         $shape2 = $slide3->createRichTextShape()
             ->setHeight(250)
-            ->setWidth(195)
-            ->setOffsetX(1060)
-            ->setOffsetY(200);
+            ->setWidth(205)
+            ->setOffsetX(1050)
+            ->setOffsetY(225);
         $shape2->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFF'));
         $shape2->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
 
@@ -705,10 +752,10 @@ class MonthlyController extends Controller
 
         // Set Size Chart
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(230)
-            ->setWidth(400)
+        $chartShape->setHeight(215)
+            ->setWidth(410)
             ->setOffsetX(25)
-            ->setOffsetY(460);
+            ->setOffsetY(475);
         // Define tipe chart
         $chartType = new Line();
         $chartShape->getPlotArea()->setType($chartType);

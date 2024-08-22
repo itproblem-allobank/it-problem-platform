@@ -398,6 +398,79 @@ class WeeklyController extends Controller
             $offsetx = $offsetx + 155;
         }
 
+        $totalexisting = 0;
+        $totalcreated = 0;
+        $totalclosed = 0;
+        foreach ($total as $key => $value) {
+            $totalexisting += $value["high_existing"] + $value["medium_existing"] + $value["low_existing"];
+            $totalcreated += $value["high"] + $value["medium"] + $value["low"];
+            $totalclosed += $value["highclosed"] + $value["mediumclosed"] + $value["lowclosed"];
+        }
+        // dd($totalcreated, $totalclosed);
+
+        // Icon +
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(-5)
+            ->setOffsetY(175);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun('+');
+        $textRun->getFont()->setBold(true)
+            ->setSize(16)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Icon -
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(-5)
+            ->setOffsetY(195);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun('-');
+        $textRun->getFont()->setBold(true)
+            ->setSize(16)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Total Existing
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(155);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($totalexisting);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        //Total Created
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(175);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($totalcreated);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        //Total Closed
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(195);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($totalclosed);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+
+
+
         //set data chart 1
         $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
         $resultdata_chart1 = [];
