@@ -533,11 +533,16 @@ class MonthlyController extends Controller
         foreach ($data_chart2 as $key => $value) {
             $closed = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), $end_date])->where('status', '=', 'Closed')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
             $pending = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), $end_date])->where('status', '=', 'Pending')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
+            $totalCount = $data_chart2->sum('count');
+            $totalValue = $closed + $pending;
+            $number = ($totalValue / $totalCount) * 100;
+            $percentage = round($number);            
             $resultdata_chart2[] = [
                 'month' => Carbon::create()->month($value->month)->format('F'),
                 'count' => $value->count,
                 'closed' => $closed,
-                'pending' => $pending
+                'pending' => $pending,
+                'percentage' => $percentage
             ];
         }
 
@@ -568,11 +573,11 @@ class MonthlyController extends Controller
 
         $dataclosed = [];
         foreach ($resultdata_chart2 as $key => $value) {
-            $dataclosed[$value['month']] = $value['closed'];
+            $dataclosed[$value['month'] . "\n" . ' (' . $value['percentage'] . '%)'] = $value['closed'];
         }
         $datapending = [];
         foreach ($resultdata_chart2 as $key => $value) {
-            $datapending[$value['month']] = $value['pending'];
+            $datapending[$value['month'] . "\n" . ' (' . $value['percentage'] . '%)'] = $value['pending'];
         }
 
         $series = new Series('Closed', $dataclosed);
