@@ -538,7 +538,7 @@ class MonthlyController extends Controller
             $number = ($totalValue / $totalCount) * 100;
             $percentage = round($number);            
             $resultdata_chart2[] = [
-                'month' => Carbon::create()->month($value->month)->format('F'),
+                'month' => Carbon::create()->month(intval($value->month))->format('F'),
                 'count' => $value->count,
                 'closed' => $closed,
                 'pending' => $pending,
