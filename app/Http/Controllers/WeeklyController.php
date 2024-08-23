@@ -682,12 +682,14 @@ class WeeklyController extends Controller
             $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
             $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
             $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
+            $status_review = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Review')->get()->count();
             $resultdata_chart3[] =
                 [
                     'sub_category' => $value->sub_category,
                     'total' => $total,
                     'count_closed' => $status_closed,
                     'count_declined' => $status_declined,
+                    'count_review' => $status_review
                 ];
         }
 
@@ -718,7 +720,7 @@ class WeeklyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart3 as $key => $value) {
-            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'],]);
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Review' => $value['count_review']]);
             $chartType->addSeries($series);
         }
 
