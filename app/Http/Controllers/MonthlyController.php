@@ -258,11 +258,9 @@ class MonthlyController extends Controller
             $mediumclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Medium')->get()->count();
             $lowclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Low')->get()->count();
             //set total data by priority
-            $high_total = $high_existing + $high_now;
-            $medium_total = $medium_existing + $medium_now;
-            $low_total = $low_existing + $low_now;
+            $totalcreated = $high_now + $medium_now + $low_now;
             //count data priority
-            $countdata = $high_total + $medium_total + $low_total;
+            $countdata = $high_existing + $medium_existing + $low_existing + $totalcreated;
             //set color by problem
             $color = '';
             if ($value->problem == 'Core System & Surrounding Apps') {
@@ -461,7 +459,8 @@ class MonthlyController extends Controller
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
             $status_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
-            $status_pending = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
+            $status_pending = Data::where(DB::raw('DATE(created)'), '<=', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->get()->count();
+            $created_pending = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->get()->count();
             $closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
             // dd($status_pending, $closed_thisweek, $count_pending);
             $color = '';
@@ -490,6 +489,7 @@ class MonthlyController extends Controller
                     'total' => $value->count,
                     'count_closed' => $status_closed,
                     'count_pending' => $status_pending,
+                    'created_pending' => $created_pending,
                     'color' => $color
                 ];
         }
@@ -520,7 +520,7 @@ class MonthlyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
-            $series = new Series($value['problem'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
+            $series = new Series($value['problem'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending'] + $value['created_pending']]);
             $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($value['color'])); // Blue
             $chartType->addSeries($series);
         }
