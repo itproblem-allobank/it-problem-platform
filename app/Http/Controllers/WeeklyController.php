@@ -255,6 +255,14 @@ class WeeklyController extends Controller
         $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
         $textRun->getFont()->setSize(14);
 
+        //
+        // $high_existing = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', 'Ekosistem MPC')->where('status', '=', 'Pending')->where('priority', '=', 'High')->get();
+        // $high_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', 'Ekosistem MPC')->where('priority', '=', 'High')->get();
+        // $highclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', 'Ekosistem MPC')->where('status', '=', 'Closed')->where('priority', '=', 'High')->get();
+
+        // dd($high_existing, $high_now, $highclosed);
+        //
+
         //data container category
         $problem = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
         // dd($problem);
@@ -399,12 +407,27 @@ class WeeklyController extends Controller
         $totalexisting = 0;
         $totalcreated = 0;
         $totalclosed = 0;
+        $totalhigh = 0;
         foreach ($total as $key => $value) {
             $totalexisting += $value["high_existing"] + $value["medium_existing"] + $value["low_existing"];
             $totalcreated += $value["high"] + $value["medium"] + $value["low"];
             $totalclosed += $value["highclosed"] + $value["mediumclosed"] + $value["lowclosed"];
+            $totalhigh += $value["high_existing"] + $value["high"]  - $value["highclosed"];
         }
-        // dd($totalcreated, $totalclosed);
+        // dd($totalcreated, $totalclosed, $totalexisting, $totalhigh);
+
+        // Total High
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(200)
+            ->setOffsetX(1125)
+            ->setOffsetY(65);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $textRun = $shape->createTextRun('Total High: ' . $totalhigh);
+        $textRun->getFont()->setBold(true)
+            ->setSize(15)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
 
         // Icon +
         $shape = $slide3->createRichTextShape();
