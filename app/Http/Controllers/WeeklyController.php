@@ -269,9 +269,9 @@ class WeeklyController extends Controller
         $total = [];
         foreach ($problem as $key => $value) {
             //declaredata priority
-            $high_existing = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
-            $medium_existing = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
-            $low_existing = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
+            $high_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'High')->get()->count();
+            $medium_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Medium')->get()->count();
+            $low_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '=', $value->problem)->where('status', '=', 'Pending')->where('priority', '=', 'Low')->get()->count();
             $high_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'High')->get()->count();
             $medium_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Medium')->get()->count();
             $low_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('priority', '=', 'Low')->get()->count();
@@ -281,7 +281,7 @@ class WeeklyController extends Controller
 
             $totalcreated = $high_now + $medium_now + $low_now;
             //count data priority
-            $countdata = $high_existing + $medium_existing + $low_existing + $totalcreated;
+            $countdata = $high_existing + $medium_existing + $low_existing + $totalcreated - $highclosed - $mediumclosed - $lowclosed;
             //set color by problem
             $color = '';
             if ($value->problem == 'Core System & Surrounding Apps') {
@@ -307,9 +307,9 @@ class WeeklyController extends Controller
             $total[] = [
                 'problem' => $value->problem,
                 'total' => $countdata,
-                'high_existing' => $high_existing + $highclosed,
-                'medium_existing' => $medium_existing + $mediumclosed,
-                'low_existing' => $low_existing + $lowclosed,
+                'high_existing' => $high_existing,
+                'medium_existing' => $medium_existing,
+                'low_existing' => $low_existing,
                 'high' =>  $high_now,
                 'medium' => $medium_now,
                 'low' => $low_now,
@@ -528,6 +528,7 @@ class WeeklyController extends Controller
                     'count_closed' => $status_closed,
                     'count_pending' => $status_pending,
                     'created_pending' => $created_pending,
+                    'closed_thisweek' => $closed_thisweek,
                     'color' => $color
                 ];
         }
@@ -558,7 +559,7 @@ class WeeklyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
-            $series = new Series($value['problem'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending'] + $value['created_pending']]);
+            $series = new Series($value['problem'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending'] + $value['created_pending'] - $value['closed_thisweek']]);
             $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($value['color'])); // Blue
             $chartType->addSeries($series);
         }
