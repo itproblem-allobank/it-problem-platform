@@ -806,7 +806,7 @@ class WeeklyController extends Controller
 
         // TABLE PROBLEM STATUS
         // Define table properties
-        $columns = 3; // Number of columns
+        $columns = 4; // Number of columns
         $tableShape = $slide3->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -820,11 +820,11 @@ class WeeklyController extends Controller
         $datacreated = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('problem', 'summary', 'status', 'created', 'changed_at')->get();
         $dataclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('status', '=', 'Closed')->select('problem', 'summary', 'status', 'created', 'changed_at')->get();
         $tempdata = [
-            ['', 'Summary', 'Status', 'Completion Time'],
+            ['', 'Summary', 'Status', 'RCA Time', 'Completion Time'],
         ];
         foreach ($datacreated as $key => $value) {
             $status = $value->status . ' - ' . Carbon::parse($value->changed_at)->format('d F Y');
-            $tempdata[] = [$value->problem, $value->summary,  $status, '-'];
+            $tempdata[] = [$value->problem, $value->summary,  $status, strval($value->rca_time),  '-'];
         }
         foreach ($dataclosed as $key => $value) {
             $status = $value->status . ' - ' . Carbon::parse($value->changed_at)->format('d F Y');
@@ -835,7 +835,7 @@ class WeeklyController extends Controller
             $daysDifference = intval($created->diffInDays($changed_at));
             $daysString = strval($daysDifference) . ' Days';
 
-            $tempdata[] = [$value->problem, $value->summary,  $status, $daysString];
+            $tempdata[] = [$value->problem, $value->summary,   $status, strval($value->rca_time), $daysString];
         }
         // dd($tempdata);
 

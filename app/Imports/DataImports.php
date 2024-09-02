@@ -28,6 +28,8 @@ class DataImports implements ToModel, WithStartRow
         $updated = gmdate("Y-m-d H:i:s", $row15);
         $row16 = ($row[16] - 25569) * 86400;
         $changed = gmdate("Y-m-d H:i:s", $row16);
+        // $row17 = ($row[17] - 25569) * 86400;
+        // $rca_time = gmdate("Y-m-d H:i:s", $row17);
 
         $str = $row[2];
         $ctr = explode(" - ", $str);
@@ -50,6 +52,7 @@ class DataImports implements ToModel, WithStartRow
             'created'           => $created,
             'updated'           => $updated,
             'changed_at'        => $changed,
+            'rca_time'          => $row[17],
         ];
 
         $assignee_too = $row[13];
