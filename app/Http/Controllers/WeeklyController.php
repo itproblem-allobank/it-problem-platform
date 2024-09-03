@@ -817,7 +817,7 @@ class WeeklyController extends Controller
         $tableShape->setOffsetY(475);
 
         // Define the data for the table
-        $datacreated = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')->get();
+        $datacreated = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('status', '=', 'Pending')->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')->get();
         $dataclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('status', '=', 'Closed')->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')->get();
 
         $tempdata = [
