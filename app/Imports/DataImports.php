@@ -31,13 +31,33 @@ class DataImports implements ToModel, WithStartRow
         // $row17 = ($row[17] - 25569) * 86400;
         // $rca_time = gmdate("Y-m-d H:i:s", $row17);
 
-        $str = $row[2];
-        $ctr = explode(" - ", $str);
+        // set RCA Time
+        if ($row[17] == null) {
+            $rca_time = null;
+        } else {
+            $row17 = ($row[17] - 25569) * 86400;
+            $rca_time = gmdate("Y-m-d H:i:s", $row17);
+        }
+
+        // set Closed Time
+        if ($row[18] == null) {
+            $closed_time = null;
+        } else {
+            $row18 = ($row[18] - 25569) * 86400;
+            $closed_time = gmdate("Y-m-d H:i:s", $row18);
+        }
+
+        // pisahkan problem & category 
+        $problem_category = $row[2];
+        $array_problem_cat = explode(" - ", $problem_category);
+        $problem = $array_problem_cat[0];
+        $category = $array_problem_cat[1] ?? "-";
 
         $data = [
             'code_jira'         => $row[0],
             'environment'       => $row[1],
-            'problem'           => $row[2],
+            'problem'           => $problem,
+            'category'          => $category,
             'summary'           => $row[3],
             'zentao_link'       => $row[4],
             'priority'          => $row[5],
@@ -52,7 +72,8 @@ class DataImports implements ToModel, WithStartRow
             'created'           => $created,
             'updated'           => $updated,
             'changed_at'        => $changed,
-            'rca_time'          => $row[17],
+            'rca_time'          => $rca_time,
+            'closed_time'       => $closed_time
         ];
 
         $assignee_too = $row[13];

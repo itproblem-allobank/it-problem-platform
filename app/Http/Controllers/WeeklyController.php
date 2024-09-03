@@ -284,7 +284,7 @@ class WeeklyController extends Controller
             $countdata = $high_existing + $medium_existing + $low_existing + $totalcreated - $highclosed - $mediumclosed - $lowclosed;
             //set color by problem
             $color = '';
-            if ($value->problem == 'Core System & Surrounding Apps') {
+            if ($value->problem == 'Core & Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
                 $color = 'ff93aacf';
@@ -502,7 +502,7 @@ class WeeklyController extends Controller
             $closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
             // dd($status_pending, $closed_thisweek, $count_pending);
             $color = '';
-            if ($value->problem == 'Core System & Surrounding Apps') {
+            if ($value->problem == 'Core & Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
                 $color = 'ff93aacf';
@@ -806,7 +806,7 @@ class WeeklyController extends Controller
 
         // TABLE PROBLEM STATUS
         // Define table properties
-        $columns = 4; // Number of columns
+        $columns = 5; // Number of columns
         $tableShape = $slide3->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -817,17 +817,37 @@ class WeeklyController extends Controller
         $tableShape->setOffsetY(475);
 
         // Define the data for the table
-        $datacreated = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('problem', 'summary', 'status', 'created', 'changed_at')->get();
-        $dataclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('status', '=', 'Closed')->select('problem', 'summary', 'status', 'created', 'changed_at')->get();
+        $datacreated = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')->get();
+        $dataclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('status', '=', 'Closed')->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')->get();
+
         $tempdata = [
-            ['', 'Summary', 'Status', 'RCA Time', 'Completion Time'],
+            ['', 'Category', 'Summary', 'Status', 'RCA Time', 'Completion Time'],
         ];
+
         foreach ($datacreated as $key => $value) {
-            $status = $value->status . ' - ' . Carbon::parse($value->changed_at)->format('d F Y');
-            $tempdata[] = [$value->problem, $value->summary,  $status, strval($value->rca_time),  '-'];
+            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d F Y');
+            
+            //declare rca time
+            if($value->rca_time == null){
+                $rca_time = '-';
+            }else{
+                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d F Y');
+            }
+
+            $tempdata[] = [$value->problem, $value->category, $value->summary,  $status, $rca_time,  '-'];
         }
+
         foreach ($dataclosed as $key => $value) {
-            $status = $value->status . ' - ' . Carbon::parse($value->changed_at)->format('d F Y');
+            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d F Y');
+
+            //declare rca time
+            if($value->rca_time == null){
+                $rca_time = '-';
+            }else{
+                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d F Y');
+            }
+
+            //set berapa hari completion time
             $created = Carbon::parse($value->created);
             $changed_at = Carbon::parse($value->changed_at);
 
@@ -835,7 +855,7 @@ class WeeklyController extends Controller
             $daysDifference = intval($created->diffInDays($changed_at));
             $daysString = strval($daysDifference) . ' Days';
 
-            $tempdata[] = [$value->problem, $value->summary,   $status, strval($value->rca_time), $daysString];
+            $tempdata[] = [$value->problem, $value->category, $value->summary,   $status, $rca_time, $daysString];
         }
         // dd($tempdata);
 
@@ -848,7 +868,7 @@ class WeeklyController extends Controller
                 }
                 //set status
                 $problem = $row[0];
-                $status = explode(' - ', $row[2]);
+                $status = explode("\n", $row[3]);
                 $firstStatus = $status[0];
                 $cell = $tableRow->nextCell();
                 $textRun = $cell->createTextRun($cellText);
@@ -861,9 +881,9 @@ class WeeklyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex == 1) {
+                    if ($cellIndex != 3) {
                         //coloring by problem
-                        if ($problem == 'Core System & Surrounding Apps') {
+                        if ($problem == 'Core & Surrounding') {
                             $cell->getFill()->setStartColor(new Color('ff89a64e'));
                         } else if ($problem == 'Ekosistem MPC') {
                             $cell->getFill()->setStartColor(new Color('ff93aacf'));
@@ -882,7 +902,7 @@ class WeeklyController extends Controller
                         } else {
                             $cell->getFill()->setStartColor(new Color('ffffffff'));
                         }
-                    } else if ($cellIndex == 2) {
+                    } else if ($cellIndex == 3) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
                             $cell->getFill()->setStartColor(new Color('fff6f610'));
@@ -1028,7 +1048,7 @@ class WeeklyController extends Controller
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 //coloring by problem
-                if ($row[1] == 'Core System & Surrounding Apps') {
+                if ($row[1] == 'Core & Surrounding') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
                 } else if ($row[1] == 'Ekosistem MPC') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff93aacf'));
@@ -1108,7 +1128,7 @@ class WeeklyController extends Controller
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 //coloring by problem
-                if ($row[1] == 'Core System & Surrounding Apps') {
+                if ($row[1] == 'Core & Surrounding') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
                 } else if ($row[1] == 'Ekosistem MPC') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff93aacf'));

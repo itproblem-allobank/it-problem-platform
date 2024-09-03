@@ -263,7 +263,7 @@ class MonthlyController extends Controller
             $countdata = $high_existing + $medium_existing + $low_existing + $totalcreated;
             //set color by problem
             $color = '';
-            if ($value->problem == 'Core System & Surrounding Apps') {
+            if ($value->problem == 'Core & Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
                 $color = 'ff93aacf';
@@ -464,7 +464,7 @@ class MonthlyController extends Controller
             $closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->get()->count();
             // dd($status_pending, $closed_thisweek, $count_pending);
             $color = '';
-            if ($value->problem == 'Core System & Surrounding Apps') {
+            if ($value->problem == 'Core & Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
                 $color = 'ff93aacf';
