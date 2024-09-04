@@ -383,16 +383,35 @@ class MonthlyController extends Controller
             //set tempat box selanjutnya
             $offsetx = $offsetx + 155;
         }
-
+        
         $totalexisting = 0;
         $totalcreated = 0;
         $totalclosed = 0;
+        $totalhigh = 0;
+        $totalmed = 0;
+        $totallow = 0;
         foreach ($total as $key => $value) {
             $totalexisting += $value["high_existing"] + $value["medium_existing"] + $value["low_existing"];
             $totalcreated += $value["high"] + $value["medium"] + $value["low"];
             $totalclosed += $value["highclosed"] + $value["mediumclosed"] + $value["lowclosed"];
+            $totalhigh += $value["high_existing"] + $value["high"]  - $value["highclosed"];
+            $totalmed += $value["medium_existing"] + $value["medium"] - $value["mediumclosed"];
+            $totallow += $value["low_existing"] + $value["low"] - $value["lowclosed"];
         }
-        // dd($totalcreated, $totalclosed);
+        // dd($totalcreated, $totalclosed, $totalexisting, $totalhigh);
+
+        // Total High, Med & Low
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(500)
+            ->setOffsetX(830)
+            ->setOffsetY(65);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $textRun = $shape->createTextRun('Total High: ' . $totalhigh . ' | Total Medium: ' . $totalmed . ' | Total Low: ' . $totallow);
+        $textRun->getFont()->setBold(true)
+            ->setSize(15)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
 
         // Icon +
         $shape = $slide3->createRichTextShape();

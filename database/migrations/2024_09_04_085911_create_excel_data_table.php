@@ -31,6 +31,8 @@ return new class extends Migration
             $table->timestamp('created')->nullable();
             $table->timestamp('updated')->nullable();
             $table->timestamp('changed_at')->nullable();
+            $table->timestamp('rca_time')->nullable();
+            $table->timestamp('closed_time')->nullable();
             $table->string('nickname', 100)->nullable();
             $table->timestamp('updated_at')->nullable();
             $table->timestamp('created_at')->nullable();
