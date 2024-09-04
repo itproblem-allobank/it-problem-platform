@@ -981,41 +981,47 @@ class WeeklyController extends Controller
             } else {
                 $target_version = $value->target_version;
             }
-            $table[] = [$id, $value->problem, $value->summary, $pending_reason, $target_version, $status];
+
+            $rootcause = $value->root_cause ?? ' - ';
+            $table[] = [$id, $value->problem, $value->summary, $pending_reason, $target_version, $rootcause, $status];
             $id++;
         }
 
         // dd($table);
 
-        $table1 = array_slice($table, 0, 17);
-        $table2 = array_slice($table, 17, 35);
+        // dd($table);
+
+        // $table1 = array_slice($table, 0, 17);
+        // $table2 = array_slice($table, 17, 35);
 
         //Table 1
-        $columns = 6;
+        $columns = 7;
         $tableShape = $slide4->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $tableShape->setHeight(300);
-        $tableShape->setWidth(600);
+        $tableShape->setWidth(1200);
         $tableShape->setOffsetX(25);
         $tableShape->setOffsetY(100);
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
         //header 
-        $header = ['No', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Status'];
+        $header = ['No', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Root Cause', 'Status'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
-                $cell->setWidth(20);
+                $cell->setWidth(50);
             } else if ($cellIndex == 1) {
-                $cell->setWidth(100);
+                $cell->setWidth(120);
             } else if ($cellIndex == 2) {
-                $cell->setWidth(200);
+                $cell->setWidth(380);
             } else if ($cellIndex == 3) {
-                $cell->setWidth(95);
+                $cell->setWidth(100);
             } else if ($cellIndex == 4) {
-                $cell->setWidth(95);
+                $cell->setWidth(100);
             } else if ($cellIndex == 5) {
-                $cell->setWidth(90);
+                $cell->setWidth(350);
+            } else if ($cellIndex == 6) {
+                $cell->setWidth(100);
             }
             $textRun = $cell->createTextRun($cellText);
             $textRun->getFont()->setBold(true);
@@ -1026,23 +1032,25 @@ class WeeklyController extends Controller
             $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         }
         //data
-        foreach ($table1 as $rowIndex => $row) {
+        foreach ($table as $rowIndex => $row) {
             $tableRow = $tableShape->createRow();
             $tableRow->setHeight(25);
             foreach ($row as $cellIndex => $cellText) {
                 $cell = $tableRow->nextCell();
                 if ($cellIndex == 0) {
-                    $cell->setWidth(20);
+                    $cell->setWidth(50);
                 } else if ($cellIndex == 1) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(120);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(200);
+                    $cell->setWidth(380);
                 } else if ($cellIndex == 3) {
-                    $cell->setWidth(95);
+                    $cell->setWidth(100);
                 } else if ($cellIndex == 4) {
-                    $cell->setWidth(95);
+                    $cell->setWidth(100);
                 } else if ($cellIndex == 5) {
-                    $cell->setWidth(90);
+                    $cell->setWidth(350);
+                } else if ($cellIndex == 6) {
+                    $cell->setWidth(100);
                 }
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -1070,85 +1078,85 @@ class WeeklyController extends Controller
             }
         }
 
-        //Table 2
-        $columns = 6;
-        $tableShape = $slide4->createTableShape($columns);
-        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $tableShape->setHeight(300);
-        $tableShape->setWidth(600);
-        $tableShape->setOffsetX(635);
-        $tableShape->setOffsetY(100);
-        $rowHeader = $tableShape->createRow();
-        $rowHeader->setHeight(25);
-        //header 
-        $header = ['No', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Status'];
-        foreach ($header as $cellIndex => $cellText) {
-            $cell = $rowHeader->nextCell();
-            if ($cellIndex == 0) {
-                $cell->setWidth(20);
-            } else if ($cellIndex == 1) {
-                $cell->setWidth(100);
-            } else if ($cellIndex == 2) {
-                $cell->setWidth(200);
-            } else if ($cellIndex == 3) {
-                $cell->setWidth(95);
-            } else if ($cellIndex == 4) {
-                $cell->setWidth(95);
-            } else if ($cellIndex == 5) {
-                $cell->setWidth(90);
-            }
-            $textRun = $cell->createTextRun($cellText);
-            $textRun->getFont()->setBold(true);
-            $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
-            $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-            $cell->getFill()->setFillType(Fill::FILL_SOLID);
-            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        }
-        //data
-        foreach ($table2 as $rowIndex => $row) {
-            $tableRow = $tableShape->createRow();
-            $tableRow->setHeight(25);
-            foreach ($row as $cellIndex => $cellText) {
-                $cell = $tableRow->nextCell();
-                if ($cellIndex == 0) {
-                    $cell->setWidth(20);
-                } else if ($cellIndex == 1) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 2) {
-                    $cell->setWidth(200);
-                } else if ($cellIndex == 3) {
-                    $cell->setWidth(95);
-                } else if ($cellIndex == 4) {
-                    $cell->setWidth(95);
-                } else if ($cellIndex == 5) {
-                    $cell->setWidth(90);
-                }
-                $textRun = $cell->createTextRun($cellText);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                //coloring by problem
-                if ($row[1] == 'Core & Surrounding') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
-                } else if ($row[1] == 'Ekosistem MPC') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff93aacf'));
-                } else if ($row[1] == 'Loan') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
-                } else if ($row[1] == 'Onboarding') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff79646'));
-                } else if ($row[1] == 'Online Payment') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4f81bd'));
-                } else if ($row[1] == 'Third Party') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
-                } else if ($row[1] == 'Transaction') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffc000'));
-                } else if ($row[1] == 'Wholesale Banking') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
-                } else {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
-                }
-            }
-        }
+        // //Table 2
+        // $columns = 6;
+        // $tableShape = $slide4->createTableShape($columns);
+        // $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        // $tableShape->setHeight(300);
+        // $tableShape->setWidth(600);
+        // $tableShape->setOffsetX(635);
+        // $tableShape->setOffsetY(100);
+        // $rowHeader = $tableShape->createRow();
+        // $rowHeader->setHeight(25);
+        // //header 
+        // $header = ['No', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Status'];
+        // foreach ($header as $cellIndex => $cellText) {
+        //     $cell = $rowHeader->nextCell();
+        //     if ($cellIndex == 0) {
+        //         $cell->setWidth(20);
+        //     } else if ($cellIndex == 1) {
+        //         $cell->setWidth(100);
+        //     } else if ($cellIndex == 2) {
+        //         $cell->setWidth(200);
+        //     } else if ($cellIndex == 3) {
+        //         $cell->setWidth(95);
+        //     } else if ($cellIndex == 4) {
+        //         $cell->setWidth(95);
+        //     } else if ($cellIndex == 5) {
+        //         $cell->setWidth(90);
+        //     }
+        //     $textRun = $cell->createTextRun($cellText);
+        //     $textRun->getFont()->setBold(true);
+        //     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+        //     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+        //     $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        //     $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        //     $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        // }
+        // //data
+        // foreach ($table2 as $rowIndex => $row) {
+        //     $tableRow = $tableShape->createRow();
+        //     $tableRow->setHeight(25);
+        //     foreach ($row as $cellIndex => $cellText) {
+        //         $cell = $tableRow->nextCell();
+        //         if ($cellIndex == 0) {
+        //             $cell->setWidth(20);
+        //         } else if ($cellIndex == 1) {
+        //             $cell->setWidth(100);
+        //         } else if ($cellIndex == 2) {
+        //             $cell->setWidth(200);
+        //         } else if ($cellIndex == 3) {
+        //             $cell->setWidth(95);
+        //         } else if ($cellIndex == 4) {
+        //             $cell->setWidth(95);
+        //         } else if ($cellIndex == 5) {
+        //             $cell->setWidth(90);
+        //         }
+        //         $textRun = $cell->createTextRun($cellText);
+        //         $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        //         $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        //         //coloring by problem
+        //         if ($row[1] == 'Core & Surrounding') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
+        //         } else if ($row[1] == 'Ekosistem MPC') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff93aacf'));
+        //         } else if ($row[1] == 'Loan') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
+        //         } else if ($row[1] == 'Onboarding') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff79646'));
+        //         } else if ($row[1] == 'Online Payment') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4f81bd'));
+        //         } else if ($row[1] == 'Third Party') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
+        //         } else if ($row[1] == 'Transaction') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffc000'));
+        //         } else if ($row[1] == 'Wholesale Banking') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
+        //         } else {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
+        //         }
+        //     }
+        // }
 
 
 
