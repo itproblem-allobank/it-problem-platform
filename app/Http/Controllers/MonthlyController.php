@@ -17,9 +17,11 @@ use PhpOffice\PhpPresentation\Shape\Chart\Series;
 use PhpOffice\PhpPresentation\Shape\Drawing\File;
 use PhpOffice\PhpPresentation\Style\Border;
 use PhpOffice\PhpPresentation\Style\Fill;
-use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Line;
-use PhpOffice\PhpPresentation\Point;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use App\Exports\DataExport;
+use ZipArchive;
 
 use Exception;
 
@@ -937,12 +939,39 @@ class MonthlyController extends Controller
 
 
         // Simpan presentasi ke dalam file
-        $filename = 'Report IT Problem ' . Carbon::parse($end_date)->format('F Y') . '.pptx';
+        // $filename = 'Report IT Problem ' . Carbon::parse($end_date)->format('F Y') . '.pptx';
+        // $savePath = storage_path($filename);
+        // $writer = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
+        // $writer->save($savePath);
+        // // Return file sebagai response download
+        // return response()->download($savePath)->deleteFileAfterSend(true);
+
+        // Simpan presentasi ke dalam file
+        $filename = 'Report Monthly IT Problem' . ' - ' . Carbon::parse($start_date)->format('F Y') .'.pptx';
         $savePath = storage_path($filename);
         $writer = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
         $writer->save($savePath);
-        // Return file sebagai response download
-        return response()->download($savePath)->deleteFileAfterSend(true);
+
+        // Simpan file Excel sementara
+        $excelPath = 'exports/List Problem Monthly - ' .  Carbon::parse($start_date)->format('F Y') . '.xlsx';
+        Excel::store(new DataExport($start_date, $end_date), $excelPath, 'local');
+
+        // 3. Buat file ZIP yang berisi kedua file tersebut
+        $zipFilename = 'Monthly Report - ' . Carbon::parse($start_date)->format('F Y') . '.zip';
+        $zipFilePath = storage_path('app/exports/' . $zipFilename);
+        $zip = new ZipArchive;
+        if ($zip->open($zipFilePath, ZipArchive::CREATE) === TRUE) {
+            $zip->addFile(storage_path('app/' . $excelPath), 'List Problem Monthly - ' .  Carbon::parse($start_date)->format('F Y') . '.xlsx');
+            $zip->addFile($savePath, $filename);
+            $zip->close();
+        }
+
+        // 4. Hapus file sementara setelah digabungkan
+        Storage::delete([$excelPath]);
+        unlink($savePath); // Menghapus file PPT secara manual karena disimpan di luar storage facade
+
+        // 5. Unduh file ZIP dan hapus setelah diunduh
+        return response()->download($zipFilePath)->deleteFileAfterSend(true);
     }
     //
 }

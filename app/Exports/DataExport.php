@@ -41,7 +41,7 @@ class DataExport implements FromCollection, WithHeadings
             'updated',
             'changed_at',
             'nickname',
-        )->whereBetween('created', [$this->start_date, $this->end_date])->get();
+        )->whereBetween('created', [$this->start_date, $this->end_date])->where('status', '=', 'pending')->get();
         $closed = Data::select(
             'code_jira',
             'environment',

@@ -1191,15 +1191,15 @@ class WeeklyController extends Controller
         $writer->save($savePath);
 
         // Simpan file Excel sementara
-        $excelPath = 'exports/list_problem_weekly.xlsx';
+        $excelPath = 'exports/List Problem Weekly.xlsx';
         Excel::store(new DataExport($start_date, $end_date), $excelPath, 'local');
 
         // 3. Buat file ZIP yang berisi kedua file tersebut
-        $zipFilename = 'weekly_report.zip';
+        $zipFilename = 'Report Weekly IT Problem' . ' - ' . Carbon::parse($start_date)->format('d') . ' - ' . Carbon::parse($end_date)->format('d F Y') . '.zip';
         $zipFilePath = storage_path('app/exports/' . $zipFilename);
         $zip = new ZipArchive;
         if ($zip->open($zipFilePath, ZipArchive::CREATE) === TRUE) {
-            $zip->addFile(storage_path('app/' . $excelPath), 'list_problem_weekly.xlsx');
+            $zip->addFile(storage_path('app/' . $excelPath), 'List Problem Weekly.xlsx');
             $zip->addFile($savePath, $filename);
             $zip->close();
         }
