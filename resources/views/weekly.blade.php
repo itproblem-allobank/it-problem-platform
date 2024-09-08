@@ -62,7 +62,7 @@
 
         if (startDateInput.value) {
             const startDate = new Date(startDateInput.value);
-            startDate.setDate(startDate.getDate() + 7);
+            startDate.setDate(startDate.getDate() + 6);
             endDateInput.value = startDate.toISOString().split('T')[0];
         } else {
             endDateInput.value = '';
@@ -75,7 +75,7 @@
 
         if (endDateInput.value) {
             const endDate = new Date(endDateInput.value);
-            endDate.setDate(endDate.getDate() - 7);
+            endDate.setDate(endDate.getDate() - 6);
             startDateInput.value = endDate.toISOString().split('T')[0];
         } else {
             startDateInput.value = '';

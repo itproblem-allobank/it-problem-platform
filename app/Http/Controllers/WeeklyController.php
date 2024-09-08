@@ -701,13 +701,22 @@ class WeeklyController extends Controller
         $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
         $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
+
+        //set data
         $series = new Series('Closed', ['3 Weeks Ago' => count($closed3week), '2 Weeks Ago' => count($closed2week), 'Last Weeks' => count($closedlweek)]);
         $series2 = new Series('Pending', ['3 Weeks Ago' => $created_pending_3week, '2 Weeks Ago' => $created_pending_2week, 'Last Weeks' => $created_pending_lweek]);
+
+        //coloring category
+        $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff686fff'));
+        $series2->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffbd446'));
+
+        //set series
         $chartType->addSeries($series);
         $chartType->addSeries($series2);
 
+        
+
         // Chart 3 Ticket Service Request Nasabah
-        // $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))->groupBy('issue_type')->get();
         $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Allo Care Service Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
         $resultdata_chart3 = [];
         foreach ($data_chart3 as $key => $value) {
@@ -913,9 +922,9 @@ class WeeklyController extends Controller
                     } else if ($cellIndex == 3) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
-                            $cell->getFill()->setStartColor(new Color('fff6f610'));
+                            $cell->getFill()->setStartColor(new Color('ffffd848'));
                         } elseif ($firstStatus == 'Closed') {
-                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                            $cell->getFill()->setStartColor(new Color('ff686fff'));
                         } else {
                             $cell->getFill()->setFillType(Fill::FILL_NONE);
                         }
