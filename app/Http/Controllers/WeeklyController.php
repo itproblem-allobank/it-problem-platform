@@ -280,8 +280,12 @@ class WeeklyController extends Controller
             $lowclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', $value->problem)->where('status', '=', 'Closed')->where('priority', '=', 'Low')->get()->count();
 
             $totalcreated = $high_now + $medium_now + $low_now;
+
+            $highexist = $high_existing + $highclosed;
+            $mediumexist = $medium_existing + $mediumclosed;
+            $lowexist = $low_existing + $lowclosed;
             //count data priority
-            $countdata = $high_existing + $medium_existing + $low_existing + $totalcreated - $highclosed - $mediumclosed - $lowclosed;
+            $countdata = $highexist + $mediumexist + $lowexist + $totalcreated - $highclosed - $mediumclosed - $lowclosed;
             //set color by problem
             $color = '';
             if ($value->problem == 'Core & Surrounding') {
@@ -294,7 +298,7 @@ class WeeklyController extends Controller
                 $color = 'fff79646';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff4f81bd';
-            } else if ($value->problem == 'Third Party') {
+            } else if ($value->problem == 'Switching & 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
                 $color = 'ffffc000';
@@ -307,9 +311,9 @@ class WeeklyController extends Controller
             $total[] = [
                 'problem' => $value->problem,
                 'total' => $countdata,
-                'high_existing' => $high_existing,
-                'medium_existing' => $medium_existing,
-                'low_existing' => $low_existing,
+                'high_existing' => $highexist,
+                'medium_existing' => $mediumexist,
+                'low_existing' => $lowexist,
                 'high' =>  $high_now,
                 'medium' => $medium_now,
                 'low' => $low_now,
@@ -516,7 +520,7 @@ class WeeklyController extends Controller
                 $color = 'fff79646';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff4f81bd';
-            } else if ($value->problem == 'Third Party') {
+            } else if ($value->problem == 'Switching & 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
                 $color = 'ffffc000';
@@ -563,7 +567,7 @@ class WeeklyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
-            $series = new Series($value['problem'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending'] + $value['created_pending'] - $value['closed_thisweek']]);
+            $series = new Series($value['problem'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending'] + $value['created_pending']]);
             $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($value['color'])); // Blue
             $chartType->addSeries($series);
         }
@@ -829,26 +833,26 @@ class WeeklyController extends Controller
         ];
 
         foreach ($datacreated as $key => $value) {
-            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d F Y');
+            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d/m/Y');
             
             //declare rca time
             if($value->rca_time == null){
                 $rca_time = '-';
             }else{
-                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d F Y');
+                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d/m/Y');
             }
 
             $tempdata[] = [$value->problem, $value->category, $value->summary,  $status, $rca_time,  '-'];
         }
 
         foreach ($dataclosed as $key => $value) {
-            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d F Y');
+            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d/m/Y');
 
             //declare rca time
             if($value->rca_time == null){
                 $rca_time = '-';
             }else{
-                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d F Y');
+                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d/m/Y');
             }
 
             //set berapa hari completion time
@@ -897,7 +901,7 @@ class WeeklyController extends Controller
                             $cell->getFill()->setStartColor(new Color('fff79646'));
                         } else if ($problem == 'Online Payment') {
                             $cell->getFill()->setStartColor(new Color('ff4f81bd'));
-                        } else if ($problem == 'Third Party') {
+                        } else if ($problem == 'Switching & 3rdparty') {
                             $cell->getFill()->setStartColor(new Color('ffee52e1'));
                         } else if ($problem == 'Transaction') {
                             $cell->getFill()->setStartColor(new Color('ffffc000'));
@@ -1070,7 +1074,7 @@ class WeeklyController extends Controller
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff79646'));
                 } else if ($row[1] == 'Online Payment') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4f81bd'));
-                } else if ($row[1] == 'Third Party') {
+                } else if ($row[1] == 'Switching & 3rdparty') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
                 } else if ($row[1] == 'Transaction') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffc000'));
@@ -1150,7 +1154,7 @@ class WeeklyController extends Controller
         //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff79646'));
         //         } else if ($row[1] == 'Online Payment') {
         //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4f81bd'));
-        //         } else if ($row[1] == 'Third Party') {
+        //         } else if ($row[1] == 'Switching & 3rdparty') {
         //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
         //         } else if ($row[1] == 'Transaction') {
         //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffc000'));

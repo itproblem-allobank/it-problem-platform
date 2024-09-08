@@ -275,7 +275,7 @@ class MonthlyController extends Controller
                 $color = 'fff79646';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff4f81bd';
-            } else if ($value->problem == 'Third Party') {
+            } else if ($value->problem == 'Switching & 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
                 $color = 'ffffc000';
@@ -495,7 +495,7 @@ class MonthlyController extends Controller
                 $color = 'fff79646';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff4f81bd';
-            } else if ($value->problem == 'Third Party') {
+            } else if ($value->problem == 'Switching & 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
                 $color = 'ffffc000';
