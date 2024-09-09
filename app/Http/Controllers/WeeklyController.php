@@ -883,11 +883,26 @@ class WeeklyController extends Controller
                 if ($cellIndex == 0) {
                     continue; // Lewati kolom yang disembunyikan
                 }
+
+                //set width
+                $cell = $tableRow->nextCell();
+                 if ($cellIndex == 1) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(420);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(100);
+                }
+                
                 //set status
                 $problem = $row[0];
                 $status = explode("\n", $row[3]);
                 $firstStatus = $status[0];
-                $cell = $tableRow->nextCell();
+                // $cell = $tableRow->nextCell();
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
