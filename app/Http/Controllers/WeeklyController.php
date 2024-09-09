@@ -1000,7 +1000,8 @@ class WeeklyController extends Controller
             }
 
             $rootcause = $value->root_cause ?? ' - ';
-            $table[] = [$id, $value->problem, $value->summary, $pending_reason, $target_version, $rootcause, $status];
+            $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d/m/Y');
+            $table[] = [$id, $value->problem, $value->summary, $pending_reason, $target_version, $rootcause, $rca_time,  $status];
             $id++;
         }
 
@@ -1012,7 +1013,7 @@ class WeeklyController extends Controller
         // $table2 = array_slice($table, 17, 35);
 
         //Table 1
-        $columns = 7;
+        $columns = 8;
         $tableShape = $slide4->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $tableShape->setHeight(300);
@@ -1022,7 +1023,7 @@ class WeeklyController extends Controller
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
         //header 
-        $header = ['No', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Root Cause', 'Status'];
+        $header = ['No', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Root Cause', 'RCA Time', 'Status'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
@@ -1036,9 +1037,11 @@ class WeeklyController extends Controller
             } else if ($cellIndex == 4) {
                 $cell->setWidth(100);
             } else if ($cellIndex == 5) {
-                $cell->setWidth(350);
+                $cell->setWidth(330);
             } else if ($cellIndex == 6) {
-                $cell->setWidth(100);
+                $cell->setWidth(75);
+            } else if ($cellIndex == 7) {
+                $cell->setWidth(75);
             }
             $textRun = $cell->createTextRun($cellText);
             $textRun->getFont()->setBold(true);
@@ -1065,9 +1068,11 @@ class WeeklyController extends Controller
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(100);
                 } else if ($cellIndex == 5) {
-                    $cell->setWidth(350);
+                    $cell->setWidth(330);
                 } else if ($cellIndex == 6) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(75);
+                } else if ($cellIndex == 7) {
+                    $cell->setWidth(75);
                 }
                 $textRun = $cell->createTextRun($cellText);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
