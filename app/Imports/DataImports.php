@@ -6,8 +6,9 @@ use App\Models\Data;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class DataImports implements ToModel, WithStartRow
+class DataImports implements ToModel, WithStartRow, WithMultipleSheets
 {
     /**
      * @param array $row
@@ -17,34 +18,40 @@ class DataImports implements ToModel, WithStartRow
 
     public function startRow(): int
     {
-        return 2;
+        return 8;
+    }
+
+    public function sheets(): array
+    {
+        return
+            [
+                1 => $this,
+            ];
     }
     public function model(array $row)
     {
         // dd($row[14]);
-        $row14 = ($row[14] - 25569) * 86400;
-        $created = gmdate("Y-m-d H:i:s", $row14);
-        $row15 = ($row[15] - 25569) * 86400;
-        $updated = gmdate("Y-m-d H:i:s", $row15);
-        $row16 = ($row[16] - 25569) * 86400;
-        $changed = gmdate("Y-m-d H:i:s", $row16);
-        // $row17 = ($row[17] - 25569) * 86400;
-        // $rca_time = gmdate("Y-m-d H:i:s", $row17);
+        $row17 = ($row[17] - 25569) * 86400;
+        $created = gmdate("Y-m-d H:i:s", $row17);
+        $row18 = ($row[18] - 25569) * 86400;
+        $updated = gmdate("Y-m-d H:i:s", $row18);
+        $row19 = ($row[19] - 25569) * 86400;
+        $changed = gmdate("Y-m-d H:i:s", $row19);
 
         // set RCA Time
-        if ($row[17] == null) {
+        if ($row[20] == null) {
             $rca_time = null;
         } else {
-            $row17 = ($row[17] - 25569) * 86400;
-            $rca_time = gmdate("Y-m-d H:i:s", $row17);
+            $row20 = ($row[20] - 25569) * 86400;
+            $rca_time = gmdate("Y-m-d H:i:s", $row20);
         }
 
         // set Closed Time
-        if ($row[18] == null) {
+        if ($row[21] == null) {
             $closed_time = null;
         } else {
-            $row18 = ($row[18] - 25569) * 86400;
-            $closed_time = gmdate("Y-m-d H:i:s", $row18);
+            $row21 = ($row[21] - 25569) * 86400;
+            $closed_time = gmdate("Y-m-d H:i:s", $row21);
         }
 
         // pisahkan problem & category 
@@ -69,6 +76,9 @@ class DataImports implements ToModel, WithStartRow
             'work_around'       => $row[11],
             'reporter'          => $row[12],
             'assignee_to'       => $row[13],
+            'description'       => $row[14],
+            'frequent'          => $row[15],
+            'complain_info'     => $row[16],
             'created'           => $created,
             'updated'           => $updated,
             'changed_at'        => $changed,
@@ -110,40 +120,6 @@ class DataImports implements ToModel, WithStartRow
                 'nickname' => 'Lucas',
             ]);
         }
-        // dd($data);
-        // if ($ctr[0] == 'QRIS' || $ctr[0] == 'Transfer' || $ctr[0] == 'Topup Incoming' || $ctr[0] == 'Tabungan' || $ctr[0] == 'Cashout' || $ctr[0] == 'Balance' || $ctr[0] == 'Virtual Debit Card') {
-        //     $data = array_merge($data, [
-        //         'problem' => 'Transaction',
-        //     ]);
-        // } else if ($ctr[0] == 'Bill Payment' || $ctr[0] == 'E-Wallet' || $ctr[0] == 'Secure Parking' || $ctr[0] == 'SNAP') {
-        //     $data = array_merge($data, [
-        //         'problem' => 'Online Payment',
-        //     ]);
-        // } else if ($ctr[0] == 'MPC' || $ctr[0] == 'Payment Gateway' || $ctr[0] == 'Topup') {
-        //     $data = array_merge($data, [
-        //         'problem' => 'Ecosistem & MPC',
-        //     ]);
-        // } else if ($ctr[0] == 'Onboarding') {
-        //     $data = array_merge($data, [
-        //         'problem' => 'Onboarding',
-        //     ]);
-        // } else if ($ctr[0] == 'Paylater' || $ctr[0] == 'Instant Cash' || $ctr[0] == 'Telemarketing') {
-        //     $data = array_merge($data, [
-        //         'problem' => 'Loan',
-        //     ]);
-        // } else if ($ctr[0] == 'Surrounding Apps' || $ctr[0] == 'E-Statement' || $ctr[0] == 'Message' || $ctr[0] == 'Server' || $ctr[0] == 'Database' || $ctr[0] == 'Requirement') {
-        //     $data = array_merge($data, [
-        //         'problem' => 'Core & Surrounding',
-        //     ]);
-        // } else if ($ctr[0] == 'Temenos' || $ctr[0] == 'IBB' || $ctr[0] == 'BI Applications' || $ctr[0] == 'Bank Devisa' || $ctr[0] == 'Payroll' ) {
-        //     $data = array_merge($data, [
-        //         'problem' => 'Wholesale Banking',
-        //     ]);
-        // } else {
-        //     $data = array_merge($data, [
-        //         'problem' => '-',
-        //     ]);
-        // }
 
         return new Data($data);
     }
