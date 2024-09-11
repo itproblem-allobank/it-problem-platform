@@ -6,8 +6,9 @@ use App\Models\Service;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class ServiceImports implements ToModel, WithStartRow
+class ServiceImports implements ToModel, WithStartRow, WithMultipleSheets
 {
     /**
      * @param array $row
@@ -15,10 +16,18 @@ class ServiceImports implements ToModel, WithStartRow
      * @return \Illuminate\Database\Eloquent\Model|null
      */
 
-    public function startRow(): int
-    {
-        return 2;
-    }
+     public function startRow(): int
+     {
+         return 8;
+     }
+ 
+     public function sheets(): array
+     {
+         return
+             [
+                 1 => $this,
+             ];
+     }
     public function model(array $row)
     {
         // dd($row[6]);
