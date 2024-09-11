@@ -28,12 +28,15 @@ return new class extends Migration
             $table->text('work_around')->nullable();
             $table->string('reporter')->nullable();
             $table->string('assignee_to')->nullable();
+            $table->string('nickname', 100)->nullable();
+            $table->text('description')->nullable();
+            $table->string('frequent', 100)->nullable();
+            $table->string('complain_info')->nullable();
             $table->timestamp('created')->nullable();
             $table->timestamp('updated')->nullable();
             $table->timestamp('changed_at')->nullable();
             $table->timestamp('rca_time')->nullable();
             $table->timestamp('closed_time')->nullable();
-            $table->string('nickname', 100)->nullable();
             $table->timestamp('updated_at')->nullable();
             $table->timestamp('created_at')->nullable();
         });
