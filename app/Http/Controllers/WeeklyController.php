@@ -329,17 +329,17 @@ class WeeklyController extends Controller
             if ($value->problem == 'Core & Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
-                $color = 'ff93aacf';
+                $color = 'ff00b0f0';
             } else if ($value->problem == 'Loan') {
                 $color = 'ffa6a6a6';
             } else if ($value->problem == 'Onboarding') {
-                $color = 'fff79646';
+                $color = 'ff81ff63';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff4f81bd';
             } else if ($value->problem == 'Switching & 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
-                $color = 'ffffc000';
+                $color = 'ff4F4AE7';
             } else if ($value->problem == 'Wholesale Banking') {
                 $color = 'ff8064a2';
             } else {
@@ -401,7 +401,7 @@ class WeeklyController extends Controller
             //row title
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(20);
-            $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'FFDCFF00'], ['status' => 'Low', 'color' => 'FF00B050']];
+            $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'fffeb909'], ['status' => 'Low', 'color' => 'fffffe00']];
             foreach ($val as $key => $v) {
                 $cell = $rowShape->nextCell();
                 $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
@@ -544,38 +544,35 @@ class WeeklyController extends Controller
         $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
-            // $status_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
+            $status_RCI = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
+                ->where('problem', '=', $value->problem)
+                ->where('status', '=', 'Root Cause Identified')
+                ->count();
+            $status_pending = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
+                ->where('problem', '=', $value->problem)
+                ->where('status', '=', 'Pending')
+                ->count();
+            // $closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
             //     ->where('problem', '=', $value->problem)
-            //     ->wwhere('status', '=', 'Closed')
+            //     ->where('status', '=', 'Closed')
             //     ->count();
-            $status_pending = Data::where(DB::raw('DATE(created)'), '<=', $start_date)
-                ->where('problem', '=', $value->problem)
-                ->whereIn('status', ['Root Cause Identified', 'Pending'])
-                ->count();
-            $created_pending = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-                ->where('problem', '=', $value->problem)
-                ->count();
-            $closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-                ->where('problem', '=', $value->problem)
-                ->where('status', '=', 'Closed')
-                ->count();
 
             //set color to chart
             $color = '';
             if ($value->problem == 'Core & Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
-                $color = 'ff93aacf';
+                $color = 'ff00b0f0';
             } else if ($value->problem == 'Loan') {
                 $color = 'ffa6a6a6';
             } else if ($value->problem == 'Onboarding') {
-                $color = 'fff79646';
+                $color = 'ff81ff63';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff4f81bd';
             } else if ($value->problem == 'Switching & 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
-                $color = 'ffffc000';
+                $color = 'ff4F4AE7';
             } else if ($value->problem == 'Wholesale Banking') {
                 $color = 'ff8064a2';
             } else {
@@ -587,9 +584,9 @@ class WeeklyController extends Controller
                 [
                     'problem' => $value->problem,
                     'total' => $value->count,
+                    'count_RCI' => $status_RCI,
                     'count_pending' => $status_pending,
-                    'created_pending' => $created_pending,
-                    'closed_thisweek' => $closed_thisweek,
+                    // 'closed_thisweek' => $closed_thisweek,
                     'color' => $color
                 ];
         }
@@ -625,7 +622,7 @@ class WeeklyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
-            $series = new Series($value['problem'], ['Pending' => $value['count_pending'] + $value['created_pending']]);
+            $series = new Series($value['problem'], [ 'RC Identified' => $value['count_RCI'], 'Pending' => $value['count_pending']]);
             $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($value['color'])); // Blue
             $chartType->addSeries($series);
         }
@@ -648,6 +645,10 @@ class WeeklyController extends Controller
         $created_pending_lweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Pending')->get()->count();
         $created_pending_2week = Data::whereBetween(DB::raw('DATE(created)'), $twoweeksago)->where('status', '=', 'Pending')->get()->count();
         $created_pending_3week = Data::whereBetween(DB::raw('DATE(created)'), $threeweeksago)->where('status', '=', 'Pending')->get()->count();
+
+        $created_rci_1week = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Root Cause Identified')->get()->count();
+        $created_rci_2week = Data::whereBetween(DB::raw('DATE(created)'), $twoweeksago)->where('status', '=', 'Root Cause Identified')->get()->count();
+        $created_rci_3week = Data::whereBetween(DB::raw('DATE(created)'), $threeweeksago)->where('status', '=', 'Root Cause Identified')->get()->count();
 
         $closedlweek = [];
         $closed2week = [];
@@ -763,15 +764,18 @@ class WeeklyController extends Controller
 
         //set data
         $series = new Series('Closed', ['3 Weeks Ago' => count($closed3week), '2 Weeks Ago' => count($closed2week), 'Last Weeks' => count($closedlweek)]);
-        $series2 = new Series('Pending', ['3 Weeks Ago' => $created_pending_3week, '2 Weeks Ago' => $created_pending_2week, 'Last Weeks' => $created_pending_lweek]);
+        $series2 = new Series('RC Identified', ['3 Weeks Ago' => $created_rci_3week, '2 Weeks Ago' => $created_rci_2week, 'Last Weeks' => $created_rci_1week]);
+        $series3 = new Series('Pending', ['3 Weeks Ago' => $created_pending_3week, '2 Weeks Ago' => $created_pending_2week, 'Last Weeks' => $created_pending_lweek]);
 
         //coloring category
-        $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff686fff'));
-        $series2->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffbd446'));
+        $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00b050'));
+        $series2->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff85208'));
+        $series3->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff6f610'));
 
         //set series
         $chartType->addSeries($series);
         $chartType->addSeries($series2);
+        $chartType->addSeries($series3);
 
 
 
@@ -828,7 +832,7 @@ class WeeklyController extends Controller
 
 
 
-        // -------------------- TABLE DETAIL TICKET THIS WEEK ---------------------
+        // -------------------- TABLE DETAIL PENDING/RCI TICKET THIS WEEK ---------------------
 
         // Define table properties
         $columns = 5; // Number of columns
@@ -856,7 +860,11 @@ class WeeklyController extends Controller
         ];
 
         foreach ($datacreated as $key => $value) {
-            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+            $tempstatus = $value->status;
+            if ($value->status == 'Root Cause Identified') {
+                $tempstatus = 'RC Identified';
+            }
+            $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
 
             //declare rca time
             if ($value->rca_time == null) {
@@ -932,17 +940,17 @@ class WeeklyController extends Controller
                         if ($problem == 'Core & Surrounding') {
                             $cell->getFill()->setStartColor(new Color('ff89a64e'));
                         } else if ($problem == 'Ekosistem MPC') {
-                            $cell->getFill()->setStartColor(new Color('ff93aacf'));
+                            $cell->getFill()->setStartColor(new Color('ff00b0f0'));
                         } else if ($problem == 'Loan') {
                             $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
                         } else if ($problem == 'Onboarding') {
-                            $cell->getFill()->setStartColor(new Color('fff79646'));
+                            $cell->getFill()->setStartColor(new Color('ff81ff63'));
                         } else if ($problem == 'Online Payment') {
                             $cell->getFill()->setStartColor(new Color('ff4f81bd'));
                         } else if ($problem == 'Switching & 3rdparty') {
                             $cell->getFill()->setStartColor(new Color('ffee52e1'));
                         } else if ($problem == 'Transaction') {
-                            $cell->getFill()->setStartColor(new Color('ffffc000'));
+                            $cell->getFill()->setStartColor(new Color('ff4F4AE7'));
                         } else if ($problem == 'Wholesale Banking') {
                             $cell->getFill()->setStartColor(new Color('ff8064a2'));
                         } else {
@@ -951,11 +959,154 @@ class WeeklyController extends Controller
                     } else if ($cellIndex == 3) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
-                            $cell->getFill()->setStartColor(new Color('ffffd848'));
+                            $cell->getFill()->setStartColor(new Color('fff6f610'));
                         } elseif ($firstStatus == 'Closed') {
-                            $cell->getFill()->setStartColor(new Color('ff686fff'));
-                        } elseif ($firstStatus == 'Root Cause Identified') {
-                            $cell->getFill()->setStartColor(new Color('ff58DCFF'));
+                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                        } elseif ($firstStatus == 'RC Identified') {
+                            $cell->getFill()->setStartColor(new Color('fff85208'));
+                        } else {
+                            $cell->getFill()->setFillType(Fill::FILL_NONE);
+                        }
+                    } else {
+                        $cell->getFill()->setFillType(Fill::FILL_NONE);
+                    }
+                }
+            }
+        }
+
+         // -------------------- TABLE DETAIL PENDING/RCI TICKET LAST WEEK ---------------------
+
+        // Define table properties
+        $columns = 5; // Number of columns
+        $tableShape = $slide3->createTableShape($columns);
+        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        // Set the table's position and size
+        $tableShape->setHeight(210);
+        $tableShape->setWidth(410);
+        $tableShape->setOffsetX(435);
+        $tableShape->setOffsetY(475);
+
+        // Define the data for the table
+        $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
+        $datacreated = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)
+        ->whereIn('status', ['Pending', 'Root Cause Identified'])
+        ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
+        ->get();
+        $dataclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), $lastweek)
+        ->where('status', '=', 'Closed')
+        ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
+        ->get();
+
+        $tempdata = [
+            ['', 'Category', 'Summary', 'Status', 'RCA Time', 'Completion Time'],
+        ];
+
+        foreach ($datacreated as $key => $value) {
+            $tempstatus = $value->status;
+            if ($value->status == 'Root Cause Identified') {
+                $tempstatus = 'RC Identified';
+            }
+            $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+
+            //declare rca time
+            if ($value->rca_time == null) {
+                $rca_time = '-';
+            } else {
+                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+            }
+
+            $tempdata[] = [$value->problem, $value->category, $value->summary,  $status, $rca_time,  '-'];
+        }
+
+        foreach ($dataclosed as $key => $value) {
+            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+
+            //declare rca time
+            if ($value->rca_time == null) {
+                $rca_time = '-';
+            } else {
+                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+            }
+
+            //set berapa hari completion time
+            $created = Carbon::parse($value->created);
+            $changed_at = Carbon::parse($value->changed_at);
+
+            // $daysDifference = ($updated_at - $created_at) / (60 * 60 * 24);
+            $daysDifference = intval($created->diffInDays($changed_at));
+            $daysString = strval($daysDifference) . ' Days';
+
+            $tempdata[] = [$value->problem, $value->category, $value->summary,   $status, $rca_time, $daysString];
+        }
+        // dd($tempdata);
+
+        foreach ($tempdata as $rowIndex => $row) {
+            $tableRow = $tableShape->createRow();
+            $tableRow->setHeight(25); // Set the height of the row
+            foreach ($row as $cellIndex => $cellText) {
+                if ($cellIndex == 0) {
+                    continue; // Lewati kolom yang disembunyikan
+                }
+
+                //set width
+                $cell = $tableRow->nextCell();
+                if ($cellIndex == 1) {
+                    $cell->setWidth(50);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(195);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(55);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(55);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(55);
+                }
+
+                //set status
+                $problem = $row[0];
+                $status = explode("\n", $row[3]);
+                $firstStatus = $status[0];
+                // $cell = $tableRow->nextCell();
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                //
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } else {
+                    if ($cellIndex != 3) {
+                        //coloring by problem
+                        if ($problem == 'Core & Surrounding') {
+                            $cell->getFill()->setStartColor(new Color('ff89a64e'));
+                        } else if ($problem == 'Ekosistem MPC') {
+                            $cell->getFill()->setStartColor(new Color('ff00b0f0'));
+                        } else if ($problem == 'Loan') {
+                            $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
+                        } else if ($problem == 'Onboarding') {
+                            $cell->getFill()->setStartColor(new Color('ff81ff63'));
+                        } else if ($problem == 'Online Payment') {
+                            $cell->getFill()->setStartColor(new Color('ff4f81bd'));
+                        } else if ($problem == 'Switching & 3rdparty') {
+                            $cell->getFill()->setStartColor(new Color('ffee52e1'));
+                        } else if ($problem == 'Transaction') {
+                            $cell->getFill()->setStartColor(new Color('ff4F4AE7'));
+                        } else if ($problem == 'Wholesale Banking') {
+                            $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                        } else {
+                            $cell->getFill()->setStartColor(new Color('ffffffff'));
+                        }
+                    } else if ($cellIndex == 3) {
+                        //coloring by status
+                        if ($firstStatus == 'Pending') {
+                            $cell->getFill()->setStartColor(new Color('fff6f610'));
+                        } elseif ($firstStatus == 'Closed') {
+                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                        } elseif ($firstStatus == 'RC Identified') {
+                            $cell->getFill()->setStartColor(new Color('fff85208'));
                         } else {
                             $cell->getFill()->setFillType(Fill::FILL_NONE);
                         }
@@ -1195,17 +1346,17 @@ class WeeklyController extends Controller
                 if ($row[1] == 'Core & Surrounding') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
                 } else if ($row[1] == 'Ekosistem MPC') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff93aacf'));
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00b0f0'));
                 } else if ($row[1] == 'Loan') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
                 } else if ($row[1] == 'Onboarding') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fff79646'));
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff81ff63'));
                 } else if ($row[1] == 'Online Payment') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4f81bd'));
                 } else if ($row[1] == 'Switching & 3rdparty') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
                 } else if ($row[1] == 'Transaction') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffc000'));
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4F4AE7'));
                 } else if ($row[1] == 'Wholesale Banking') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
                 } else {
