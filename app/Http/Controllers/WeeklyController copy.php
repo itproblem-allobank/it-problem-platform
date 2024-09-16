@@ -241,7 +241,7 @@ class WeeklyController extends Controller
             ->setWidth(400)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('IT Problem - Status Rootcause Identified & Pending');
+        $textRun = $shape->createTextRun('Report IT Problem');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -255,6 +255,13 @@ class WeeklyController extends Controller
         $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
         $textRun->getFont()->setSize(14);
 
+        //
+        // $high_existing = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '=', 'Ekosistem MPC')->where('status', '=', 'Pending')->where('priority', '=', 'High')->get();
+        // $high_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('problem', '=', 'Ekosistem MPC')->where('priority', '=', 'High')->get();
+        // $highclosed = Data::whereBetween('changed_at', [$start_date, $end_date])->where('problem', '=', 'Ekosistem MPC')->where('status', '=', 'Closed')->where('priority', '=', 'High')->get();
+
+        // dd($high_existing, $high_now, $highclosed);
+        //
 
         //data container category
         $problem = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
@@ -328,11 +335,11 @@ class WeeklyController extends Controller
             } else if ($value->problem == 'Onboarding') {
                 $color = 'ff81ff63';
             } else if ($value->problem == 'Online Payment') {
-                $color = 'ff09b1a7';
+                $color = 'ff4f81bd';
             } else if ($value->problem == 'Switching & 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
-                $color = 'ff8380ee';
+                $color = 'ff4F4AE7';
             } else if ($value->problem == 'Wholesale Banking') {
                 $color = 'ff8064a2';
             } else {
@@ -466,7 +473,7 @@ class WeeklyController extends Controller
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
         $textRun = $shape->createTextRun('Total High: ' . $totalhigh . ' | Total Medium: ' . $totalmed . ' | Total Low: ' . $totallow);
         $textRun->getFont()->setBold(true)
-            ->setSize(14)
+            ->setSize(15)
             ->setColor(new Color(Color::COLOR_BLACK));
 
 
@@ -561,11 +568,11 @@ class WeeklyController extends Controller
             } else if ($value->problem == 'Onboarding') {
                 $color = 'ff81ff63';
             } else if ($value->problem == 'Online Payment') {
-                $color = 'ff09b1a7';
+                $color = 'ff4f81bd';
             } else if ($value->problem == 'Switching & 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
-                $color = 'ff8380ee';
+                $color = 'ff4F4AE7';
             } else if ($value->problem == 'Wholesale Banking') {
                 $color = 'ff8064a2';
             } else {
@@ -732,8 +739,8 @@ class WeeklyController extends Controller
         // set chart shape
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(250)
-            ->setWidth(820)
-            ->setOffsetX(440)
+            ->setWidth(410)
+            ->setOffsetX(435)
             ->setOffsetY(225);
         // Define tipe chart
         $chartType = new Bar();
@@ -769,6 +776,60 @@ class WeeklyController extends Controller
         $chartType->addSeries($series);
         $chartType->addSeries($series2);
         $chartType->addSeries($series3);
+
+
+
+        // -------------------- CHART 3 ---------------------
+        $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Allo Care Service Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
+        $resultdata_chart3 = [];
+        foreach ($data_chart3 as $key => $value) {
+            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
+            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
+            $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
+            $status_review = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Review')->get()->count();
+            $status_userconfirmation = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
+            $resultdata_chart3[] =
+                [
+                    'sub_category' => $value->sub_category,
+                    'total' => $total,
+                    'count_closed' => $status_closed,
+                    'count_declined' => $status_declined,
+                    'count_review' => $status_review,
+                    'count_userconfirmation' => $status_userconfirmation
+                ];
+        }
+
+        // Set Size Chart
+        $chartShape = $slide3->createChartShape();
+        $chartShape->setHeight(250)
+            ->setWidth(410)
+            ->setOffsetX(845)
+            ->setOffsetY(225);
+        // Define tipe chart
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Ticket Service Request Nasabah');
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+
+        // Tambahkan seri data ke chart
+        foreach ($resultdata_chart3 as $key => $value) {
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Review' => $value['count_review'], 'User Confirmation' => $value['count_userconfirmation']]);
+            $chartType->addSeries($series);
+        }
+
 
 
         // -------------------- TABLE DETAIL PENDING/RCI TICKET THIS WEEK ---------------------
@@ -895,11 +956,11 @@ class WeeklyController extends Controller
                         } else if ($problem == 'Onboarding') {
                             $cell->getFill()->setStartColor(new Color('ff81ff63'));
                         } else if ($problem == 'Online Payment') {
-                            $cell->getFill()->setStartColor(new Color('ff09b1a7'));
+                            $cell->getFill()->setStartColor(new Color('ff4f81bd'));
                         } else if ($problem == 'Switching & 3rdparty') {
                             $cell->getFill()->setStartColor(new Color('ffee52e1'));
                         } else if ($problem == 'Transaction') {
-                            $cell->getFill()->setStartColor(new Color('ff8380ee'));
+                            $cell->getFill()->setStartColor(new Color('ff4F4AE7'));
                         } else if ($problem == 'Wholesale Banking') {
                             $cell->getFill()->setStartColor(new Color('ff8064a2'));
                         } else {
@@ -933,7 +994,7 @@ class WeeklyController extends Controller
         // Set the table's position and size
         $tableShape->setHeight(210);
         $tableShape->setWidth(410);
-        $tableShape->setOffsetX(440);
+        $tableShape->setOffsetX(435);
         $tableShape->setOffsetY(475);
 
         // Define the data for the table
@@ -1049,11 +1110,11 @@ class WeeklyController extends Controller
                         } else if ($problem == 'Onboarding') {
                             $cell->getFill()->setStartColor(new Color('ff81ff63'));
                         } else if ($problem == 'Online Payment') {
-                            $cell->getFill()->setStartColor(new Color('ff09b1a7'));
+                            $cell->getFill()->setStartColor(new Color('ff4f81bd'));
                         } else if ($problem == 'Switching & 3rdparty') {
                             $cell->getFill()->setStartColor(new Color('ffee52e1'));
                         } else if ($problem == 'Transaction') {
-                            $cell->getFill()->setStartColor(new Color('ff8380ee'));
+                            $cell->getFill()->setStartColor(new Color('ff4F4AE7'));
                         } else if ($problem == 'Wholesale Banking') {
                             $cell->getFill()->setStartColor(new Color('ff8064a2'));
                         } else {
@@ -1078,7 +1139,60 @@ class WeeklyController extends Controller
         }
 
 
- 
+        // -------------------- CHART 4 ---------------------
+        $data_chart4 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
+        $resultdata_chart4 = [];
+        foreach ($data_chart4 as $key => $value) {
+            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
+            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
+            $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
+            $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%' . 'Approval' . '%')->get()->count();
+            $status_inprogress = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'In Progress')->get()->count();
+            $status_userconfirmation = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
+            $resultdata_chart4[] =
+                [
+                    'sub_category' => $value->sub_category,
+                    'total' => $total,
+                    'count_closed' => $status_closed,
+                    'count_declined' => $status_declined,
+                    'count_approval' => $status_approval,
+                    'count_inprogress' => $status_inprogress,
+                    'count_userconfirmation' => $status_userconfirmation
+                ];
+        }
+        // Set Size Chart
+        $chartShape = $slide3->createChartShape();
+        $chartShape->setHeight(210)
+            ->setWidth(410)
+            ->setOffsetX(845)
+            ->setOffsetY(475);
+        // Define tipe chart
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Ticket Service Customer Care');
+
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+
+        // Tambahkan seri data ke chart
+        foreach ($resultdata_chart4 as $key => $value) {
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'In Progress' => $value['count_inprogress'], 'User Confirmation' => $value['count_userconfirmation']]);
+            $chartType->addSeries($series);
+        }
+
 
         //Slide 4
         $slide4 = $objPHPPresentation->createSlide();
@@ -1259,11 +1373,11 @@ class WeeklyController extends Controller
                 } else if ($row[1] == 'Onboarding') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff81ff63'));
                 } else if ($row[1] == 'Online Payment') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff09b1a7'));
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4f81bd'));
                 } else if ($row[1] == 'Switching & 3rdparty') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
                 } else if ($row[1] == 'Transaction') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8380ee'));
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff4F4AE7'));
                 } else if ($row[1] == 'Wholesale Banking') {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
                 } else {
