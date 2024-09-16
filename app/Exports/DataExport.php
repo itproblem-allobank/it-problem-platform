@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\Data;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Facades\DB;
 
 class DataExport implements FromCollection, WithHeadings
 {
@@ -44,7 +45,7 @@ class DataExport implements FromCollection, WithHeadings
             'updated',
             'changed_at',
             'nickname',
-        )->whereBetween('created', [$this->start_date, $this->end_date])->where('status', '=', 'pending')->get();
+        )->whereBetween(DB::raw('DATE(created)'), [$this->start_date, $this->end_date])->whereIn('status', ['Pending', 'Root Cause Identified'])->get();
         $closed = Data::select(
             'code_jira',
             'environment',
@@ -67,7 +68,7 @@ class DataExport implements FromCollection, WithHeadings
             'updated',
             'changed_at',
             'nickname',
-        )->whereBetween('changed_at', [$this->start_date, $this->end_date])->where('status', '=', 'closed')->get();
+        )->whereBetween(DB::raw('DATE(changed_at)'), [$this->start_date, $this->end_date])->where('status', '=', 'closed')->get();
 
         $createdArray = $created->toArray();
         $closedArray = $closed->toArray();
