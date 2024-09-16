@@ -856,7 +856,7 @@ class WeeklyController extends Controller
         ->get();
 
         $tempdata = [
-            ['', 'Category', 'Summary', 'Status', 'RCA Time', 'Completion Time'],
+            ['', 'Category', 'Summary', 'Status', 'RCA Time', 'Complete Time'],
         ];
 
         foreach ($datacreated as $key => $value) {
@@ -864,37 +864,47 @@ class WeeklyController extends Controller
             if ($value->status == 'Root Cause Identified') {
                 $tempstatus = 'RC Identified';
             }
-            $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+            $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
+            
+            //convert date to carbon parse
+            $created = Carbon::parse($value->created);
+            $rcatime = Carbon::parse($value->rca_time);
 
             //declare rca time
             if ($value->rca_time == null) {
                 $rca_time = '-';
             } else {
-                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                $rca_days = intval($created->diffInDays($rcatime));
+                $rca_days_string = strval($rca_days) . ' days';
+                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
             }
 
             $tempdata[] = [$value->problem, $value->category, $value->summary,  $status, $rca_time,  '-'];
         }
 
         foreach ($dataclosed as $key => $value) {
-            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+            $status = $value->status . "\n" . Carbon::parse($value->created)->format('d/m/y');
+            //convert date to carbon parse
+            $created = Carbon::parse($value->created);
+            $changed_at = Carbon::parse($value->changed_at);
+            $rcatime = Carbon::parse($value->rca_time);
 
             //declare rca time
             if ($value->rca_time == null) {
                 $rca_time = '-';
             } else {
-                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                $rca_days = intval($created->diffInDays($rcatime));
+                $rca_days_string = strval($rca_days) . ' days';
+                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
             }
 
-            //set berapa hari completion time
-            $created = Carbon::parse($value->created);
-            $changed_at = Carbon::parse($value->changed_at);
 
             // $daysDifference = ($updated_at - $created_at) / (60 * 60 * 24);
-            $daysDifference = intval($created->diffInDays($changed_at));
-            $daysString = strval($daysDifference) . ' Days';
+            $completion_days = intval($created->diffInDays($changed_at));
+            $completion_days_string = strval($completion_days) . ' Days';
+            $completion_time = $completion_days_string . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
 
-            $tempdata[] = [$value->problem, $value->category, $value->summary,   $status, $rca_time, $daysString];
+            $tempdata[] = [$value->problem, $value->category, $value->summary,   $status, $rca_time, $completion_time];
         }
         // dd($tempdata);
 
@@ -999,7 +1009,7 @@ class WeeklyController extends Controller
         ->get();
 
         $tempdata = [
-            ['', 'Category', 'Summary', 'Status', 'RCA Time', 'Completion Time'],
+            ['', 'Category', 'Summary', 'Status', 'RCA Time', 'Complete Time'],
         ];
 
         foreach ($datacreated as $key => $value) {
@@ -1007,37 +1017,48 @@ class WeeklyController extends Controller
             if ($value->status == 'Root Cause Identified') {
                 $tempstatus = 'RC Identified';
             }
-            $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+            $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
+
+            //convert date to carbon parse
+            $created = Carbon::parse($value->created);
+            $changed_at = Carbon::parse($value->changed_at);
+            $rcatime = Carbon::parse($value->rca_time);
 
             //declare rca time
             if ($value->rca_time == null) {
                 $rca_time = '-';
             } else {
-                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                $rca_days = intval($created->diffInDays($rcatime));
+                $rca_days_string = strval($rca_days) . ' days';
+                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
             }
 
             $tempdata[] = [$value->problem, $value->category, $value->summary,  $status, $rca_time,  '-'];
         }
 
         foreach ($dataclosed as $key => $value) {
-            $status = $value->status . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+            $status = $value->status . "\n" . Carbon::parse($value->created)->format('d/m/y');
+            
+            //convert date to carbon parse
+            $created = Carbon::parse($value->created);
+            $changed_at = Carbon::parse($value->changed_at);
+            $rcatime = Carbon::parse($value->rca_time);
 
             //declare rca time
             if ($value->rca_time == null) {
                 $rca_time = '-';
             } else {
-                $rca_time = 'Done' . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                $rca_days = intval($created->diffInDays($rcatime));
+                $rca_days_string = strval($rca_days) . ' days';
+                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
             }
 
-            //set berapa hari completion time
-            $created = Carbon::parse($value->created);
-            $changed_at = Carbon::parse($value->changed_at);
-
             // $daysDifference = ($updated_at - $created_at) / (60 * 60 * 24);
-            $daysDifference = intval($created->diffInDays($changed_at));
-            $daysString = strval($daysDifference) . ' Days';
+            $completion_days = intval($created->diffInDays($changed_at));
+            $completion_days_string = strval($completion_days) . ' Days';
+            $completion_time = $completion_days_string . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
 
-            $tempdata[] = [$value->problem, $value->category, $value->summary,   $status, $rca_time, $daysString];
+            $tempdata[] = [$value->problem, $value->category, $value->summary,   $status, $rca_time, $completion_time];
         }
         // dd($tempdata);
 
@@ -1284,7 +1305,7 @@ class WeeklyController extends Controller
         $rowHeader = $tableShape->createRow();
         $rowHeader->setHeight(25);
         //header 
-        $header = ['Code Jira', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Root Cause', 'Status' . "\n" . 'Created time', 'RCA Time', 'Completion Time'];
+        $header = ['Code Jira', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Root Cause', 'Status' . "\n" . 'Created time', 'RCA Time', 'Complete Time'];
         foreach ($header as $cellIndex => $cellText) {
             $cell = $rowHeader->nextCell();
             if ($cellIndex == 0) {
