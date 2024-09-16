@@ -238,7 +238,7 @@ class WeeklyController extends Controller
         // Tambahkan teks judul slide
         $shape = $slide3->createRichTextShape()
             ->setHeight(50)
-            ->setWidth(400)
+            ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
         $textRun = $shape->createTextRun('IT Problem - Status Rootcause Identified & Pending');
@@ -615,7 +615,7 @@ class WeeklyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
-            $series = new Series($value['problem'], [ 'RC Identified' => $value['count_RCI'], 'Pending' => $value['count_pending']]);
+            $series = new Series($value['problem'], ['RC Identified' => $value['count_RCI'], 'Pending' => $value['count_pending']]);
             $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($value['color'])); // Blue
             $chartType->addSeries($series);
         }
@@ -786,13 +786,13 @@ class WeeklyController extends Controller
 
         // Define the data for the table
         $datacreated = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-        ->whereIn('status', ['Pending', 'Root Cause Identified'])
-        ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
-        ->get();
+            ->whereIn('status', ['Pending', 'Root Cause Identified'])
+            ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
+            ->get();
         $dataclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-        ->where('status', '=', 'Closed')
-        ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
-        ->get();
+            ->where('status', '=', 'Closed')
+            ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
+            ->get();
 
         $tempdata = [
             ['', 'Category', 'Summary', 'Status', 'RCA Time', 'Complete Time'],
@@ -804,7 +804,7 @@ class WeeklyController extends Controller
                 $tempstatus = 'RC Identified';
             }
             $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
-            
+
             //convert date to carbon parse
             $created = Carbon::parse($value->created);
             $rcatime = Carbon::parse($value->rca_time);
@@ -923,7 +923,7 @@ class WeeklyController extends Controller
             }
         }
 
-         // -------------------- TABLE DETAIL PENDING/RCI TICKET LAST WEEK ---------------------
+        // -------------------- TABLE DETAIL PENDING/RCI TICKET LAST WEEK ---------------------
 
         // Define table properties
         $columns = 5; // Number of columns
@@ -939,13 +939,13 @@ class WeeklyController extends Controller
         // Define the data for the table
         $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
         $datacreated = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)
-        ->whereIn('status', ['Pending', 'Root Cause Identified'])
-        ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
-        ->get();
+            ->whereIn('status', ['Pending', 'Root Cause Identified'])
+            ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
+            ->get();
         $dataclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), $lastweek)
-        ->where('status', '=', 'Closed')
-        ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
-        ->get();
+            ->where('status', '=', 'Closed')
+            ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
+            ->get();
 
         $tempdata = [
             ['', 'Category', 'Summary', 'Status', 'RCA Time', 'Complete Time'],
@@ -977,7 +977,7 @@ class WeeklyController extends Controller
 
         foreach ($dataclosed as $key => $value) {
             $status = $value->status . "\n" . Carbon::parse($value->created)->format('d/m/y');
-            
+
             //convert date to carbon parse
             $created = Carbon::parse($value->created);
             $changed_at = Carbon::parse($value->changed_at);
@@ -1078,7 +1078,7 @@ class WeeklyController extends Controller
         }
 
 
- 
+
 
         //Slide 4
         $slide4 = $objPHPPresentation->createSlide();
@@ -1106,10 +1106,10 @@ class WeeklyController extends Controller
         // Tambahkan teks judul slide
         $shape = $slide4->createRichTextShape()
             ->setHeight(50)
-            ->setWidth(800)
+            ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('All Ticket IT Problem - Priority High');
+        $textRun = $shape->createTextRun('IT Problem - Ticket Closed and Service Request');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -1123,19 +1123,205 @@ class WeeklyController extends Controller
         $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
         $textRun->getFont()->setSize(14);
 
+
+        // ------------ CHART 1 / Problem Category Closed ----------------
+        $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        $resultdata_chart1 = [];
+        foreach ($data_chart1 as $key => $value) {
+            $status_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
+                ->where('problem', '=', $value->problem)
+                ->where('status', '=', 'Closed')
+                ->count();
+
+            //set color to chart
+            $color = '';
+            if ($value->problem == 'Core & Surrounding') {
+                $color = 'ff89a64e';
+            } else if ($value->problem == 'Ekosistem MPC') {
+                $color = 'ff00b0f0';
+            } else if ($value->problem == 'Loan') {
+                $color = 'ffa6a6a6';
+            } else if ($value->problem == 'Onboarding') {
+                $color = 'ff81ff63';
+            } else if ($value->problem == 'Online Payment') {
+                $color = 'ff09b1a7';
+            } else if ($value->problem == 'Switching & 3rdparty') {
+                $color = 'ffee52e1';
+            } else if ($value->problem == 'Transaction') {
+                $color = 'ff8380ee';
+            } else if ($value->problem == 'Wholesale Banking') {
+                $color = 'ff8064a2';
+            } else {
+                $color = 'ffffffff';
+            }
+
+            // insert data to array
+            $resultdata_chart1[] =
+                [
+                    'problem' => $value->problem,
+                    'total' => $value->count,
+                    'count_closed' => $status_closed,
+                    'color' => $color
+                ];
+        }
+
+        // set chart shape
+        $chartShape = $slide4->createChartShape();
+        $chartShape->setHeight(250)
+            ->setWidth(410)
+            ->setOffsetX(25)
+            ->setOffsetY(115);
+
+        // Define tipe chart
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+
+        // Set judul chart
+        $chartShape->getTitle()->setText('Problem Category Status Closed');
+
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+
+        // Tambahkan seri data ke chart
+        foreach ($resultdata_chart1 as $key => $value) {
+            $series = new Series($value['problem'], ['Closed' => $value['count_closed']]);
+            $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($value['color'])); // Blue
+            $chartType->addSeries($series);
+        }
+
+
+
+        // ------------ CHART 2 / Ticket Service Request Nasabah ----------------
+        $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Allo Care Service Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
+        $resultdata_chart3 = [];
+        foreach ($data_chart3 as $key => $value) {
+            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
+            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
+            $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
+            $status_review = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Review')->get()->count();
+            $status_userconfirmation = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
+            $resultdata_chart3[] =
+                [
+                    'sub_category' => $value->sub_category,
+                    'total' => $total,
+                    'count_closed' => $status_closed,
+                    'count_declined' => $status_declined,
+                    'count_review' => $status_review,
+                    'count_userconfirmation' => $status_userconfirmation
+                ];
+        }
+
+        // Set Size Chart
+        $chartShape = $slide4->createChartShape();
+        $chartShape->setHeight(250)
+            ->setWidth(410)
+            ->setOffsetX(435)
+            ->setOffsetY(115);
+        // Define tipe chart
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Ticket Service Request Nasabah');
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+
+        // Tambahkan seri data ke chart
+        foreach ($resultdata_chart3 as $key => $value) {
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Review' => $value['count_review'], 'User Confirmation' => $value['count_userconfirmation']]);
+            $chartType->addSeries($series);
+        }
+
+
+        // ------------ CHART 3 / Ticket Service Customer Care ----------------
+        $data_chart4 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
+        $resultdata_chart4 = [];
+        foreach ($data_chart4 as $key => $value) {
+            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
+            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
+            $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
+            $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%' . 'Approval' . '%')->get()->count();
+            $status_inprogress = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'In Progress')->get()->count();
+            $status_userconfirmation = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
+            $resultdata_chart4[] =
+                [
+                    'sub_category' => $value->sub_category,
+                    'total' => $total,
+                    'count_closed' => $status_closed,
+                    'count_declined' => $status_declined,
+                    'count_approval' => $status_approval,
+                    'count_inprogress' => $status_inprogress,
+                    'count_userconfirmation' => $status_userconfirmation
+                ];
+        }
+        // Set Size Chart
+        $chartShape = $slide4->createChartShape();
+        $chartShape->setHeight(250)
+            ->setWidth(410)
+            ->setOffsetX(845)
+            ->setOffsetY(115);
+        // Define tipe chart
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Ticket Service Customer Care');
+
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+
+        // Tambahkan seri data ke chart
+        foreach ($resultdata_chart4 as $key => $value) {
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'In Progress' => $value['count_inprogress'], 'User Confirmation' => $value['count_userconfirmation']]);
+            $chartType->addSeries($series);
+        }
+
+
         // -------------------- TABLE TICKET IT PROBLEM HIGH --------------------
         $data_combined = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-            // ->where('priority', '=', 'High')
+            ->where('priority', '=', 'High')
             ->where('status', '=', 'Closed')
             ->orderBy('problem', 'asc')
             ->union(
                 Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-                    // ->where('priority', '=', 'High')
+                    ->where('priority', '=', 'High')
                     ->where('status', '!=', 'Closed')
             )
             ->orderBy('problem', 'asc')
             ->get();
-
 
         $table = [];
 
@@ -1181,52 +1367,32 @@ class WeeklyController extends Controller
         // dd($table);
 
         //Table 1
-        $columns = 9;
-        $tableShape = $slide4->createTableShape($columns);
-        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $tableShape->setHeight(300);
-        $tableShape->setWidth(1200);
-        $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(100);
-        $rowHeader = $tableShape->createRow();
-        $rowHeader->setHeight(25);
-        //header 
-        $header = ['Code Jira', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Root Cause', 'Status' . "\n" . 'Created time', 'RCA Time', 'Complete Time'];
-        foreach ($header as $cellIndex => $cellText) {
-            $cell = $rowHeader->nextCell();
-            if ($cellIndex == 0) {
-                $cell->setWidth(50);
-            } else if ($cellIndex == 1) {
-                $cell->setWidth(120);
-            } else if ($cellIndex == 2) {
-                $cell->setWidth(350);
-            } else if ($cellIndex == 3) {
-                $cell->setWidth(89);
-            } else if ($cellIndex == 4) {
-                $cell->setWidth(89);
-            } else if ($cellIndex == 5) {
-                $cell->setWidth(300);
-            } else if ($cellIndex == 6) {
-                $cell->setWidth(74);
-            } else if ($cellIndex == 7) {
-                $cell->setWidth(74);
-            } else if ($cellIndex == 8) {
-                $cell->setWidth(74);
-            }
-            $textRun = $cell->createTextRun($cellText);
-            $textRun->getFont()->setBold(true);
-            $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
-            $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-            $cell->getFill()->setFillType(Fill::FILL_SOLID);
-            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        }
-        //data
-        foreach ($table as $rowIndex => $row) {
-            $tableRow = $tableShape->createRow();
-            $tableRow->setHeight(25);
-            foreach ($row as $cellIndex => $cellText) {
-                $cell = $tableRow->nextCell();
+
+        // CHECK DATA JIKA KOSONG MAKA TIDAK TAMPIL
+        if ($table == []) {
+        } else {
+            // Tambahkan teks judul slide
+            $shape = $slide4->createRichTextShape()
+                ->setHeight(50)
+                ->setWidth(1000)
+                ->setOffsetX(25)
+                ->setOffsetY(380);
+            $textRun = $shape->createTextRun('Priority High this Week');
+            $textRun->getFont()->setBold(true)
+                ->setSize(30);
+            $columns = 9;
+            $tableShape = $slide4->createTableShape($columns);
+            $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+            $tableShape->setHeight(300);
+            $tableShape->setWidth(1200);
+            $tableShape->setOffsetX(25);
+            $tableShape->setOffsetY(440);
+            $rowHeader = $tableShape->createRow();
+            $rowHeader->setHeight(25);
+            //header 
+            $header = ['Code Jira', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Root Cause', 'Status' . "\n" . 'Created time', 'RCA Time', 'Complete Time'];
+            foreach ($header as $cellIndex => $cellText) {
+                $cell = $rowHeader->nextCell();
                 if ($cellIndex == 0) {
                     $cell->setWidth(50);
                 } else if ($cellIndex == 1) {
@@ -1247,27 +1413,61 @@ class WeeklyController extends Controller
                     $cell->setWidth(74);
                 }
                 $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold(true);
+                $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                //coloring by problem
-                if ($row[1] == 'Core & Surrounding') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
-                } else if ($row[1] == 'Ekosistem MPC') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00b0f0'));
-                } else if ($row[1] == 'Loan') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
-                } else if ($row[1] == 'Onboarding') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff81ff63'));
-                } else if ($row[1] == 'Online Payment') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff09b1a7'));
-                } else if ($row[1] == 'Switching & 3rdparty') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
-                } else if ($row[1] == 'Transaction') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8380ee'));
-                } else if ($row[1] == 'Wholesale Banking') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
-                } else {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
+            }
+            //data
+            foreach ($table as $rowIndex => $row) {
+                $tableRow = $tableShape->createRow();
+                $tableRow->setHeight(25);
+                foreach ($row as $cellIndex => $cellText) {
+                    $cell = $tableRow->nextCell();
+                    if ($cellIndex == 0) {
+                        $cell->setWidth(50);
+                    } else if ($cellIndex == 1) {
+                        $cell->setWidth(120);
+                    } else if ($cellIndex == 2) {
+                        $cell->setWidth(350);
+                    } else if ($cellIndex == 3) {
+                        $cell->setWidth(89);
+                    } else if ($cellIndex == 4) {
+                        $cell->setWidth(89);
+                    } else if ($cellIndex == 5) {
+                        $cell->setWidth(300);
+                    } else if ($cellIndex == 6) {
+                        $cell->setWidth(74);
+                    } else if ($cellIndex == 7) {
+                        $cell->setWidth(74);
+                    } else if ($cellIndex == 8) {
+                        $cell->setWidth(74);
+                    }
+                    $textRun = $cell->createTextRun($cellText);
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                    //coloring by problem
+                    if ($row[1] == 'Core & Surrounding') {
+                        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
+                    } else if ($row[1] == 'Ekosistem MPC') {
+                        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00b0f0'));
+                    } else if ($row[1] == 'Loan') {
+                        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
+                    } else if ($row[1] == 'Onboarding') {
+                        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff81ff63'));
+                    } else if ($row[1] == 'Online Payment') {
+                        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff09b1a7'));
+                    } else if ($row[1] == 'Switching & 3rdparty') {
+                        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
+                    } else if ($row[1] == 'Transaction') {
+                        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8380ee'));
+                    } else if ($row[1] == 'Wholesale Banking') {
+                        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
+                    } else {
+                        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
+                    }
                 }
             }
         }
