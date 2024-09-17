@@ -458,16 +458,37 @@ class WeeklyController extends Controller
         // dd($totalcreated, $totalclosed, $totalexisting, $totalhigh);
 
         // Total High, Med & Low
-        $shape = $slide3->createRichTextShape();
-        $shape->setHeight(25)
-            ->setWidth(500)
-            ->setOffsetX(850)
-            ->setOffsetY(65);
-        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        $textRun = $shape->createTextRun('Total High: ' . $totalhigh . ' | Total Medium: ' . $totalmed . ' | Total Low: ' . $totallow);
-        $textRun->getFont()->setBold(true)
-            ->setSize(14)
-            ->setColor(new Color(Color::COLOR_BLACK));
+        // $shape = $slide3->createRichTextShape();
+        // $shape->setHeight(25)
+        //     ->setWidth(500)
+        //     ->setOffsetX(850)
+        //     ->setOffsetY(65);
+        // $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        // $textRun = $shape->createTextRun('Total High: ' . $totalhigh . ' | Total Medium: ' . $totalmed . ' | Total Low: ' . $totallow);
+        // $textRun->getFont()->setBold(true)
+        //     ->setSize(14)
+        //     ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Total HIGH, MED, LOW
+        $tableShape = $slide3->createTableShape(3);
+            $tableShape->setHeight(100);
+            $tableShape->setWidth(400);
+            $tableShape->setOffsetX(855);
+            $tableShape->setOffsetY(75);
+
+            //row title
+            $rowShape = $tableShape->createRow();
+            $rowShape->setHeight(20);
+            $val = [['status' => 'Total High', 'color' => 'FFFF0000', 'value' => $totalhigh], ['status' => 'Total Medium', 'color' => 'fffeb909', 'value' => $totalmed], ['status' => 'Total Low', 'color' => 'fffffe00', 'value' => $totallow]];
+            foreach ($val as $key => $v) {
+                $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $textRun = $cell->createTextRun($v['status'] . ' : ' . $v['value']);
+                $textRun->getFont()->setBold(true)
+                ->setSize(12);
+            }
 
 
         // Icon +
