@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Data;
 use App\Models\Service;
 use App\Exports\DataExport;
+use App\Exports\allDataExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
@@ -652,7 +653,7 @@ class WeeklyController extends Controller
         $changed_closed_2week = Data::whereBetween('changed_at', $twoweeksago)->where('status', '=', 'Closed')->get();
         $changed_closed_3week = Data::whereBetween('changed_at', $threeweeksago)->where('status', '=', 'Closed')->get();
 
-        $created_closed_lweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Closed')->get();
+        // $created_closed_lweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Closed')->get();
         $created_closed_2week = Data::whereBetween(DB::raw('DATE(created)'), $twoweeksago)->where('status', '=', 'Closed')->get();
         $created_closed_3week = Data::whereBetween(DB::raw('DATE(created)'), $threeweeksago)->where('status', '=', 'Closed')->get();
 
@@ -692,17 +693,17 @@ class WeeklyController extends Controller
                 ];
             }
         }
-        foreach ($created_closed_lweek as $key => $value) {
-            $uniqueKey = createUniqueKey($value);
-            if (!in_array($uniqueKey, $temp1week)) {
-                $temp1week[] = $uniqueKey;
-                $closedlweek[] = [
-                    'problem' => $value->summary,
-                    'created' => $value->created,
-                    'status' => $value->status
-                ];
-            }
-        }
+        // foreach ($created_closed_lweek as $key => $value) {
+        //     $uniqueKey = createUniqueKey($value);
+        //     if (!in_array($uniqueKey, $temp1week)) {
+        //         $temp1week[] = $uniqueKey;
+        //         $closedlweek[] = [
+        //             'problem' => $value->summary,
+        //             'created' => $value->created,
+        //             'status' => $value->status
+        //         ];
+        //     }
+        // }
         //gabung 2 week
         foreach ($changed_closed_2week as $key => $value) {
             $uniqueKey = createUniqueKey($value);
@@ -1522,21 +1523,26 @@ class WeeklyController extends Controller
         $writer->save($savePath);
 
         // Simpan file Excel sementara
-        $excelPath = 'exports/List Problem Weekly.xlsx';
-        Excel::store(new DataExport($start_date, $end_date), $excelPath, 'local');
+        $excelPathProduct = 'exports/List Problem for Product.xlsx';
+        Excel::store(new DataExport($start_date, $end_date), $excelPathProduct, 'local');
+        
+        // Simpan file Excel sementara
+        $excelPathWebank = 'exports/List Problem for Webank.xlsx';
+        Excel::store(new allDataExport($start_date, $end_date), $excelPathWebank, 'local');
 
         // 3. Buat file ZIP yang berisi kedua file tersebut
         $zipFilename = 'Report Weekly IT Problem' . ' - ' . Carbon::parse($start_date)->format('d') . ' - ' . Carbon::parse($end_date)->format('d F Y') . '.zip';
         $zipFilePath = storage_path('app/exports/' . $zipFilename);
         $zip = new ZipArchive;
         if ($zip->open($zipFilePath, ZipArchive::CREATE) === TRUE) {
-            $zip->addFile(storage_path('app/' . $excelPath), 'List Problem Weekly.xlsx');
+            $zip->addFile(storage_path('app/' . $excelPathProduct), 'List Problem for Product.xlsx');
+            $zip->addFile(storage_path('app/' . $excelPathWebank), 'List Problem for Webank.xlsx');
             $zip->addFile($savePath, $filename);
             $zip->close();
         }
 
         // 4. Hapus file sementara setelah digabungkan
-        Storage::delete([$excelPath]);
+        Storage::delete([$excelPathProduct, $excelPathWebank]);
         unlink($savePath); // Menghapus file PPT secara manual karena disimpan di luar storage facade
 
         // 5. Unduh file ZIP dan hapus setelah diunduh
