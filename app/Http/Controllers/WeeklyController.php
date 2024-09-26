@@ -292,17 +292,17 @@ class WeeklyController extends Controller
                 ->where('priority', '=', 'Low')
                 ->count();
             //count ticket closed
-            $highclosed = Data::whereBetween('changed_at', [$start_date, $end_date])
+            $highclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('status', '=', 'Closed')
                 ->where('priority', '=', 'High')
                 ->count();
-            $mediumclosed = Data::whereBetween('changed_at', [$start_date, $end_date])
+            $mediumclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('status', '=', 'Closed')
                 ->where('priority', '=', 'Medium')
                 ->count();
-            $lowclosed = Data::whereBetween('changed_at', [$start_date, $end_date])
+            $lowclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('status', '=', 'Closed')
                 ->where('priority', '=', 'Low')
@@ -472,24 +472,24 @@ class WeeklyController extends Controller
 
         // Total HIGH, MED, LOW
         $tableShape = $slide3->createTableShape(3);
-            $tableShape->setHeight(100);
-            $tableShape->setWidth(400);
-            $tableShape->setOffsetX(855);
-            $tableShape->setOffsetY(75);
+        $tableShape->setHeight(100);
+        $tableShape->setWidth(400);
+        $tableShape->setOffsetX(855);
+        $tableShape->setOffsetY(75);
 
-            //row title
-            $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(20);
-            $val = [['status' => 'Total High', 'color' => 'FFFF0000', 'value' => $totalhigh], ['status' => 'Total Medium', 'color' => 'fffeb909', 'value' => $totalmed], ['status' => 'Total Low', 'color' => 'fffffe00', 'value' => $totallow]];
-            foreach ($val as $key => $v) {
-                $cell = $rowShape->nextCell();
-                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $textRun = $cell->createTextRun($v['status'] . ' : ' . $v['value']);
-                $textRun->getFont()->setBold(true)
+        //row title
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(20);
+        $val = [['status' => 'Total High', 'color' => 'FFFF0000', 'value' => $totalhigh], ['status' => 'Total Medium', 'color' => 'fffeb909', 'value' => $totalmed], ['status' => 'Total Low', 'color' => 'fffffe00', 'value' => $totallow]];
+        foreach ($val as $key => $v) {
+            $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $textRun = $cell->createTextRun($v['status'] . ' : ' . $v['value']);
+            $textRun->getFont()->setBold(true)
                 ->setSize(12);
-            }
+        }
 
 
         // Icon +
@@ -806,30 +806,35 @@ class WeeklyController extends Controller
         $tableShape->setOffsetX(25);
         $tableShape->setOffsetY(475);
 
-        // Define the data for the table
-        $datacreated = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+        // GET DATA FROM DATABASE
+        $data_table = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
-            ->get();
-        $dataclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-            ->where('status', '=', 'Closed')
-            ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
+            ->union(
+                Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+                    ->where('status', '=', 'Closed')
+                    ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
+            )
             ->get();
 
+        // DEFINE ARRAY
         $tempdata = [
             ['', 'Category', 'Summary', 'Status', 'RCA Time', 'Complete Time'],
         ];
 
-        foreach ($datacreated as $key => $value) {
+        // ADD ARRAY DATA
+        foreach ($data_table as $key => $value) {
             $tempstatus = $value->status;
             if ($value->status == 'Root Cause Identified') {
                 $tempstatus = 'RC Identified';
             }
             $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
+            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
 
             //convert date to carbon parse
             $created = Carbon::parse($value->created);
             $rcatime = Carbon::parse($value->rca_time);
+            $closed_time = Carbon::parse($value->closed_time);
 
             //declare rca time
             if ($value->rca_time == null) {
@@ -840,35 +845,20 @@ class WeeklyController extends Controller
                 $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, $value->category, $value->summary,  $status, $rca_time,  '-'];
-        }
-
-        foreach ($dataclosed as $key => $value) {
-            $status = $value->status . "\n" . Carbon::parse($value->created)->format('d/m/y');
-            //convert date to carbon parse
-            $created = Carbon::parse($value->created);
-            $changed_at = Carbon::parse($value->changed_at);
-            $rcatime = Carbon::parse($value->rca_time);
-
-            //declare rca time
-            if ($value->rca_time == null) {
-                $rca_time = '-';
+            //declare completion time
+            if ($value->closed_time == null) {
+                $completion_time = '-';
             } else {
-                $rca_days = intval($created->diffInDays($rcatime));
-                $rca_days_string = strval($rca_days) . ' days';
-                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                $completion_days = intval($created->diffInDays($closed_time));
+                $completion_days_string = strval($completion_days) . ' Days';
+                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-
-            // $daysDifference = ($updated_at - $created_at) / (60 * 60 * 24);
-            $completion_days = intval($created->diffInDays($changed_at));
-            $completion_days_string = strval($completion_days) . ' Days';
-            $completion_time = $completion_days_string . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
-
-            $tempdata[] = [$value->problem, $value->category, $value->summary,   $status, $rca_time, $completion_time];
+            $tempdata[] = [$value->problem, $value->category, $summary,  $status, $rca_time,  $completion_time];
         }
-        // dd($tempdata);
 
+
+        // INSERT ARRAY TO TABLE
         foreach ($tempdata as $rowIndex => $row) {
             $tableRow = $tableShape->createRow();
             $tableRow->setHeight(25); // Set the height of the row
@@ -945,6 +935,8 @@ class WeeklyController extends Controller
             }
         }
 
+
+
         // -------------------- TABLE DETAIL PENDING/RCI TICKET LAST WEEK ---------------------
 
         // Define table properties
@@ -960,25 +952,29 @@ class WeeklyController extends Controller
 
         // Define the data for the table
         $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
-        $datacreated = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)
+        $data_table_lastweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
-            ->get();
-        $dataclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), $lastweek)
-            ->where('status', '=', 'Closed')
-            ->select('problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
+            ->union(
+                Data::whereBetween(DB::raw('DATE(changed_at)'), $lastweek)
+                    ->where('status', '=', 'Closed')
+                    ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
+            )
             ->get();
 
+        //SET TABLE HEADER
         $tempdata = [
             ['', 'Category', 'Summary', 'Status', 'RCA Time', 'Complete Time'],
         ];
 
-        foreach ($datacreated as $key => $value) {
+        //SET TABLE DATA
+        foreach ($data_table_lastweek as $key => $value) {
             $tempstatus = $value->status;
             if ($value->status == 'Root Cause Identified') {
                 $tempstatus = 'RC Identified';
             }
             $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
+            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
 
             //convert date to carbon parse
             $created = Carbon::parse($value->created);
@@ -994,35 +990,21 @@ class WeeklyController extends Controller
                 $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, $value->category, $value->summary,  $status, $rca_time,  '-'];
-        }
-
-        foreach ($dataclosed as $key => $value) {
-            $status = $value->status . "\n" . Carbon::parse($value->created)->format('d/m/y');
-
-            //convert date to carbon parse
-            $created = Carbon::parse($value->created);
-            $changed_at = Carbon::parse($value->changed_at);
-            $rcatime = Carbon::parse($value->rca_time);
-
-            //declare rca time
-            if ($value->rca_time == null) {
-                $rca_time = '-';
+            if ($value->closed_time == null) {
+                $completion_time = '-';
             } else {
-                $rca_days = intval($created->diffInDays($rcatime));
-                $rca_days_string = strval($rca_days) . ' days';
-                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                $completion_days = intval($created->diffInDays($closed_time));
+                $completion_days_string = strval($completion_days) . ' Days';
+                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            // $daysDifference = ($updated_at - $created_at) / (60 * 60 * 24);
-            $completion_days = intval($created->diffInDays($changed_at));
-            $completion_days_string = strval($completion_days) . ' Days';
-            $completion_time = $completion_days_string . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
-
-            $tempdata[] = [$value->problem, $value->category, $value->summary,   $status, $rca_time, $completion_time];
+            $tempdata[] = [$value->problem, $value->category, $summary,  $status, $rca_time,  $completion_time];
         }
+
         // dd($tempdata);
 
+       
+        // SET ARRAY TO TABLE
         foreach ($tempdata as $rowIndex => $row) {
             $tableRow = $tableShape->createRow();
             $tableRow->setHeight(25); // Set the height of the row
@@ -1525,7 +1507,7 @@ class WeeklyController extends Controller
         // Simpan file Excel sementara
         $excelPathProduct = 'exports/List Problem for Product.xlsx';
         Excel::store(new DataExport($start_date, $end_date), $excelPathProduct, 'local');
-        
+
         // Simpan file Excel sementara
         $excelPathWebank = 'exports/List Problem for Webank.xlsx';
         Excel::store(new allDataExport($start_date, $end_date), $excelPathWebank, 'local');
