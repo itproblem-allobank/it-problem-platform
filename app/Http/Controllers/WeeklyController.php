@@ -608,7 +608,7 @@ class WeeklyController extends Controller
 
         // set chart shape
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(250)
+        $chartShape->setHeight(200)
             ->setWidth(410)
             ->setOffsetX(25)
             ->setOffsetY(225);
@@ -753,7 +753,7 @@ class WeeklyController extends Controller
 
         // set chart shape
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(250)
+        $chartShape->setHeight(200)
             ->setWidth(820)
             ->setOffsetX(440)
             ->setOffsetY(225);
@@ -801,7 +801,7 @@ class WeeklyController extends Controller
         $titleTable->setHeight(50);
         $titleTable->setWidth(410);
         $titleTable->setOffsetX(25);
-        $titleTable->setOffsetY(475);
+        $titleTable->setOffsetY(425);
         //coloring
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
@@ -825,7 +825,7 @@ class WeeklyController extends Controller
         $tableShape->setHeight(210);
         $tableShape->setWidth(410);
         $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(525);
+        $tableShape->setOffsetY(475);
 
         // GET DATA FROM DATABASE
         $data_table = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
@@ -965,7 +965,7 @@ class WeeklyController extends Controller
          $titleTable->setHeight(50);
          $titleTable->setWidth(820);
          $titleTable->setOffsetX(440);
-         $titleTable->setOffsetY(475);
+         $titleTable->setOffsetY(425);
          //coloring
          $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
          $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
@@ -989,7 +989,7 @@ class WeeklyController extends Controller
         $tableShape->setHeight(210);
         $tableShape->setWidth(410);
         $tableShape->setOffsetX(440);
-        $tableShape->setOffsetY(525);
+        $tableShape->setOffsetY(475);
 
         // Define the data for the table
         $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
