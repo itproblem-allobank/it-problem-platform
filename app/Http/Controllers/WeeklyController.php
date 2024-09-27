@@ -795,6 +795,27 @@ class WeeklyController extends Controller
 
         // -------------------- TABLE DETAIL PENDING/RCI TICKET THIS WEEK ---------------------
 
+        // TITLE TABLE
+        $titleTable = $slide3->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(410);
+        $titleTable->setOffsetX(25);
+        $titleTable->setOffsetY(475);
+        //coloring
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        //set margin
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        // Create a TextRun for "Ticket Detail This Week" with bold formatting
+        $textRun1 = $titleTable->createTextRun('Ticket Detail This Week');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10); // Set the desired font size here
+        // Create another TextRun for the second line with custom font size
+        $textRun2 = $titleTable->createTextRun("\nPending problems and RC identified problems created this week + Newly closed problems this week");
+        $textRun2->getFont()->setSize(9); // Set the desired font size here
+
         // Define table properties
         $columns = 5; // Number of columns
         $tableShape = $slide3->createTableShape($columns);
@@ -804,7 +825,7 @@ class WeeklyController extends Controller
         $tableShape->setHeight(210);
         $tableShape->setWidth(410);
         $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(475);
+        $tableShape->setOffsetY(525);
 
         // GET DATA FROM DATABASE
         $data_table = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
@@ -938,6 +959,26 @@ class WeeklyController extends Controller
 
 
         // -------------------- TABLE DETAIL PENDING/RCI TICKET LAST WEEK ---------------------
+         // TITLE TABLE
+         $titleTable = $slide3->createRichTextShape();
+         $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+         $titleTable->setHeight(50);
+         $titleTable->setWidth(820);
+         $titleTable->setOffsetX(440);
+         $titleTable->setOffsetY(475);
+         //coloring
+         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+         //set margin
+         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+         // Create a TextRun for "Ticket Detail This Week" with bold formatting
+         $textRun1 = $titleTable->createTextRun('Ticket Detail This Week');
+         $textRun1->getFont()->setBold(true);
+         $textRun1->getFont()->setSize(10); // Set the desired font size here
+         // Create another TextRun for the second line with custom font size
+         $textRun2 = $titleTable->createTextRun("\nPending problems and RC identified problems created this week + Newly closed problems this week");
+         $textRun2->getFont()->setSize(9); // Set the desired font size here
 
         // Define table properties
         $columns = 5; // Number of columns
@@ -948,7 +989,7 @@ class WeeklyController extends Controller
         $tableShape->setHeight(210);
         $tableShape->setWidth(410);
         $tableShape->setOffsetX(440);
-        $tableShape->setOffsetY(475);
+        $tableShape->setOffsetY(525);
 
         // Define the data for the table
         $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
@@ -1003,7 +1044,7 @@ class WeeklyController extends Controller
 
         // dd($tempdata);
 
-       
+
         // SET ARRAY TO TABLE
         foreach ($tempdata as $rowIndex => $row) {
             $tableRow = $tableShape->createRow();
