@@ -185,7 +185,7 @@ class WeeklyController extends Controller
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
         // Create the text run for "IT infra Operation"
-        $textRun3 = $textShape1->createTextRun("Information Technology\nInfrastructure & Operations");
+        $textRun3 = $textShape1->createTextRun("Information Technology\nInfrastructure & Operations Head");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
@@ -209,7 +209,7 @@ class WeeklyController extends Controller
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
         // Create the text run for "IT Problem Lead"
-        $textRun3 = $textShape2->createTextRun("IT Problem Lead");
+        $textRun3 = $textShape2->createTextRun("IT Problem Section Head");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
