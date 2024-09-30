@@ -18,11 +18,13 @@ use PhpOffice\PhpPresentation\Style\Alignment;
 use PhpOffice\PhpPresentation\Style\Color;
 use PhpOffice\PhpPresentation\DocumentLayout;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Bar;
+use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie3D;
 use PhpOffice\PhpPresentation\Shape\Chart\Series;
 use PhpOffice\PhpPresentation\Shape\Drawing\File;
 use PhpOffice\PhpPresentation\Style\Border;
 use PhpOffice\PhpPresentation\Style\Fill;
 use Exception;
+use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie;
 use Termwind\Components\Raw;
 
 class WeeklyController extends Controller
@@ -653,7 +655,7 @@ class WeeklyController extends Controller
         $changed_closed_2week = Data::whereBetween('changed_at', $twoweeksago)->where('status', '=', 'Closed')->get();
         $changed_closed_3week = Data::whereBetween('changed_at', $threeweeksago)->where('status', '=', 'Closed')->get();
 
-        // $created_closed_lweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Closed')->get();
+        $created_closed_lweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Closed')->get();
         $created_closed_2week = Data::whereBetween(DB::raw('DATE(created)'), $twoweeksago)->where('status', '=', 'Closed')->get();
         $created_closed_3week = Data::whereBetween(DB::raw('DATE(created)'), $threeweeksago)->where('status', '=', 'Closed')->get();
 
@@ -693,17 +695,17 @@ class WeeklyController extends Controller
                 ];
             }
         }
-        // foreach ($created_closed_lweek as $key => $value) {
-        //     $uniqueKey = createUniqueKey($value);
-        //     if (!in_array($uniqueKey, $temp1week)) {
-        //         $temp1week[] = $uniqueKey;
-        //         $closedlweek[] = [
-        //             'problem' => $value->summary,
-        //             'created' => $value->created,
-        //             'status' => $value->status
-        //         ];
-        //     }
-        // }
+        foreach ($created_closed_lweek as $key => $value) {
+            $uniqueKey = createUniqueKey($value);
+            if (!in_array($uniqueKey, $temp1week)) {
+                $temp1week[] = $uniqueKey;
+                $closedlweek[] = [
+                    'problem' => $value->summary,
+                    'created' => $value->created,
+                    'status' => $value->status
+                ];
+            }
+        }
         //gabung 2 week
         foreach ($changed_closed_2week as $key => $value) {
             $uniqueKey = createUniqueKey($value);
@@ -959,26 +961,26 @@ class WeeklyController extends Controller
 
 
         // -------------------- TABLE DETAIL PENDING/RCI TICKET LAST WEEK ---------------------
-         // TITLE TABLE
-         $titleTable = $slide3->createRichTextShape();
-         $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
-         $titleTable->setHeight(50);
-         $titleTable->setWidth(820);
-         $titleTable->setOffsetX(440);
-         $titleTable->setOffsetY(425);
-         //coloring
-         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
-         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
-         //set margin
-         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-         // Create a TextRun for "Ticket Detail This Week" with bold formatting
-         $textRun1 = $titleTable->createTextRun('Ticket Detail This Week');
-         $textRun1->getFont()->setBold(true);
-         $textRun1->getFont()->setSize(10); // Set the desired font size here
-         // Create another TextRun for the second line with custom font size
-         $textRun2 = $titleTable->createTextRun("\nPending problems and RC identified problems created this week + Newly closed problems this week");
-         $textRun2->getFont()->setSize(9); // Set the desired font size here
+        // TITLE TABLE
+        $titleTable = $slide3->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(820);
+        $titleTable->setOffsetX(440);
+        $titleTable->setOffsetY(425);
+        //coloring
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        //set margin
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        // Create a TextRun for "Ticket Detail This Week" with bold formatting
+        $textRun1 = $titleTable->createTextRun('Ticket Detail Last Week');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10); // Set the desired font size here
+        // Create another TextRun for the second line with custom font size
+        $textRun2 = $titleTable->createTextRun("\nPending problems and RC identified problems created last week + Newly closed problems last week");
+        $textRun2->getFont()->setSize(9); // Set the desired font size here
 
         // Define table properties
         $columns = 5; // Number of columns
@@ -1353,6 +1355,57 @@ class WeeklyController extends Controller
             $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'In Progress' => $value['count_inprogress'], 'User Confirmation' => $value['count_userconfirmation']]);
             $chartType->addSeries($series);
         }
+
+
+
+        // ------------ CHART 4 / RCA Time ----------------
+
+        // $tonalityData = ['data' => 1, 'no' => 2, 'yes' => 3];
+
+        // /* Create a pie chart (that should be inserted in a shape) */
+        // $pie3DChart = new Pie3D();
+        // $pie3DChart->setExplosion(0);
+        // $series = new Series('Resolved Time', $tonalityData);
+        // $series->setShowPercentage(true);
+        // $series->setShowSeriesName(false);
+        // $series->getDataPointFill(0)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FF4672A8'));
+        // $series->getDataPointFill(1)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FF8AA64F'));
+        // $series->getDataPointFill(2)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFAB4744'));
+        // $pie3DChart->addSeries($series);
+
+        // /* Create a shape (chart) */
+        // $shape = $slide4->createChartShape();
+        // $shape->setName('Resolved Time')
+        //     ->setResizeProportional(false)
+        //     ->setHeight(250)
+        //     ->setWidth(410)
+        //     ->setOffsetX(25)
+        //     ->setOffsetY(365);
+        // $shape->getTitle()->setText('Resolved Time');
+        // $shape->getPlotArea()->setType($pie3DChart);
+        // $shape->getView3D()->setRotationX(40);
+        // $shape->getView3D()->setPerspective(10);
+        // //set borders
+        // $shape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        // $shape->getBorder()->setColor(new Color('FF000000')); // Black border
+        // $shape->getBorder()->setLineWidth(1);
+        // $shape->getPlotArea()->getAxisY()->setIsVisible(false);
+        // $shape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+
+
+
+        // SAMPLE
+        // $results = Data::where('status', '=', 'Closed')->select('priority', 'summary', DB::raw('DATE(created)'), DB::raw('DATE(changed_at)'), DB::raw('DATEDIFF(changed_at, created) as days_diff'))
+        // ->orderBy('priority')    
+        // ->get();
+
+        // $test = [];
+        // foreach ($results as $key => $value) {
+        //     $test[] = $value->summary . ' - ' . strval($value->days_diff . ' Hari' . ' - ' . $value->priority);
+        // }
+
+        // dd($test);
+        // 
 
 
         // -------------------- TABLE TICKET IT PROBLEM HIGH --------------------
