@@ -47,9 +47,11 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
         // set RCA Time
         if ($row[20] == null) {
             $rca_time = null;
+            $rca_days = null;
         } else {
             $row20 = ($row[20] - 25569) * 86400;
             $rca_time = gmdate("Y-m-d H:i:s", $row20);
+            $rca_days = Carbon::parse($created)->diffInDays(Carbon::parse($rca_time));
         }
 
         // set Closed Time
@@ -65,6 +67,13 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
         $array_problem_cat = explode(" - ", $problem_category);
         $problem = $array_problem_cat[0];
         $category = $array_problem_cat[1] ?? "-";
+
+        // set resolved days
+        if ($row[6] == 'Closed') {
+            $resolved_days = Carbon::parse($created)->diffInDays(Carbon::parse($changed));
+        } else {
+            $resolved_days = null;
+        }
 
         $data = [
             'code_jira'         => $code_jira,
@@ -89,7 +98,9 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
             'updated'           => $updated,
             'changed_at'        => $changed,
             'rca_time'          => $rca_time,
-            'closed_time'       => $closed_time
+            'closed_time'       => $closed_time,
+            'resolved_days'     => $resolved_days,
+            'rca_days'          => $rca_days
         ];
 
         $assignee_too = $row[13];
