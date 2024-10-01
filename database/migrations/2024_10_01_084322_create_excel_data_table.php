@@ -39,6 +39,8 @@ return new class extends Migration
             $table->timestamp('closed_time')->nullable();
             $table->timestamp('updated_at')->nullable();
             $table->timestamp('created_at')->nullable();
+            $table->integer('resolved_days')->nullable();
+            $table->integer('rca_days')->nullable();
         });
     }
 
