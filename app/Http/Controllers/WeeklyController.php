@@ -1274,8 +1274,8 @@ class WeeklyController extends Controller
         $chartShape = $slide4->createChartShape();
         $chartShape->setHeight(250)
             ->setWidth(410)
-            ->setOffsetX(435)
-            ->setOffsetY(115);
+            ->setOffsetX(25)
+            ->setOffsetY(365);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -1327,8 +1327,8 @@ class WeeklyController extends Controller
         $chartShape = $slide4->createChartShape();
         $chartShape->setHeight(250)
             ->setWidth(410)
-            ->setOffsetX(845)
-            ->setOffsetY(115);
+            ->setOffsetX(435)
+            ->setOffsetY(365);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -1391,8 +1391,8 @@ class WeeklyController extends Controller
             ->setResizeProportional(false)
             ->setHeight(250)
             ->setWidth(410)
-            ->setOffsetX(25)
-            ->setOffsetY(365);
+            ->setOffsetX(435)
+            ->setOffsetY(115);
         $shape->getTitle()->setText('RCA Time');
         $shape->getPlotArea()->setType($pie3DChart);
         $shape->getView3D()->setRotationX(40);
@@ -1442,8 +1442,8 @@ class WeeklyController extends Controller
             ->setResizeProportional(false)
             ->setHeight(250)
             ->setWidth(410)
-            ->setOffsetX(435)
-            ->setOffsetY(365);
+            ->setOffsetX(845)
+            ->setOffsetY(115);
         $shape->getTitle()->setText('Resolved Time');
         $shape->getPlotArea()->setType($pie3DChart);
         $shape->getView3D()->setRotationX(40);
