@@ -1368,14 +1368,15 @@ class WeeklyController extends Controller
         $low_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Low')->where('rca_days', '<=', 183)->count();
         $low_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Low')->where('rca_days', '>', 183)->count();
 
-        $pie_data = ['High < 1 Month' => $high_sla, 'High > 1 Month' => $high_oversla, 'Medium < 2 Month' => $medium_sla, 'Medium > 2 Month' => $medium_oversla, 'Low < 12 Month' => $low_sla, 'Low > 12 Month' => $low_oversla];
+        $pie_data = ['High < 15 Days' => $high_sla, 'High > 15 Days' => $high_oversla, 'Medium < 1 Month' => $medium_sla, 'Medium > 1 Month' => $medium_oversla, 'Low < 6 Month' => $low_sla, 'Low > 6 Month' => $low_oversla];
 
         // dd($pie_data);
         // Create pie chart & Insert to slide
         $pie3DChart = new Pie3D();
         $pie3DChart->setExplosion(0);
         $series = new Series('RCA Time', $pie_data);
-        $series->setShowPercentage(false);
+        $series->setShowPercentage(true);
+        $series->setShowValue(false);
         $series->setShowSeriesName(false);
         $series->getDataPointFill(0)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffff0000'));
         $series->getDataPointFill(1)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFF4C4C'));
@@ -1426,7 +1427,8 @@ class WeeklyController extends Controller
         $pie3DChart = new Pie3D();
         $pie3DChart->setExplosion(0);
         $series = new Series('Resolved Time', $pie_data);
-        $series->setShowPercentage(false);
+        $series->setShowPercentage(true);
+        $series->setShowValue(false);
         $series->setShowSeriesName(false);
         $series->getDataPointFill(0)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffff0000'));
         $series->getDataPointFill(1)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFF4C4C'));
