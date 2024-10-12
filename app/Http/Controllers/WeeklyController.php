@@ -650,30 +650,37 @@ class WeeklyController extends Controller
         $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
         $twoweeksago = [Carbon::parse($start_date)->subDays(14), Carbon::parse($start_date)->subDays(8)];
         $threeweeksago = [Carbon::parse($start_date)->subDays(21), Carbon::parse($start_date)->subDays(15)];
+        $fourweeksago = [Carbon::parse($start_date)->subDays(28), Carbon::parse($start_date)->subDays(22)];
         //
         $changed_closed_lweek = Data::whereBetween('changed_at', $lastweek)->where('status', '=', 'Closed')->get();
         $changed_closed_2week = Data::whereBetween('changed_at', $twoweeksago)->where('status', '=', 'Closed')->get();
         $changed_closed_3week = Data::whereBetween('changed_at', $threeweeksago)->where('status', '=', 'Closed')->get();
+        $changed_closed_4week = Data::whereBetween('changed_at', $fourweeksago)->where('status', '=', 'Closed')->get();
 
         $created_closed_lweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Closed')->get();
         $created_closed_2week = Data::whereBetween(DB::raw('DATE(created)'), $twoweeksago)->where('status', '=', 'Closed')->get();
         $created_closed_3week = Data::whereBetween(DB::raw('DATE(created)'), $threeweeksago)->where('status', '=', 'Closed')->get();
+        $created_closed_4week = Data::whereBetween(DB::raw('DATE(created)'), $fourweeksago)->where('status', '=', 'Closed')->get();
 
         $created_pending_lweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Pending')->get()->count();
         $created_pending_2week = Data::whereBetween(DB::raw('DATE(created)'), $twoweeksago)->where('status', '=', 'Pending')->get()->count();
         $created_pending_3week = Data::whereBetween(DB::raw('DATE(created)'), $threeweeksago)->where('status', '=', 'Pending')->get()->count();
+        $created_pending_4week = Data::whereBetween(DB::raw('DATE(created)'), $fourweeksago)->where('status', '=', 'Pending')->get()->count();
 
         $created_rci_1week = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)->where('status', '=', 'Root Cause Identified')->get()->count();
         $created_rci_2week = Data::whereBetween(DB::raw('DATE(created)'), $twoweeksago)->where('status', '=', 'Root Cause Identified')->get()->count();
         $created_rci_3week = Data::whereBetween(DB::raw('DATE(created)'), $threeweeksago)->where('status', '=', 'Root Cause Identified')->get()->count();
+        $created_rci_4week = Data::whereBetween(DB::raw('DATE(created)'), $fourweeksago)->where('status', '=', 'Root Cause Identified')->get()->count();
 
         $closedlweek = [];
         $closed2week = [];
         $closed3week = [];
+        $closed4week = [];
 
         $temp1week = []; // Array sementara untuk menyimpan elemen unik
         $temp2week = [];
         $temp3week = [];
+        $temp4week = [];
 
         function createUniqueKey($value)
         {
@@ -753,6 +760,30 @@ class WeeklyController extends Controller
             }
         }
 
+        //gabung 4 week
+        foreach ($changed_closed_4week as $key => $value) {
+            $uniqueKey = createUniqueKey($value);
+            if (!in_array($uniqueKey, $temp4week)) {
+                $temp4week[] = $uniqueKey;
+                $closed4week[] = [
+                    'problem' => $value->summary,
+                    'created' => $value->created,
+                    'status' => $value->status
+                ];
+            }
+        }
+        foreach ($created_closed_4week as $key => $value) {
+            $uniqueKey = createUniqueKey($value);
+            if (!in_array($uniqueKey, $temp4week)) {
+                $temp4week[] = $uniqueKey;
+                $closed4week[] = [
+                    'problem' => $value->summary,
+                    'created' => $value->created,
+                    'status' => $value->status
+                ];
+            }
+        }
+
         // set chart shape
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(200)
@@ -763,7 +794,7 @@ class WeeklyController extends Controller
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
-        $chartShape->getTitle()->setText('Ticket by Last 3 Weeks');
+        $chartShape->getTitle()->setText('Ticket by Last 4 Weeks');
         // Mendapatkan objek sumbu
         $xAxis = $chartShape->getPlotArea()->getAxisX();
         $yAxis = $chartShape->getPlotArea()->getAxisY();
@@ -780,9 +811,9 @@ class WeeklyController extends Controller
 
 
         //set data
-        $series = new Series('Closed', ['3 Weeks Ago' => count($closed3week), '2 Weeks Ago' => count($closed2week), 'Last Weeks' => count($closedlweek)]);
-        $series2 = new Series('RC Identified', ['3 Weeks Ago' => $created_rci_3week, '2 Weeks Ago' => $created_rci_2week, 'Last Weeks' => $created_rci_1week]);
-        $series3 = new Series('Pending', ['3 Weeks Ago' => $created_pending_3week, '2 Weeks Ago' => $created_pending_2week, 'Last Weeks' => $created_pending_lweek]);
+        $series = new Series('Closed', ['4 Weeks Ago' => count($closed4week) ,'3 Weeks Ago' => count($closed3week), '2 Weeks Ago' => count($closed2week), 'Last Weeks' => count($closedlweek)]);
+        $series2 = new Series('RC Identified', [ '4 Weeks Ago' => $created_rci_4week ,'3 Weeks Ago' => $created_rci_3week, '2 Weeks Ago' => $created_rci_2week, 'Last Weeks' => $created_rci_1week]);
+        $series3 = new Series('Pending', [ '4 Weeks Ago' => $created_pending_4week, '3 Weeks Ago' => $created_pending_3week, '2 Weeks Ago' => $created_pending_2week, 'Last Weeks' => $created_pending_lweek]);
 
         //coloring category
         $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00b050'));
@@ -1376,7 +1407,7 @@ class WeeklyController extends Controller
         $pie3DChart->setExplosion(0);
         $series = new Series('RCA Time', $pie_data);
         $series->setShowPercentage(true);
-        $series->setShowValue(false);
+        $series->setShowValue(true);
         $series->setShowSeriesName(false);
         $series->getDataPointFill(0)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffff0000'));
         $series->getDataPointFill(1)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFF4C4C'));
@@ -1428,7 +1459,7 @@ class WeeklyController extends Controller
         $pie3DChart->setExplosion(0);
         $series = new Series('Resolved Time', $pie_data);
         $series->setShowPercentage(true);
-        $series->setShowValue(false);
+        $series->setShowValue(true);
         $series->setShowSeriesName(false);
         $series->getDataPointFill(0)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffff0000'));
         $series->getDataPointFill(1)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFF4C4C'));
