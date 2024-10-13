@@ -811,9 +811,9 @@ class WeeklyController extends Controller
 
 
         //set data
-        $series = new Series('Closed', ['4 Weeks Ago' => count($closed4week) ,'3 Weeks Ago' => count($closed3week), '2 Weeks Ago' => count($closed2week), 'Last Weeks' => count($closedlweek)]);
-        $series2 = new Series('RC Identified', [ '4 Weeks Ago' => $created_rci_4week ,'3 Weeks Ago' => $created_rci_3week, '2 Weeks Ago' => $created_rci_2week, 'Last Weeks' => $created_rci_1week]);
-        $series3 = new Series('Pending', [ '4 Weeks Ago' => $created_pending_4week, '3 Weeks Ago' => $created_pending_3week, '2 Weeks Ago' => $created_pending_2week, 'Last Weeks' => $created_pending_lweek]);
+        $series = new Series('Closed', ['4 Weeks Ago' => count($closed4week), '3 Weeks Ago' => count($closed3week), '2 Weeks Ago' => count($closed2week), 'Last Weeks' => count($closedlweek)]);
+        $series2 = new Series('RC Identified', ['4 Weeks Ago' => $created_rci_4week, '3 Weeks Ago' => $created_rci_3week, '2 Weeks Ago' => $created_rci_2week, 'Last Weeks' => $created_rci_1week]);
+        $series3 = new Series('Pending', ['4 Weeks Ago' => $created_pending_4week, '3 Weeks Ago' => $created_pending_3week, '2 Weeks Ago' => $created_pending_2week, 'Last Weeks' => $created_pending_lweek]);
 
         //coloring category
         $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00b050'));
@@ -1279,6 +1279,49 @@ class WeeklyController extends Controller
             $chartType->addSeries($series);
         }
 
+        // detail ticket closed last week & Last month
+        $tableShape = $slide4->createTableShape(1);
+        $tableShape->setHeight(100);
+        $tableShape->setWidth(150);
+        $tableShape->setOffsetX(25);
+        $tableShape->setOffsetY(375);
+
+        // set data last week
+        $startlw = Carbon::parse($start_date)->subDays(7)->format('d/m/y');
+        $endlw = Carbon::parse($start_date)->subDays(1)->format('d/m/y');
+        $datalw = Data::where(DB::raw('DATE(changed_at)'), '<=', Carbon::parse($start_date)->subDays(1))->where('status', '=', 'Closed')->count();
+
+        // Menambah baris pertama
+        $row = $tableShape->createRow();
+        $cell = $row->nextCell();
+        $cell->createTextRun('Closed Last Week');
+        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FF5A9BD5')); // Warna biru
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $cell->createBreak();
+        $cell->createTextRun("(" . $startlw . " - " . $endlw . ")");
+        $cell->createBreak();
+        $cell->createTextRun(strval($datalw))->getFont()->setBold(true)->setSize(20);
+
+        // set data last month
+        $month = Carbon::parse($start_date)->subMonth(1)->format('F Y');
+        $endDate = Carbon::parse($start_date)->subMonth(1)->endOfMonth();
+        $datalm = Data::whereDate(DB::raw('DATE(changed_at)'), '<=', $endDate)
+              ->where('status', '=', 'Closed')
+              ->count();
+
+        // Menambah baris kedua
+        $row = $tableShape->createRow();
+        $cell = $row->nextCell();
+        $cell->createTextRun('Closed Last Month');
+        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFDBE5F1')); // Warna abu muda
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $cell->createBreak();
+        $cell->createTextRun("(" . $month . ")");
+        $cell->createBreak();
+        $cell->createTextRun(strval($datalm))->getFont()->setBold(true)->setSize(20);
+
 
 
         // ------------ CHART 2 / Ticket Service Request Nasabah ----------------
@@ -1301,17 +1344,38 @@ class WeeklyController extends Controller
                 ];
         }
 
+        // TITLE TABLE
+        $titleTable = $slide4->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(410);
+        $titleTable->setOffsetX(225);
+        $titleTable->setOffsetY(375);
+        //coloring
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        //set margin
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        // Create a TextRun for "Ticket Detail This Week" with bold formatting
+        $textRun1 = $titleTable->createTextRun('Allo Care Service Request Ticket');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10); // Set the desired font size here
+        // Create another TextRun for the second line with custom font size
+        $textRun2 = $titleTable->createTextRun("\nAllo Care Service Request ticket created on This Week filtering by Subcategory");
+        $textRun2->getFont()->setSize(9); // Set the desired font size here
+
         // Set Size Chart
         $chartShape = $slide4->createChartShape();
         $chartShape->setHeight(250)
             ->setWidth(410)
-            ->setOffsetX(25)
-            ->setOffsetY(365);
+            ->setOffsetX(225)
+            ->setOffsetY(425);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
-        $chartShape->getTitle()->setText('Ticket Service Request Nasabah');
+        $chartShape->getTitle()->setText('Service Request from Infomedia');
         // Mendapatkan objek sumbu
         $xAxis = $chartShape->getPlotArea()->getAxisX();
         $yAxis = $chartShape->getPlotArea()->getAxisY();
@@ -1343,6 +1407,7 @@ class WeeklyController extends Controller
             $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%' . 'Approval' . '%')->get()->count();
             $status_inprogress = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'In Progress')->get()->count();
             $status_userconfirmation = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
+            $status_assignedtoDBA = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Assigned to DBA')->get()->count();
             $resultdata_chart4[] =
                 [
                     'sub_category' => $value->sub_category,
@@ -1351,20 +1416,44 @@ class WeeklyController extends Controller
                     'count_declined' => $status_declined,
                     'count_approval' => $status_approval,
                     'count_inprogress' => $status_inprogress,
-                    'count_userconfirmation' => $status_userconfirmation
+                    'count_userconfirmation' => $status_userconfirmation,
+                    'count_assignedtoDBA' => $status_assignedtoDBA
+
                 ];
         }
+
+        // TITLE TABLE
+        $titleTable = $slide4->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(410);
+        $titleTable->setOffsetX(635);
+        $titleTable->setOffsetY(375);
+        //coloring
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        //set margin
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        // Create a TextRun for "Ticket Detail This Week" with bold formatting
+        $textRun1 = $titleTable->createTextRun('Contact Center Request Ticket');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10); // Set the desired font size here
+        // Create another TextRun for the second line with custom font size
+        $textRun2 = $titleTable->createTextRun("\nContact Center Request ticket created on This Week filtering by Subcategory\n Notes: untuk Process on DBA adalah ticket Penutupan Akun");
+        $textRun2->getFont()->setSize(9); // Set the desired font size here
+
         // Set Size Chart
         $chartShape = $slide4->createChartShape();
         $chartShape->setHeight(250)
             ->setWidth(410)
-            ->setOffsetX(435)
-            ->setOffsetY(365);
+            ->setOffsetX(635)
+            ->setOffsetY(425);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
-        $chartShape->getTitle()->setText('Ticket Service Customer Care');
+        $chartShape->getTitle()->setText('Service Request from CC');
 
         // Mendapatkan objek sumbu
         $xAxis = $chartShape->getPlotArea()->getAxisX();
@@ -1383,7 +1472,7 @@ class WeeklyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart4 as $key => $value) {
-            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'In Progress' => $value['count_inprogress'], 'User Confirmation' => $value['count_userconfirmation']]);
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'Process on DBA' => $value['count_assignedtoDBA'], 'Process on Problem' => $value['count_inprogress'], 'User Confirmation' => $value['count_userconfirmation']]);
             $chartType->addSeries($series);
         }
 
@@ -1392,14 +1481,14 @@ class WeeklyController extends Controller
         // ------------ CHART 4 / RCA Time ----------------
 
         // define data
-        $high_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'High')->where('rca_days', '<=', 15)->count();
-        $high_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'High')->where('rca_days', '>', 15)->count();
-        $medium_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Medium')->where('rca_days', '<=', 30)->count();
-        $medium_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Medium')->where('rca_days', '>', 30)->count();
-        $low_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Low')->where('rca_days', '<=', 183)->count();
-        $low_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Low')->where('rca_days', '>', 183)->count();
+        $high_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'High')->where('rca_days', '<=', 3)->count();
+        $high_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'High')->where('rca_days', '>', 3)->count();
+        $medium_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Medium')->where('rca_days', '<=', 6)->count();
+        $medium_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Medium')->where('rca_days', '>', 6)->count();
+        $low_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Low')->where('rca_days', '<=', 10)->count();
+        $low_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Low')->where('rca_days', '>', 10)->count();
 
-        $pie_data = ['High < 15 Days' => $high_sla, 'High > 15 Days' => $high_oversla, 'Medium < 1 Month' => $medium_sla, 'Medium > 1 Month' => $medium_oversla, 'Low < 6 Month' => $low_sla, 'Low > 6 Month' => $low_oversla];
+        $pie_data = ['High < 3 Days' => $high_sla, 'High > 3 Days' => $high_oversla, 'Medium < 6 Days' => $medium_sla, 'Medium > 6 Days' => $medium_oversla, 'Low < 10 Days' => $low_sla, 'Low > 10 Days' => $low_oversla];
 
         // dd($pie_data);
         // Create pie chart & Insert to slide
