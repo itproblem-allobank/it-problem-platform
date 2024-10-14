@@ -1203,6 +1203,25 @@ class WeeklyController extends Controller
 
 
         // ------------ CHART 1 / Problem Category Closed ----------------
+
+        // set title chart
+        $titleTable = $slide4->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(410);
+        $titleTable->setOffsetX(25);
+        $titleTable->setOffsetY(100);
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $textRun1 = $titleTable->createTextRun('IT Problem Ticket Closed');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10); 
+        $textRun2 = $titleTable->createTextRun("\nAll Ticket IT Problem closed on this week filtering by Category");
+        $textRun2->getFont()->setSize(9);
+
+        // create chart
         $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
@@ -1245,10 +1264,10 @@ class WeeklyController extends Controller
 
         // set chart shape
         $chartShape = $slide4->createChartShape();
-        $chartShape->setHeight(250)
+        $chartShape->setHeight(215)
             ->setWidth(410)
             ->setOffsetX(25)
-            ->setOffsetY(115);
+            ->setOffsetY(150);
 
         // Define tipe chart
         $chartType = new Bar();
@@ -1344,30 +1363,26 @@ class WeeklyController extends Controller
                 ];
         }
 
-        // TITLE TABLE
+        // set title table
         $titleTable = $slide4->createRichTextShape();
         $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $titleTable->setHeight(50);
         $titleTable->setWidth(410);
         $titleTable->setOffsetX(225);
         $titleTable->setOffsetY(375);
-        //coloring
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
-        //set margin
         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        // Create a TextRun for "Ticket Detail This Week" with bold formatting
         $textRun1 = $titleTable->createTextRun('Allo Care Service Request Ticket');
         $textRun1->getFont()->setBold(true);
-        $textRun1->getFont()->setSize(10); // Set the desired font size here
-        // Create another TextRun for the second line with custom font size
+        $textRun1->getFont()->setSize(10);
         $textRun2 = $titleTable->createTextRun("\nAllo Care Service Request ticket created on This Week filtering by Subcategory");
-        $textRun2->getFont()->setSize(9); // Set the desired font size here
+        $textRun2->getFont()->setSize(9); 
 
         // Set Size Chart
         $chartShape = $slide4->createChartShape();
-        $chartShape->setHeight(250)
+        $chartShape->setHeight(215)
             ->setWidth(410)
             ->setOffsetX(225)
             ->setOffsetY(425);
@@ -1422,30 +1437,26 @@ class WeeklyController extends Controller
                 ];
         }
 
-        // TITLE TABLE
+        // set title table
         $titleTable = $slide4->createRichTextShape();
         $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $titleTable->setHeight(50);
         $titleTable->setWidth(410);
         $titleTable->setOffsetX(635);
         $titleTable->setOffsetY(375);
-        //coloring
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
-        //set margin
         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        // Create a TextRun for "Ticket Detail This Week" with bold formatting
         $textRun1 = $titleTable->createTextRun('Contact Center Request Ticket');
         $textRun1->getFont()->setBold(true);
-        $textRun1->getFont()->setSize(10); // Set the desired font size here
-        // Create another TextRun for the second line with custom font size
+        $textRun1->getFont()->setSize(10);
         $textRun2 = $titleTable->createTextRun("\nContact Center Request ticket created on This Week filtering by Subcategory\n Notes: untuk Process on DBA adalah ticket Penutupan Akun");
-        $textRun2->getFont()->setSize(9); // Set the desired font size here
+        $textRun2->getFont()->setSize(9);
 
         // Set Size Chart
         $chartShape = $slide4->createChartShape();
-        $chartShape->setHeight(250)
+        $chartShape->setHeight(215)
             ->setWidth(410)
             ->setOffsetX(635)
             ->setOffsetY(425);
@@ -1480,6 +1491,23 @@ class WeeklyController extends Controller
 
         // ------------ CHART 4 / RCA Time ----------------
 
+        // set title chart
+        $titleTable = $slide4->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(410);
+        $titleTable->setOffsetX(435);
+        $titleTable->setOffsetY(100);
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $textRun1 = $titleTable->createTextRun('IT Problem Ticket RCA Time');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10); 
+        $textRun2 = $titleTable->createTextRun("\nCounting all ticket IT Problem by RCA Time identified");
+        $textRun2->getFont()->setSize(9);
+
         // define data
         $high_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'High')->where('rca_days', '<=', 3)->count();
         $high_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'High')->where('rca_days', '>', 3)->count();
@@ -1510,10 +1538,10 @@ class WeeklyController extends Controller
         $shape = $slide4->createChartShape();
         $shape->setName('RCA Time')
             ->setResizeProportional(false)
-            ->setHeight(250)
+            ->setHeight(215)
             ->setWidth(410)
             ->setOffsetX(435)
-            ->setOffsetY(115);
+            ->setOffsetY(150);
         $shape->getTitle()->setText('RCA Time');
         $shape->getPlotArea()->setType($pie3DChart);
         $shape->getView3D()->setRotationX(40);
@@ -1529,6 +1557,23 @@ class WeeklyController extends Controller
 
 
         // ------------ CHART 5 / Resolved Time ----------------
+
+        // set title chart
+        $titleTable = $slide4->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(410);
+        $titleTable->setOffsetX(845);
+        $titleTable->setOffsetY(100);
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $textRun1 = $titleTable->createTextRun('IT Problem Ticket Resolved Time');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10); 
+        $textRun2 = $titleTable->createTextRun("\nCounting all ticket IT Problem by Resolved Time identified");
+        $textRun2->getFont()->setSize(9);
 
         // define data
         $high_sla = Data::where('status', '=', 'cLosed')->where('priority', '=', 'High')->where('resolved_days', '<=', 30)->count();
@@ -1562,10 +1607,10 @@ class WeeklyController extends Controller
         $shape = $slide4->createChartShape();
         $shape->setName('Resolved Time')
             ->setResizeProportional(false)
-            ->setHeight(250)
+            ->setHeight(215)
             ->setWidth(410)
             ->setOffsetX(845)
-            ->setOffsetY(115);
+            ->setOffsetY(150);
         $shape->getTitle()->setText('Resolved Time');
         $shape->getPlotArea()->setType($pie3DChart);
         $shape->getView3D()->setRotationX(40);
