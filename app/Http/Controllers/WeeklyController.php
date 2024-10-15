@@ -1217,7 +1217,7 @@ class WeeklyController extends Controller
         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $textRun1 = $titleTable->createTextRun('IT Problem Ticket Closed');
         $textRun1->getFont()->setBold(true);
-        $textRun1->getFont()->setSize(10); 
+        $textRun1->getFont()->setSize(10);
         $textRun2 = $titleTable->createTextRun("\nAll Ticket IT Problem closed on this week filtering by Category");
         $textRun2->getFont()->setSize(9);
 
@@ -1378,7 +1378,7 @@ class WeeklyController extends Controller
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
         $textRun2 = $titleTable->createTextRun("\nAllo Care Service Request ticket created on This Week filtering by Subcategory");
-        $textRun2->getFont()->setSize(9); 
+        $textRun2->getFont()->setSize(9);
 
         // Set Size Chart
         $chartShape = $slide4->createChartShape();
@@ -1504,7 +1504,7 @@ class WeeklyController extends Controller
         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $textRun1 = $titleTable->createTextRun('IT Problem Ticket RCA Time');
         $textRun1->getFont()->setBold(true);
-        $textRun1->getFont()->setSize(10); 
+        $textRun1->getFont()->setSize(10);
         $textRun2 = $titleTable->createTextRun("\nCounting all ticket IT Problem by RCA Time identified");
         $textRun2->getFont()->setSize(9);
 
@@ -1571,7 +1571,7 @@ class WeeklyController extends Controller
         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $textRun1 = $titleTable->createTextRun('IT Problem Ticket Resolved Time');
         $textRun1->getFont()->setBold(true);
-        $textRun1->getFont()->setSize(10); 
+        $textRun1->getFont()->setSize(10);
         $textRun2 = $titleTable->createTextRun("\nCounting all ticket IT Problem by Resolved Time identified");
         $textRun2->getFont()->setSize(9);
 
@@ -1698,8 +1698,7 @@ class WeeklyController extends Controller
 
             $rootcause = $value->root_cause ?? ' - ';
 
-            //Status
-            $status = $value->status . "\n" . Carbon::parse($value->created)->format('d/m/Y');
+            $createddate = Carbon::parse($value->created)->format('d/m/Y') ;
 
             //RCA Days
             $created_rca = Carbon::parse($value->created);
@@ -1719,15 +1718,23 @@ class WeeklyController extends Controller
                 $completion_time = '-';
             }
 
+            if ($value->status == 'Closed') {
+                $status = $value->status . "\n" . Carbon::parse($value->closed_time)->format('d/m/Y');
+            } else {
+                $status = $value->status . "\n" . ' - ';
+            }
+
             //insert to table
-            $table[] = [$value->code_jira, $value->problem, $value->summary, $pending_reason, $target_version, $rootcause, $status, $rca_time, $completion_time];
+            $table[] = [$value->code_jira, $value->problem, $value->summary, $pending_reason, $target_version, $rootcause, $createddate, $rca_time, $completion_time, $status];
         }
+
+        // dd($table);
 
         // CHECK DATA JIKA KOSONG MAKA TIDAK TAMPIL
         if ($table == []) {
         } else {
             // Tambahkan table
-            $columns = 9;
+            $columns = 10;
             $tableShape = $slide5->createTableShape($columns);
             $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
             $tableShape->setHeight(300);
@@ -1737,7 +1744,18 @@ class WeeklyController extends Controller
             $rowHeader = $tableShape->createRow();
             $rowHeader->setHeight(25);
             //header 
-            $header = ['Code Jira', 'Problem', 'Summary', 'Pending Reason', 'Target Version', 'Root Cause', 'Status' . "\n" . 'Created time', 'RCA Time', 'Complete Time'];
+            $header = [
+                'Code Jira',
+                'Problem',
+                'Summary',
+                'Pending Reason',
+                'Target Version',
+                'Root Cause',
+                'Created Date',
+                'Created-RCA' . "\n" . 'Time',
+                'Resolved Time',
+                'Status' . "\n" . 'Completed Time'
+            ];
             foreach ($header as $cellIndex => $cellText) {
                 $cell = $rowHeader->nextCell();
                 if ($cellIndex == 0) {
@@ -1745,18 +1763,20 @@ class WeeklyController extends Controller
                 } else if ($cellIndex == 1) {
                     $cell->setWidth(120);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(350);
+                    $cell->setWidth(300);
                 } else if ($cellIndex == 3) {
                     $cell->setWidth(89);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(89);
                 } else if ($cellIndex == 5) {
-                    $cell->setWidth(300);
+                    $cell->setWidth(276);
                 } else if ($cellIndex == 6) {
                     $cell->setWidth(74);
                 } else if ($cellIndex == 7) {
                     $cell->setWidth(74);
                 } else if ($cellIndex == 8) {
+                    $cell->setWidth(74);
+                } else if ($cellIndex == 9) {
                     $cell->setWidth(74);
                 }
                 $textRun = $cell->createTextRun($cellText);
@@ -1778,18 +1798,20 @@ class WeeklyController extends Controller
                     } else if ($cellIndex == 1) {
                         $cell->setWidth(120);
                     } else if ($cellIndex == 2) {
-                        $cell->setWidth(350);
+                        $cell->setWidth(300);
                     } else if ($cellIndex == 3) {
                         $cell->setWidth(89);
                     } else if ($cellIndex == 4) {
                         $cell->setWidth(89);
                     } else if ($cellIndex == 5) {
-                        $cell->setWidth(300);
+                        $cell->setWidth(276);
                     } else if ($cellIndex == 6) {
                         $cell->setWidth(74);
                     } else if ($cellIndex == 7) {
                         $cell->setWidth(74);
                     } else if ($cellIndex == 8) {
+                        $cell->setWidth(74);
+                    } else if ($cellIndex == 9) {
                         $cell->setWidth(74);
                     }
                     $textRun = $cell->createTextRun($cellText);
@@ -1839,7 +1861,7 @@ class WeeklyController extends Controller
 
         $pie_data = ['1 Day' => $days1, '2 Days' => $days2, '3 Days' => $days3, '4 Days' => $days4, '5 Days' => $days5, 'Over 5 Days' => $daysover5];
 
-        
+
 
         // dd($pie_data);
         // Create pie chart & Insert to slide
