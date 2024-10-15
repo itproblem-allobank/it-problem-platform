@@ -846,7 +846,7 @@ class WeeklyController extends Controller
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10); // Set the desired font size here
         // Create another TextRun for the second line with custom font size
-        $textRun2 = $titleTable->createTextRun("\nPending problems and RC identified problems created this week + Newly closed problems this week");
+        $textRun2 = $titleTable->createTextRun("\nPending and RCA Identified Problems Created This Week + Newly Closed Problems");
         $textRun2->getFont()->setSize(9); // Set the desired font size here
 
         // Define table properties
@@ -1010,7 +1010,7 @@ class WeeklyController extends Controller
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10); // Set the desired font size here
         // Create another TextRun for the second line with custom font size
-        $textRun2 = $titleTable->createTextRun("\nPending problems and RC identified problems created last week + Newly closed problems last week");
+        $textRun2 = $titleTable->createTextRun("\nPending and RCA Identified Problems Created Last Week + Newly Closed Problems");
         $textRun2->getFont()->setSize(9); // Set the desired font size here
 
         // Define table properties
@@ -1218,7 +1218,7 @@ class WeeklyController extends Controller
         $textRun1 = $titleTable->createTextRun('IT Problem Ticket Closed');
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nAll Ticket IT Problem closed on this week filtering by Category");
+        $textRun2 = $titleTable->createTextRun("\nTotal IT Problem Tickets Closed This Week by Category");
         $textRun2->getFont()->setSize(9);
 
         // create chart
@@ -1377,7 +1377,7 @@ class WeeklyController extends Controller
         $textRun1 = $titleTable->createTextRun('Allo Care Service Request Ticket');
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nAllo Care Service Request ticket created on This Week filtering by Subcategory");
+        $textRun2 = $titleTable->createTextRun("\nAllo Care Service Request Tickets Created This Week by Subcategory");
         $textRun2->getFont()->setSize(9);
 
         // Set Size Chart
@@ -1451,7 +1451,7 @@ class WeeklyController extends Controller
         $textRun1 = $titleTable->createTextRun('Contact Center Request Ticket');
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nContact Center Request ticket created on This Week filtering by Subcategory\n Notes: untuk Process on DBA adalah ticket Penutupan Akun");
+        $textRun2 = $titleTable->createTextRun("\nContact Center Request Tickets Created This Week by Subcategory\n(Note: DBA Process for “Penutupan Akun” Tickets)");
         $textRun2->getFont()->setSize(9);
 
         // Set Size Chart
@@ -1505,7 +1505,7 @@ class WeeklyController extends Controller
         $textRun1 = $titleTable->createTextRun('IT Problem Ticket RCA Time');
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nCounting all ticket IT Problem by RCA Time identified");
+        $textRun2 = $titleTable->createTextRun("\nCounting IT Problem Tickets by RCA Time Identified (8 Sept - Present)");
         $textRun2->getFont()->setSize(9);
 
         // define data
@@ -1572,7 +1572,7 @@ class WeeklyController extends Controller
         $textRun1 = $titleTable->createTextRun('IT Problem Ticket Resolved Time');
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nCounting all ticket IT Problem by Resolved Time identified");
+        $textRun2 = $titleTable->createTextRun("\nCounting All IT Problem Tickets by Resolved Time Identified");
         $textRun2->getFont()->setSize(9);
 
         // define data
