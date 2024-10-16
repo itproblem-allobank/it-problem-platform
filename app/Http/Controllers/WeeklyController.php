@@ -1390,57 +1390,6 @@ class WeeklyController extends Controller
             }
         }
 
-        // ------------ CHART 4 / RCA Time ----------------
-
-        $days1 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 1)->count();
-        $days2 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 2)->count();
-        $days3 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 3)->count();
-        $days4 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 4)->count();
-        $days5 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 5)->count();
-        $daysover5 = Data::where('rca_time', '!=', null)->where('rca_days', '>', 5)->count();
-
-        $pie_data = ['1 Day' => $days1, '2 Days' => $days2, '3 Days' => $days3, '4 Days' => $days4, '5 Days' => $days5, 'Over 5 Days' => $daysover5];
-
-
-
-        // dd($pie_data);
-        // Create pie chart & Insert to slide
-        $pie3DChart = new Pie3D();
-        $pie3DChart->setExplosion(0);
-        $series = new Series('RCA Time', $pie_data);
-        $series->setShowPercentage(true);
-        $series->setShowValue(true);
-        $series->setShowSeriesName(false);
-        $series->getDataPointFill(0)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffff0000'));
-        $series->getDataPointFill(1)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFF4C4C'));
-        $series->getDataPointFill(2)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffeb909'));
-        $series->getDataPointFill(3)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFC634'));
-        $series->getDataPointFill(4)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffffe00'));
-        $series->getDataPointFill(5)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFCFB84'));
-        $pie3DChart->addSeries($series);
-
-        /* Create a shape (chart) */
-        $shape = $slide4->createChartShape();
-        $shape->setName('RCA Time')
-            ->setResizeProportional(false)
-            ->setHeight(250)
-            ->setWidth(410)
-            ->setOffsetX(435)
-            ->setOffsetY(300);
-        $shape->getTitle()->setText('RCA Time');
-        $shape->getPlotArea()->setType($pie3DChart);
-        $shape->getView3D()->setRotationX(40);
-        $shape->getView3D()->setPerspective(10);
-        //set borders
-        $shape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $shape->getBorder()->setColor(new Color('FF000000')); // Black border
-        $shape->getBorder()->setLineWidth(1);
-        $shape->getPlotArea()->getAxisY()->setIsVisible(false);
-        $shape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
-
-
-
-
 
         //Slide 5
         $slide5 = $objPHPPresentation->createSlide();
@@ -1775,7 +1724,6 @@ class WeeklyController extends Controller
         }
 
 
-
         // ------------ CHART 4 / RCA Time ----------------
 
         // set title chart
@@ -1795,15 +1743,15 @@ class WeeklyController extends Controller
         $textRun2 = $titleTable->createTextRun("\nCounting IT Problem Tickets by RCA Time Identified (8 Sept - Present)");
         $textRun2->getFont()->setSize(9);
 
-        // define data
-        $high_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'High')->where('rca_days', '<=', 3)->count();
-        $high_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'High')->where('rca_days', '>', 3)->count();
-        $medium_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Medium')->where('rca_days', '<=', 6)->count();
-        $medium_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Medium')->where('rca_days', '>', 6)->count();
-        $low_sla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Low')->where('rca_days', '<=', 10)->count();
-        $low_oversla = Data::where('rca_time', '!=', null)->where('priority', '=', 'Low')->where('rca_days', '>', 10)->count();
+        // Define data
+        $days1 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 1)->count();
+        $days2 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 2)->count();
+        $days3 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 3)->count();
+        $days4 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 4)->count();
+        $days5 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 5)->count();
+        $daysover5 = Data::where('rca_time', '!=', null)->where('rca_days', '>', 5)->count();
 
-        $pie_data = ['High < 3 Days' => $high_sla, 'High > 3 Days' => $high_oversla, 'Medium < 6 Days' => $medium_sla, 'Medium > 6 Days' => $medium_oversla, 'Low < 10 Days' => $low_sla, 'Low > 10 Days' => $low_oversla];
+        $pie_data = ['1 Day' => $days1, '2 Days' => $days2, '3 Days' => $days3, '4 Days' => $days4, '5 Days' => $days5, 'Over 5 Days' => $daysover5];
 
         // Create pie chart & Insert to slide
         $pie3DChart = new Pie3D();
@@ -1827,7 +1775,6 @@ class WeeklyController extends Controller
             ->setWidth(410)
             ->setOffsetX(25)
             ->setOffsetY(150);
-
         $shape->getTitle()->setText('RCA Time');
         $shape->getTitle()->setVisible(false);
         $shape->getPlotArea()->setType($pie3DChart);
@@ -1839,7 +1786,6 @@ class WeeklyController extends Controller
         $shape->getBorder()->setLineWidth(1);
         $shape->getPlotArea()->getAxisY()->setIsVisible(false);
         $shape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
-
 
 
 
