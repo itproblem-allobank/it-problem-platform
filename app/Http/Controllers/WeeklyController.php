@@ -1559,6 +1559,7 @@ class WeeklyController extends Controller
 
         // Set judul chart
         $chartShape->getTitle()->setText('Problem Category Status Closed');
+        $chartShape->getTitle()->setVisible(false);
 
         // Mendapatkan objek sumbu
         $xAxis = $chartShape->getPlotArea()->getAxisX();
@@ -1675,6 +1676,7 @@ class WeeklyController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Service Request from Infomedia');
+        $chartShape->getTitle()->setVisible(false);
         // Mendapatkan objek sumbu
         $xAxis = $chartShape->getPlotArea()->getAxisX();
         $yAxis = $chartShape->getPlotArea()->getAxisY();
@@ -1749,6 +1751,7 @@ class WeeklyController extends Controller
         $chartShape->getPlotArea()->setType($chartType);
         // Set judul chart
         $chartShape->getTitle()->setText('Service Request from CC');
+        $chartShape->getTitle()->setVisible(false);
 
         // Mendapatkan objek sumbu
         $xAxis = $chartShape->getPlotArea()->getAxisX();
@@ -1802,7 +1805,6 @@ class WeeklyController extends Controller
 
         $pie_data = ['High < 3 Days' => $high_sla, 'High > 3 Days' => $high_oversla, 'Medium < 6 Days' => $medium_sla, 'Medium > 6 Days' => $medium_oversla, 'Low < 10 Days' => $low_sla, 'Low > 10 Days' => $low_oversla];
 
-        // dd($pie_data);
         // Create pie chart & Insert to slide
         $pie3DChart = new Pie3D();
         $pie3DChart->setExplosion(0);
@@ -1820,14 +1822,14 @@ class WeeklyController extends Controller
 
         /* Create a shape (chart) */
         $shape = $slide5->createChartShape();
-        $shape->setName('RCA Time')
-            ->setResizeProportional(false)
+        $shape->setResizeProportional(false)
             ->setHeight(215)
             ->setWidth(410)
             ->setOffsetX(25)
             ->setOffsetY(150);
 
         $shape->getTitle()->setText('RCA Time');
+        $shape->getTitle()->setVisible(false);
         $shape->getPlotArea()->setType($pie3DChart);
         $shape->getView3D()->setRotationX(40);
         $shape->getView3D()->setPerspective(10);
@@ -1890,13 +1892,13 @@ class WeeklyController extends Controller
 
         /* Create a shape (chart) */
         $shape = $slide5->createChartShape();
-        $shape->setName('Resolved Time')
-            ->setResizeProportional(false)
+        $shape->setResizeProportional(false)
             ->setHeight(215)
             ->setWidth(410)
             ->setOffsetX(845)
             ->setOffsetY(150);
         $shape->getTitle()->setText('Resolved Time');
+        $shape->getTitle()->setVisible(false);
         $shape->getPlotArea()->setType($pie3DChart);
         $shape->getView3D()->setRotationX(40);
         $shape->getView3D()->setPerspective(10);
