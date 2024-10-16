@@ -1172,6 +1172,189 @@ class WeeklyController extends Controller
             }
         }
 
+        // ---------- SLIDE TAMBAHAN (Detail Ticket RCA & Pending) ----------------
+
+        // Set mockup 
+        $slide_additional = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide_additional->addShape($backgroundImage);
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20);
+        $slide_additional->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        $shape = $slide_additional->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('Detail ticket RCA & Pending');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slide_additional->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(60);
+        $startdate = Carbon::parse($start_date)->format('d F Y');
+        $enddate = Carbon::parse($end_date)->format('d F Y');
+        $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
+        $textRun->getFont()->setSize(14);
+
+        // Define data
+        $detaildata = Data::where('status', '=', 'Pending')
+            ->union(Data::where('status',  '=', 'Root Cause Identified'))->get();
+
+        // dd($detaildata);
+
+        // ----------------- Create Table ------------------------------ 
+        $columns = 6;
+        $table = $slide_additional->createTableShape($columns);
+        $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        // Set table position & Size
+        $table->setheight(210);
+        $table->setwidth(610);
+        $table->setOffsetX(25);
+        $table->setOffsetY(100);
+
+        // DEFINE ARRAY
+        $tempdata = [
+            ['', 'Category', 'Summary', 'Created Date', 'Created-RCA Time', 'Resolved Time', 'Status & Complete Time'],
+        ];
+
+        // ADD ARRAY DATA
+        foreach ($detaildata as $key => $value) {
+            $tempstatus = $value->status;
+            if ($value->status == 'Root Cause Identified') {
+                $tempstatus = 'RC Identified';
+            }
+
+            if ($value->status == 'Closed') {
+                $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+            } else {
+                $status = $tempstatus . "\n" . '-';
+            }
+
+            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+            //convert date to carbon parse
+            $created = Carbon::parse($value->created);
+            $rcatime = Carbon::parse($value->rca_time);
+            $closed_time = Carbon::parse($value->closed_time);
+
+            //declare rca time
+            if ($value->rca_time == null) {
+                $rca_time = '-';
+            } else {
+                $rca_days = intval($created->diffInDays($rcatime));
+                $rca_days_string = strval($rca_days) . ' days';
+                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+            }
+
+            //declare completion time
+            if ($value->closed_time == null) {
+                $completion_time = '-';
+            } else {
+                $completion_days = intval($created->diffInDays($closed_time));
+                $completion_days_string = strval($completion_days) . ' Days';
+                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
+            }
+
+            $tempdata[] = [$value->problem, $value->category, $summary,  $created->format('d/m/y'), $rca_time,  $completion_time, $status];
+        }
+
+
+        // INSERT ARRAY TO TABLE
+        foreach ($tempdata as $rowIndex => $row) {
+            $tableRow = $table->createRow();
+            $tableRow->setHeight(25); // Set the height of the row
+            foreach ($row as $cellIndex => $cellText) {
+                if ($cellIndex == 0) {
+                    continue; // Lewati kolom yang disembunyikan
+                }
+
+                //set width
+                $cell = $tableRow->nextCell();
+                if ($cellIndex == 1) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(280);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(60);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(60);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(80);
+                }
+
+                //set status
+                $problem = $row[0];
+                $status = explode("\n", $row[6]);
+                $firstStatus = $status[0];
+                // $cell = $tableRow->nextCell();
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                //
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } else {
+                    if ($cellIndex != 6) {
+                        //coloring by problem
+                        if ($problem == 'Core & Surrounding') {
+                            $cell->getFill()->setStartColor(new Color('ff89a64e'));
+                        } else if ($problem == 'Ekosistem MPC') {
+                            $cell->getFill()->setStartColor(new Color('ff00b0f0'));
+                        } else if ($problem == 'Loan') {
+                            $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
+                        } else if ($problem == 'Onboarding') {
+                            $cell->getFill()->setStartColor(new Color('ff81ff63'));
+                        } else if ($problem == 'Online Payment') {
+                            $cell->getFill()->setStartColor(new Color('ff09b1a7'));
+                        } else if ($problem == 'Switching & 3rdparty') {
+                            $cell->getFill()->setStartColor(new Color('ffee52e1'));
+                        } else if ($problem == 'Transaction') {
+                            $cell->getFill()->setStartColor(new Color('ff8380ee'));
+                        } else if ($problem == 'Wholesale Banking') {
+                            $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                        } else {
+                            $cell->getFill()->setStartColor(new Color('ffffffff'));
+                        }
+                    } else if ($cellIndex == 6) {
+                        //coloring by status
+                        if ($firstStatus == 'Pending') {
+                            $cell->getFill()->setStartColor(new Color('fff6f610'));
+                        } elseif ($firstStatus == 'Closed') {
+                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                        } elseif ($firstStatus == 'RC Identified') {
+                            $cell->getFill()->setStartColor(new Color('fff85208'));
+                        } else {
+                            $cell->getFill()->setFillType(Fill::FILL_NONE);
+                        }
+                    } else {
+                        $cell->getFill()->setFillType(Fill::FILL_NONE);
+                    }
+                }
+            }
+        }
 
         // ----------- SLIDE 4 ----------------------------------
         $slide4 = $objPHPPresentation->createSlide();
