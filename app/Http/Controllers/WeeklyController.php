@@ -1222,7 +1222,7 @@ class WeeklyController extends Controller
         // dd($detaildata);
 
         // ----------------- Create Table ------------------------------ 
-        $columns = 6;
+        $columns = 4;
         $table = $slide_additional->createTableShape($columns);
         $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -1234,7 +1234,7 @@ class WeeklyController extends Controller
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'Category', 'Summary', 'Created Date', 'Created-RCA Time', 'Resolved Time', 'Status & Complete Time'],
+            ['', 'Category', 'Summary', 'Status' . "\n" . 'Created Date', 'Created-RCA Time'],
         ];
 
         // ADD ARRAY DATA
@@ -1244,11 +1244,7 @@ class WeeklyController extends Controller
                 $tempstatus = 'RC Identified';
             }
 
-            if ($value->status == 'Closed') {
-                $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
-            } else {
-                $status = $tempstatus . "\n" . '-';
-            }
+            $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
 
             $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
 
@@ -1275,7 +1271,7 @@ class WeeklyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, $value->category, $summary,  $created->format('d/m/y'), $rca_time,  $completion_time, $status];
+            $tempdata[] = [$value->problem, $value->category, $summary,  $status, $rca_time];
         }
 
 
@@ -1295,16 +1291,14 @@ class WeeklyController extends Controller
                 } else if ($cellIndex == 2) {
                     $cell->setWidth(280);
                 } else if ($cellIndex == 3) {
-                    $cell->setWidth(60);
+                    $cell->setWidth(80);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(60);
-                } else if ($cellIndex == 5) {
-                    $cell->setWidth(80);
                 }
 
                 //set status
                 $problem = $row[0];
-                $status = explode("\n", $row[6]);
+                $status = explode("\n", $row[3]);
                 $firstStatus = $status[0];
                 // $cell = $tableRow->nextCell();
                 $textRun = $cell->createTextRun($cellText);
@@ -1317,7 +1311,7 @@ class WeeklyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex != 6) {
+                    if ($cellIndex != 3) {
                         //coloring by problem
                         if ($problem == 'Core & Surrounding') {
                             $cell->getFill()->setStartColor(new Color('ff89a64e'));
@@ -1338,7 +1332,7 @@ class WeeklyController extends Controller
                         } else {
                             $cell->getFill()->setStartColor(new Color('ffffffff'));
                         }
-                    } else if ($cellIndex == 6) {
+                    } else if ($cellIndex == 3) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
                             $cell->getFill()->setStartColor(new Color('fff6f610'));
