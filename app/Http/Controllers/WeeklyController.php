@@ -258,69 +258,83 @@ class WeeklyController extends Controller
         $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
         $textRun->getFont()->setSize(14);
 
-
-        //data container category
+        // NEW
+        $lw_startdate = Carbon::parse($start_date)->subDays(7);
+        $lw_enddate = Carbon::parse($end_date)->subDays(7);
         $problem = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
-        // dd($problem);
-        $total = [];
+
         foreach ($problem as $key => $value) {
-            //count ticket existing
-            $high_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)
+            $high_lastweek = Data::where(DB::raw('DATE(created)'), '<', $start_date)
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'High')
                 ->whereIn('status', ['Root Cause Identified', 'Pending'])
+                ->union(Data::whereBetween(DB::raw('DATE(changed_at)'), [$lw_startdate, $lw_enddate])
+                    ->where('problem', '=', $value->problem)
+                    ->where('priority', '=', 'High')
+                    ->where('status', '=', 'Closed'))
                 ->count();
-            $medium_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)
+
+            $medium_lastweek = Data::where(DB::raw('DATE(created)'), '<', $start_date)
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Medium')
                 ->whereIn('status', ['Root Cause Identified', 'Pending'])
+                ->union(Data::whereBetween(DB::raw('DATE(changed_at)'), [$lw_startdate, $lw_enddate])
+                    ->where('problem', '=', $value->problem)
+                    ->where('priority', '=', 'Medium')
+                    ->where('status', '=', 'Closed'))
                 ->count();
-            $low_existing = Data::where(DB::raw('DATE(created)'), '<', $start_date)
+
+            $low_lastweek = Data::where(DB::raw('DATE(created)'), '<', $start_date)
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Low')
                 ->whereIn('status', ['Root Cause Identified', 'Pending'])
+                ->union(Data::whereBetween(DB::raw('DATE(changed_at)'), [$lw_startdate, $lw_enddate])
+                    ->where('problem', '=', $value->problem)
+                    ->where('priority', '=', 'Low')
+                    ->where('status', '=', 'Closed'))
                 ->count();
-            //count ticket created
-            $high_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+
+            $high_thisweek = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'High')
                 ->count();
-            $medium_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+
+            $medium_thisweek = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Medium')
                 ->count();
-            $low_now = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+
+            $low_thisweek = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Low')
                 ->count();
-            //count ticket closed
-            $highclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+
+            $high_closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
-                ->where('status', '=', 'Closed')
                 ->where('priority', '=', 'High')
-                ->count();
-            $mediumclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-                ->where('problem', '=', $value->problem)
                 ->where('status', '=', 'Closed')
+                ->count();
+
+            $medium_closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+                ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Medium')
-                ->count();
-            $lowclosed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-                ->where('problem', '=', $value->problem)
                 ->where('status', '=', 'Closed')
-                ->where('priority', '=', 'Low')
                 ->count();
 
-            //count total created
-            $totalcreated = $high_now + $medium_now + $low_now;
+            $low_closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+                ->where('problem', '=', $value->problem)
+                ->where('priority', '=', 'Low')
+                ->where('status', '=', 'Closed')
+                ->count();
 
-            $highexist = $high_existing + $highclosed;
-            $mediumexist = $medium_existing + $mediumclosed;
-            $lowexist = $low_existing + $lowclosed;
+            // COUNT DATA
+            $total_high = $high_lastweek + $high_thisweek - $high_closed_thisweek;
+            $total_medium = $medium_lastweek + $medium_thisweek - $medium_closed_thisweek;
+            $total_low = $low_lastweek + $low_thisweek - $low_closed_thisweek;
 
-            //count data priority
-            $countdata = $highexist + $mediumexist + $lowexist + $totalcreated - $highclosed - $mediumclosed - $lowclosed;
+            $total_count = $total_high + $total_medium + $total_low;
 
-            //set color by problem
+            // SET COLOR
             $color = '';
             if ($value->problem == 'Core & Surrounding') {
                 $color = 'ff89a64e';
@@ -342,24 +356,22 @@ class WeeklyController extends Controller
                 $color = 'ffffffff';
             }
 
-            //inject data to array
+
             $total[] = [
                 'problem' => $value->problem,
-                'total' => $countdata,
-                'high_existing' => $highexist,
-                'medium_existing' => $mediumexist,
-                'low_existing' => $lowexist,
-                'high' =>  $high_now,
-                'medium' => $medium_now,
-                'low' => $low_now,
-                'highclosed' => $highclosed,
-                'mediumclosed' => $mediumclosed,
-                'lowclosed' => $lowclosed,
-                'color' => $color
+                'total' => $total_count,
+                'color' => $color,
+                'high_lastweek' => $high_lastweek,
+                'medium_lastweek' => $medium_lastweek,
+                'low_lastweek' => $low_lastweek,
+                'high_thisweek' => $high_thisweek,
+                'medium_thisweek' => $medium_thisweek,
+                'low_thisweek' => $low_thisweek,
+                'high_closed_thisweek' => $high_closed_thisweek,
+                'medium_closed_thisweek' => $medium_closed_thisweek,
+                'low_closed_thisweek' => $low_closed_thisweek,
             ];
         }
-
-        // dd($total);
 
         function truncateString($string, $limit = 20)
         {
@@ -409,7 +421,11 @@ class WeeklyController extends Controller
 
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(20);
-            $value = [$data['high_existing'], $data['medium_existing'], $data['low_existing']];
+            $value = [
+                $data['high_lastweek'],
+                $data['medium_lastweek'],
+                $data['low_lastweek']
+            ];
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
                 $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
@@ -420,7 +436,12 @@ class WeeklyController extends Controller
 
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(20);
-            $value = [$data['high'], $data['medium'], $data['low']];
+            $value = [
+                $data['high_thisweek'],
+                $data['medium_thisweek'],
+                $data['low_thisweek']
+            ];
+            
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
                 $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
@@ -431,7 +452,12 @@ class WeeklyController extends Controller
 
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(20);
-            $value = [$data['highclosed'], $data['mediumclosed'], $data['lowclosed']];
+            $value = [
+                $data['high_closed_thisweek'],
+                $data['medium_closed_thisweek'],
+                $data['low_closed_thisweek']
+            ];
+
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
                 $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
@@ -444,33 +470,21 @@ class WeeklyController extends Controller
             $offsetx = $offsetx + 155;
         }
 
-        $totalexisting = 0;
-        $totalcreated = 0;
-        $totalclosed = 0;
-        $totalhigh = 0;
-        $totalmed = 0;
-        $totallow = 0;
-        foreach ($total as $key => $value) {
-            $totalexisting += $value["high_existing"] + $value["medium_existing"] + $value["low_existing"];
-            $totalcreated += $value["high"] + $value["medium"] + $value["low"];
-            $totalclosed += $value["highclosed"] + $value["mediumclosed"] + $value["lowclosed"];
-            $totalhigh += $value["high_existing"] + $value["high"]  - $value["highclosed"];
-            $totalmed += $value["medium_existing"] + $value["medium"] - $value["mediumclosed"];
-            $totallow += $value["low_existing"] + $value["low"] - $value["lowclosed"];
-        }
-        // dd($totalcreated, $totalclosed, $totalexisting, $totalhigh);
+        $total_last_week = 0;
+        $total_this_week = 0;
+        $total_closed_this_week = 0;
+        $total_high = 0; 
+        $total_medium = 0;
+        $total_low = 0;
 
-        // Total High, Med & Low
-        // $shape = $slide3->createRichTextShape();
-        // $shape->setHeight(25)
-        //     ->setWidth(500)
-        //     ->setOffsetX(850)
-        //     ->setOffsetY(65);
-        // $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        // $textRun = $shape->createTextRun('Total High: ' . $totalhigh . ' | Total Medium: ' . $totalmed . ' | Total Low: ' . $totallow);
-        // $textRun->getFont()->setBold(true)
-        //     ->setSize(14)
-        //     ->setColor(new Color(Color::COLOR_BLACK));
+        foreach ($total as $key => $value) {
+            $total_last_week += $value["high_lastweek"] + $value["medium_lastweek"] + $value["low_lastweek"];
+            $total_this_week += $value["high_thisweek"] + $value["medium_thisweek"] + $value["low_thisweek"];
+            $total_closed_this_week += $value["high_closed_thisweek"] + $value["medium_closed_thisweek"] + $value["low_closed_thisweek"];
+            $total_high += $value["high_lastweek"] + $value["high_thisweek"] - $value["high_closed_thisweek"];
+            $total_medium += $value["medium_lastweek"] + $value["medium_thisweek"] - $value["medium_closed_thisweek"];
+            $total_low += $value["low_lastweek"] + $value["low_thisweek"] - $value["low_closed_thisweek"];
+        }
 
         // Total HIGH, MED, LOW
         $tableShape = $slide3->createTableShape(3);
@@ -482,7 +496,7 @@ class WeeklyController extends Controller
         //row title
         $rowShape = $tableShape->createRow();
         $rowShape->setHeight(20);
-        $val = [['status' => 'Total High', 'color' => 'FFFF0000', 'value' => $totalhigh], ['status' => 'Total Medium', 'color' => 'fffeb909', 'value' => $totalmed], ['status' => 'Total Low', 'color' => 'fffffe00', 'value' => $totallow]];
+        $val = [['status' => 'Total High', 'color' => 'FFFF0000', 'value' => $total_high], ['status' => 'Total Medium', 'color' => 'fffeb909', 'value' => $total_medium], ['status' => 'Total Low', 'color' => 'fffffe00', 'value' => $total_low]];
         foreach ($val as $key => $v) {
             $cell = $rowShape->nextCell();
             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
@@ -525,7 +539,7 @@ class WeeklyController extends Controller
             ->setOffsetX(1247)
             ->setOffsetY(155);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $shape->createTextRun($totalexisting);
+        $textRun = $shape->createTextRun($total_last_week);
         $textRun->getFont()->setBold(true)
             ->setSize(12)
             ->setColor(new Color(Color::COLOR_BLACK));
@@ -537,7 +551,7 @@ class WeeklyController extends Controller
             ->setOffsetX(1247)
             ->setOffsetY(175);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $shape->createTextRun($totalcreated);
+        $textRun = $shape->createTextRun($total_this_week);
         $textRun->getFont()->setBold(true)
             ->setSize(12)
             ->setColor(new Color(Color::COLOR_BLACK));
@@ -549,7 +563,7 @@ class WeeklyController extends Controller
             ->setOffsetX(1247)
             ->setOffsetY(195);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $shape->createTextRun($totalclosed);
+        $textRun = $shape->createTextRun($total_closed_this_week);
         $textRun->getFont()->setBold(true)
             ->setSize(12)
             ->setColor(new Color(Color::COLOR_BLACK));
@@ -1709,7 +1723,7 @@ class WeeklyController extends Controller
             $chartType->addSeries($series);
         }
 
-        
+
         // detail ticket closed last week & Last month
         $tableShape1 = $slide5->createTableShape(1);
         $tableShape1->setHeight(95);
