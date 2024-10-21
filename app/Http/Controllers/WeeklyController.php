@@ -1709,20 +1709,20 @@ class WeeklyController extends Controller
             $chartType->addSeries($series);
         }
 
+        
         // detail ticket closed last week & Last month
-        $tableShape = $slide5->createTableShape(1);
-        $tableShape->setHeight(100);
-        $tableShape->setWidth(150);
-        $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(375);
+        $tableShape1 = $slide5->createTableShape(1);
+        $tableShape1->setHeight(95);
+        $tableShape1->setWidth(205);
+        $tableShape1->setOffsetX(435);
+        $tableShape1->setOffsetY(365);
 
         // set data last week
         $startlw = Carbon::parse($start_date)->subDays(7)->format('d/m/y');
         $endlw = Carbon::parse($start_date)->subDays(1)->format('d/m/y');
         $datalw = Data::where(DB::raw('DATE(changed_at)'), '<=', Carbon::parse($start_date)->subDays(1))->where('status', '=', 'Closed')->count();
 
-        // Menambah baris pertama
-        $row = $tableShape->createRow();
+        $row = $tableShape1->createRow();
         $cell = $row->nextCell();
         $cell->createTextRun('Closed Last Week');
         $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FF5A9BD5')); // Warna biru
@@ -1733,6 +1733,13 @@ class WeeklyController extends Controller
         $cell->createBreak();
         $cell->createTextRun(strval($datalw))->getFont()->setBold(true)->setSize(20);
 
+
+        $tableShape2 = $slide5->createTableShape(1);
+        $tableShape2->setHeight(95);
+        $tableShape2->setWidth(205);
+        $tableShape2->setOffsetX(640);
+        $tableShape2->setOffsetY(365);
+
         // set data last month
         $month = Carbon::parse($start_date)->subMonth(1)->format('F Y');
         $endDate = Carbon::parse($start_date)->subMonth(1)->endOfMonth();
@@ -1741,7 +1748,7 @@ class WeeklyController extends Controller
             ->count();
 
         // Menambah baris kedua
-        $row = $tableShape->createRow();
+        $row = $tableShape2->createRow();
         $cell = $row->nextCell();
         $cell->createTextRun('Closed Last Month');
         $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFDBE5F1')); // Warna abu muda
@@ -1779,8 +1786,8 @@ class WeeklyController extends Controller
         $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $titleTable->setHeight(50);
         $titleTable->setWidth(410);
-        $titleTable->setOffsetX(225);
-        $titleTable->setOffsetY(375);
+        $titleTable->setOffsetX(230);
+        $titleTable->setOffsetY(425);
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -1795,8 +1802,8 @@ class WeeklyController extends Controller
         $chartShape = $slide5->createChartShape();
         $chartShape->setHeight(215)
             ->setWidth(410)
-            ->setOffsetX(225)
-            ->setOffsetY(425);
+            ->setOffsetX(230)
+            ->setOffsetY(475);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -1854,8 +1861,8 @@ class WeeklyController extends Controller
         $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $titleTable->setHeight(50);
         $titleTable->setWidth(410);
-        $titleTable->setOffsetX(635);
-        $titleTable->setOffsetY(375);
+        $titleTable->setOffsetX(640);
+        $titleTable->setOffsetY(425);
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -1870,8 +1877,8 @@ class WeeklyController extends Controller
         $chartShape = $slide5->createChartShape();
         $chartShape->setHeight(215)
             ->setWidth(410)
-            ->setOffsetX(635)
-            ->setOffsetY(425);
+            ->setOffsetX(640)
+            ->setOffsetY(475);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
