@@ -1975,9 +1975,9 @@ class WeeklyController extends Controller
         $days3 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 3)->count();
         $days4 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 4)->count();
         $days5 = Data::where('rca_time', '!=', null)->where('rca_days', '=', 5)->count();
-        $daysover5 = Data::where('rca_time', '!=', null)->where('rca_days', '>', 5)->count();
+        // $daysover5 = Data::where('rca_time', '!=', null)->where('rca_days', '>', 5)->count();
 
-        $pie_data = ['1 Day' => $days1, '2 Days' => $days2, '3 Days' => $days3, '4 Days' => $days4, '5 Days' => $days5, 'Over 5 Days' => $daysover5];
+        $pie_data = ['1 Day' => $days1, '2 Days' => $days2, '3 Days' => $days3, '4 Days' => $days4, '5 Days' => $days5];
 
         // Create pie chart & Insert to slide
         $pie3DChart = new Pie3D();
