@@ -268,7 +268,8 @@ class WeeklyController extends Controller
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'High')
                 ->whereIn('status', ['Root Cause Identified', 'Pending'])
-                ->union(Data::whereBetween(DB::raw('DATE(changed_at)'), [$lw_startdate, $lw_enddate])
+                ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
+                    ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
                     ->where('problem', '=', $value->problem)
                     ->where('priority', '=', 'High')
                     ->where('status', '=', 'Closed'))
@@ -278,7 +279,8 @@ class WeeklyController extends Controller
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Medium')
                 ->whereIn('status', ['Root Cause Identified', 'Pending'])
-                ->union(Data::whereBetween(DB::raw('DATE(changed_at)'), [$lw_startdate, $lw_enddate])
+                ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
+                    ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
                     ->where('problem', '=', $value->problem)
                     ->where('priority', '=', 'Medium')
                     ->where('status', '=', 'Closed'))
@@ -288,7 +290,8 @@ class WeeklyController extends Controller
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Low')
                 ->whereIn('status', ['Root Cause Identified', 'Pending'])
-                ->union(Data::whereBetween(DB::raw('DATE(changed_at)'), [$lw_startdate, $lw_enddate])
+                ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
+                    ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
                     ->where('problem', '=', $value->problem)
                     ->where('priority', '=', 'Low')
                     ->where('status', '=', 'Closed'))
@@ -373,6 +376,31 @@ class WeeklyController extends Controller
             ];
         }
 
+        //
+        // $high_lastweek = Data::where(DB::raw('DATE(created)'), '<', $start_date)
+        //     ->where('problem', '=', 'Ekosistem MPC')
+        //     ->where('priority', '=', 'High')
+        //     ->whereIn('status', ['Root Cause Identified', 'Pending'])
+        //     ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
+        //         ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
+        //         ->where('problem', '=', 'Ekosistem MPC')
+        //         ->where('priority', '=', 'High')
+        //         ->where('status', '=', 'Closed'))
+        //     ->count();
+        // $high_thisweek = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+        //     ->where('problem', '=', 'Ekosistem MPC')
+        //     ->where('priority', '=', 'High')
+        //     ->count();
+        // $high_closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+        //     ->where('problem', '=', 'Ekosistem MPC')
+        //     ->where('priority', '=', 'High')
+        //     ->where('status', '=', 'Closed')
+        //     ->count();
+
+
+        // dd($high_lastweek, $high_thisweek, $high_closed_thisweek);
+        //
+
         function truncateString($string, $limit = 20)
         {
             if (strlen($string) > $limit) {
@@ -441,7 +469,7 @@ class WeeklyController extends Controller
                 $data['medium_thisweek'],
                 $data['low_thisweek']
             ];
-            
+
             foreach ($value as $key => $v) {
                 $cell = $rowShape->nextCell();
                 $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
@@ -473,7 +501,7 @@ class WeeklyController extends Controller
         $total_last_week = 0;
         $total_this_week = 0;
         $total_closed_this_week = 0;
-        $total_high = 0; 
+        $total_high = 0;
         $total_medium = 0;
         $total_low = 0;
 
