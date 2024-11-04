@@ -611,10 +611,6 @@ class WeeklyController extends Controller
                 ->where('problem', '=', $value->problem)
                 ->where('status', '=', 'Pending')
                 ->count();
-            // $closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-            //     ->where('problem', '=', $value->problem)
-            //     ->where('status', '=', 'Closed')
-            //     ->count();
 
             //set color to chart
             $color = '';
