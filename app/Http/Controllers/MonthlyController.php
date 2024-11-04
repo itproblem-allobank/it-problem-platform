@@ -648,6 +648,7 @@ class MonthlyController extends Controller
         $resultdata_chart2 = [];
         foreach ($data_chart2 as $key => $value) {
             $closed = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), Carbon::parse($end_date)->subMonths(1)])->where('status', '=', 'Closed')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
+            $rcidentified = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), Carbon::parse($end_date)->subMonths(1)])->where('status', '=', 'Root Cause Identified')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
             $pending = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), Carbon::parse($end_date)->subMonths(1)])->where('status', '=', 'Pending')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
             $totalCount = $data_chart2->sum('count');
             $totalValue = $closed + $pending;
@@ -657,6 +658,7 @@ class MonthlyController extends Controller
                 'month' => Carbon::create()->month(intval($value->month))->format('F'),
                 'count' => $value->count,
                 'closed' => $closed,
+                'rcidentified' => $rcidentified,
                 'pending' => $pending,
                 'percentage' => $percentage
             ];
@@ -691,14 +693,20 @@ class MonthlyController extends Controller
         foreach ($resultdata_chart2 as $key => $value) {
             $dataclosed[$value['month'] . "\n" . ' (' . $value['percentage'] . '%)'] = $value['closed'];
         }
+        $datarcidentified = [];
+        foreach ($resultdata_chart2 as $key => $value) {
+            $datarcidentified[$value['month'] . "\n" . ' (' . $value['percentage'] . '%)'] = $value['rcidentified'];
+        }
         $datapending = [];
         foreach ($resultdata_chart2 as $key => $value) {
             $datapending[$value['month'] . "\n" . ' (' . $value['percentage'] . '%)'] = $value['pending'];
         }
 
         $series = new Series('Closed', $dataclosed);
+        $series1 = new Series('Root Cause Identified', $datarcidentified);
         $series2 = new Series('Pending', $datapending);
         $chartType->addSeries($series);
+        $chartType->addSeries($series1);
         $chartType->addSeries($series2);
 
         // Chart 3 Ticket Service Request Jira
@@ -747,15 +755,17 @@ class MonthlyController extends Controller
         }
 
         //Chart 5 Problem by Assignee & Status
-        $data_chart5 = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('nickname', DB::raw('count(*) as count'))->groupBy('nickname')->get();
+        $data_chart5 = Data::select('nickname', DB::raw('count(*) as count'))->groupBy('nickname')->get();
         $resultdata_chart5 = [];
         foreach ($data_chart5 as $key => $value) {
-            $closed = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Closed')->get()->count();
+            $closed = Data::whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Closed')->get()->count();
+            $rcidentified = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Root Cause Identified')->get()->count();
             $pending = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Pending')->get()->count();
             $resultdata_chart5[] = [
                 'nickname' => $value->nickname,
                 'count' => $value->count,
                 'closed' => $closed,
+                'rcidentified' => $rcidentified,
                 'pending' => $pending
             ];
         }
@@ -763,6 +773,10 @@ class MonthlyController extends Controller
         $data_closed = [];
         foreach ($resultdata_chart5 as $key => $value) {
             $data_closed[$value['nickname']] = $value['closed'];
+        }
+        $data_rcidentified = [];
+        foreach ($resultdata_chart5 as $key => $value) {
+            $data_rcidentified[$value['nickname']] = $value['rcidentified'];
         }
         $data_pending = [];
         foreach ($resultdata_chart5 as $key => $value) {
@@ -787,9 +801,11 @@ class MonthlyController extends Controller
         $yAxis->setTitle('');
         // Tambahkan seri data ke chart
         $series1 = new Series('Closed', $data_closed);
-        $series2 = new Series('Pending', $data_pending);
+        $series2 = new Series('Root Cause Identified', $data_rcidentified);
+        $series3 = new Series('Pending', $data_pending);
         $chartType->addSeries($series1);
         $chartType->addSeries($series2);
+        $chartType->addSeries($series3);
         // Chart Bordered
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
