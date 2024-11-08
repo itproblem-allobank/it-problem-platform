@@ -21,6 +21,8 @@ use PhpOffice\PhpPresentation\Shape\Chart\Type\Line;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\DataExport;
+use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie3D;
+use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie;
 use ZipArchive;
 
 use Exception;
@@ -636,12 +638,12 @@ class MonthlyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart1 as $key => $value) {
-            $series = new Series($value['problem'], [ 'Closed' => $value['count_closed'] ,'RC Identified' => $value['count_RCI'], 'Pending' => $value['count_pending']]);
+            $series = new Series($value['problem'], ['Closed' => $value['count_closed'], 'RC Identified' => $value['count_RCI'], 'Pending' => $value['count_pending']]);
             $series->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($value['color'])); // Blue
             $chartType->addSeries($series);
         }
 
-          // -------------------- CHART 2 ---------------------
+        // -------------------- CHART 2 ---------------------
         $data_chart2 = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), Carbon::parse($end_date)->subMonths(1)])->select(DB::raw('MONTH(created) as month'), DB::raw('count(*) as count'))
             ->groupBy(DB::raw('MONTH(created)'))
             ->get();
@@ -919,6 +921,115 @@ class MonthlyController extends Controller
         $chartType->addSeries($closed);
 
 
+        // ----------------- ADDITIONAL SLIDE ----------------
+        $additionalslide = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $additionalslide->addShape($backgroundImage);
+
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(1050); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(20); // Posisi vertikal gambar
+        $additionalslide->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        // Tambahkan teks judul slide
+        $shape = $additionalslide->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(700)
+            ->setOffsetX(50)
+            ->setOffsetY(25);
+        $textRun = $shape->createTextRun('Report IT Problem');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+
+        // -------------- SET CHART --------------------------
+        // set title chart
+        $titleTable = $additionalslide->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(410);
+        $titleTable->setOffsetX(25);
+        $titleTable->setOffsetY(100);
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $textRun1 = $titleTable->createTextRun('IT Problem Ticket RCA Time');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10);
+        $textRun2 = $titleTable->createTextRun("\nCounting IT Problem Tickets by RCA Time Identified (8 Sept - Present)");
+        $textRun2->getFont()->setSize(9);
+
+        // Define data
+        $days1 = Data::where('created', '>=', '2024-09-01')
+            ->where('rca_time', '!=', null)->where('rca_days', '=', 1)
+            ->count();
+        $days2 = Data::where('created', '>=', '2024-09-01')
+            ->where('rca_time', '!=', null)->where('rca_days', '=', 2)
+            ->count();
+        $days3 = Data::where('created', '>=', '2024-09-01')
+            ->where('rca_time', '!=', null)->where('rca_days', '=', 3)
+            ->count();
+        $days4 = Data::where('created', '>=', '2024-09-01')
+            ->where('rca_time', '!=', null)->where('rca_days', '=', 4)
+            ->count();
+        $days5 = Data::where('created', '>=', '2024-09-01')
+            ->where('rca_time', '!=', null)->where('rca_days', '=', 5)
+            ->count();
+        // $daysover5 = Data::where('rca_time', '!=', null)->where('rca_days', '>', 5)->count();
+
+        $pie_data = ['1 Day' => $days1, '2 Days' => $days2, '3 Days' => $days3, '4 Days' => $days4, '5 Days' => $days5];
+
+        // Create pie chart & Insert to slide
+        $pie3DChart = new Pie();
+        $pie3DChart->setExplosion(0);
+        $series = new Series('RCA Time', $pie_data);
+        $series->setShowPercentage(true);
+        $series->setShowValue(true);
+        $series->setShowSeriesName(false);
+        $series->getDataPointFill(0)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffff0000'));
+        $series->getDataPointFill(1)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFF4C4C'));
+        $series->getDataPointFill(2)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffeb909'));
+        $series->getDataPointFill(3)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFC634'));
+        $series->getDataPointFill(4)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffffe00'));
+        $series->getDataPointFill(5)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFCFB84'));
+        $pie3DChart->addSeries($series);
+
+        /* Create a shape (chart) */
+        $shape = $additionalslide->createChartShape();
+        $shape->setResizeProportional(false)
+            ->setHeight(215)
+            ->setWidth(410)
+            ->setOffsetX(25)
+            ->setOffsetY(150);
+        $shape->getTitle()->setText('RCA Time');
+        $shape->getTitle()->setVisible(false);
+        $shape->getPlotArea()->setType($pie3DChart);
+        $shape->getView3D()->setRotationX(40);
+        $shape->getView3D()->setPerspective(10);
+        //set borders
+        $shape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $shape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $shape->getBorder()->setLineWidth(1);
+        $shape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $shape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+        //
+
+
+        
         //Slide 4
         $slide4 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
