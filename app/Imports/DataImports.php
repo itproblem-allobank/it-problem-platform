@@ -45,6 +45,7 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
         $changed = gmdate("Y-m-d H:i:s", $row19);
 
         // set RCA Time
+        $rca_fix = null;
         if ($row[20] == null) {
             $rca_time = null;
             $rca_days = null;
@@ -52,6 +53,12 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
             $row20 = ($row[20] - 25569) * 86400;
             $rca_time = gmdate("Y-m-d H:i:s", $row20);
             $rca_days = Carbon::parse($created)->diffInDays(Carbon::parse($rca_time));
+            // dd($rca_days);
+            if ($rca_days <= 1) {
+                $rca_fix = 1;
+            } else {
+                $rca_fix = $rca_days;
+            }
         }
 
         // set Closed Time
@@ -100,7 +107,7 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
             'rca_time'          => $rca_time,
             'closed_time'       => $closed_time,
             'resolved_days'     => $resolved_days,
-            'rca_days'          => $rca_days
+            'rca_days'          => $rca_fix
         ];
 
         $assignee_too = $row[13];
