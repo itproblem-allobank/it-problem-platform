@@ -581,21 +581,22 @@ class MonthlyController extends Controller
                 ->where('status', '=', 'Pending')
                 ->count();
 
+            // SET COLOR
             $color = '';
             if ($value->problem == 'Core & Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
-                $color = 'ff93aacf';
+                $color = 'ff00b0f0';
             } else if ($value->problem == 'Loan') {
                 $color = 'ffa6a6a6';
             } else if ($value->problem == 'Onboarding') {
-                $color = 'fff79646';
+                $color = 'ff81ff63';
             } else if ($value->problem == 'Online Payment') {
-                $color = 'ff4f81bd';
+                $color = 'ff09b1a7';
             } else if ($value->problem == 'Switching & 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
-                $color = 'ffffc000';
+                $color = 'ff8380ee';
             } else if ($value->problem == 'Wholesale Banking') {
                 $color = 'ff8064a2';
             } else {
@@ -1029,7 +1030,7 @@ class MonthlyController extends Controller
         //
 
 
-        
+
         //Slide 4
         $slide4 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
