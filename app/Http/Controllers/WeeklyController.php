@@ -2054,6 +2054,7 @@ class WeeklyController extends Controller
         foreach ($data_chart4 as $key => $value) {
             $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
             $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
+            $status_pending = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Pending')->get()->count();
             $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
             $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%' . 'Approval' . '%')->get()->count();
             $status_inprogress = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'In Progress')->get()->count();
@@ -2064,6 +2065,7 @@ class WeeklyController extends Controller
                     'sub_category' => $value->sub_category,
                     'total' => $total,
                     'count_closed' => $status_closed,
+                    'count_pending' => $status_pending,
                     'count_declined' => $status_declined,
                     'count_approval' => $status_approval,
                     'count_inprogress' => $status_inprogress,
@@ -2120,7 +2122,7 @@ class WeeklyController extends Controller
 
         // Tambahkan seri data ke chart
         foreach ($resultdata_chart4 as $key => $value) {
-            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'Process on DBA' => $value['count_assignedtoDBA'], 'Process on Problem' => $value['count_inprogress'], 'User Confirmation' => $value['count_userconfirmation']]);
+            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Pending' => $value['count_pending'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'Process on DBA' => $value['count_assignedtoDBA'], 'Process on Problem' => $value['count_inprogress'], 'User Confirmation' => $value['count_userconfirmation']]);
             $chartType->addSeries($series);
         }
 
