@@ -2147,24 +2147,30 @@ class WeeklyController extends Controller
         $textRun2->getFont()->setSize(9);
 
         // Define data
-        $days1 = Data::where('created', '>=', '2024-09-01')
-            ->where('rca_time', '!=', null)->where('rca_days', '=', 1)
+        $days1 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->where('rca_days', '=', 1)
             ->count();
-        $days2 = Data::where('created', '>=', '2024-09-01')
-            ->where('rca_time', '!=', null)->where('rca_days', '=', 2)
+        $days2 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->where('rca_days', '=', 2)
             ->count();
-        $days3 = Data::where('created', '>=', '2024-09-01')
-            ->where('rca_time', '!=', null)->where('rca_days', '=', 3)
+        $days3 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->where('rca_days', '=', 3)
             ->count();
-        $days4 = Data::where('created', '>=', '2024-09-01')
-            ->where('rca_time', '!=', null)->where('rca_days', '=', 4)
+        $days4 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->where('rca_days', '=', 4)
             ->count();
-        $days5 = Data::where('created', '>=', '2024-09-01')
-            ->where('rca_time', '!=', null)->where('rca_days', '=', 5)
+        $days5 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->where('rca_days', '=', 5)
             ->count();
-        // $daysover5 = Data::where('rca_time', '!=', null)->where('rca_days', '>', 5)->count();
 
         $pie_data = ['1 Day' => $days1, '2 Days' => $days2, '3 Days' => $days3, '4 Days' => $days4, '5 Days' => $days5];
+
+        // dd($pie_data);
 
         // Create pie chart & Insert to slide
         $pie3DChart = new Pie3D();
