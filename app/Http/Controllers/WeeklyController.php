@@ -376,31 +376,6 @@ class WeeklyController extends Controller
             ];
         }
 
-        //
-        // $high_lastweek = Data::where(DB::raw('DATE(created)'), '<', $start_date)
-        //     ->where('problem', '=', 'Ekosistem MPC')
-        //     ->where('priority', '=', 'High')
-        //     ->whereIn('status', ['Root Cause Identified', 'Pending'])
-        //     ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
-        //         ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
-        //         ->where('problem', '=', 'Ekosistem MPC')
-        //         ->where('priority', '=', 'High')
-        //         ->where('status', '=', 'Closed'))
-        //     ->count();
-        // $high_thisweek = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-        //     ->where('problem', '=', 'Ekosistem MPC')
-        //     ->where('priority', '=', 'High')
-        //     ->count();
-        // $high_closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-        //     ->where('problem', '=', 'Ekosistem MPC')
-        //     ->where('priority', '=', 'High')
-        //     ->where('status', '=', 'Closed')
-        //     ->count();
-
-
-        // dd($high_lastweek, $high_thisweek, $high_closed_thisweek);
-        //
-
         function truncateString($string, $limit = 20)
         {
             if (strlen($string) > $limit) {
@@ -1210,6 +1185,49 @@ class WeeklyController extends Controller
             }
         }
 
+        // ----------- SLIDE ENHANCEMENT ------------------------
+        $slideEnhancement = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slideEnhancement->addShape($backgroundImage);
+
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20);
+        $slideEnhancement->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        // Tambahkan teks judul slide
+        $shape = $slideEnhancement->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('IT Problem - Enhancement');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slideEnhancement->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(60);
+        $startdate = Carbon::parse($start_date)->format('d F Y');
+        $enddate = Carbon::parse($end_date)->format('d F Y');
+        $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
+        $textRun->getFont()->setSize(14);
+
         // ---------- SLIDE TAMBAHAN (Detail Ticket RCA & Pending) ----------------
 
         // Set mockup 
@@ -1387,6 +1405,7 @@ class WeeklyController extends Controller
                 }
             }
         }
+
 
         // ----------- SLIDE 4 ----------------------------------
         $slide4 = $objPHPPresentation->createSlide();
