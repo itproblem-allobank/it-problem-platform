@@ -259,9 +259,9 @@ class WeeklyController extends Controller
         $textRun->getFont()->setSize(14);
 
         // NEW
-        $lw_startdate = Carbon::parse($start_date)->subDays(7);
-        $lw_enddate = Carbon::parse($end_date)->subDays(7);
-        $problem = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        $problem = Data::select('problem', DB::raw('count(*) as count'))
+        ->where('problem', '!=', 'Enhancement')
+        ->groupBy('problem')->get();
 
         foreach ($problem as $key => $value) {
             $high_lastweek = Data::where(DB::raw('DATE(created)'), '<', $start_date)
@@ -575,7 +575,11 @@ class WeeklyController extends Controller
 
 
         // -------------------- CHART 1 ---------------------
-        $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
+        ->select('problem', DB::raw('count(*) as count'))
+        ->where('problem', '!=', 'Enhancement')
+        ->groupBy('problem')
+        ->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
             $status_RCI = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
