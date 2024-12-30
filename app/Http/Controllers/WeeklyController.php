@@ -1244,12 +1244,15 @@ class WeeklyController extends Controller
         $tableShape->setOffsetY(110);
 
         // GET DATA FROM DATABASE
-        $data_table = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-            ->where('problem', '!=', 'Enhancement')
+        $data_table = Data::
+            // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
             ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             ->union(
-                Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+                Data::
+                    // whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+                    where('problem', '=', 'Enhancement')
                     ->where('status', '=', 'Closed')
                     ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             )
@@ -1433,82 +1436,82 @@ class WeeklyController extends Controller
         $enhancement_count = $enhancement_high + $enhancement_medium + $enhancement_low;
 
         $tableShape = $slideEnhancement->createTableShape(3);
-            $tableShape->setHeight(100);
-            $tableShape->setWidth(144);
-            $tableShape->setOffsetX(1100);
-            $tableShape->setOffsetY(80);
+        $tableShape->setHeight(100);
+        $tableShape->setWidth(144);
+        $tableShape->setOffsetX(1100);
+        $tableShape->setOffsetY(80);
 
-            //row judul
-            $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(40);
+        //row judul
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(40);
+        $cell = $rowShape->nextCell();
+        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $cell->setColSpan(3);
+        $textRun = $cell->createTextRun($enhancement_count . "\n" . truncateString('Enhancement'));
+        $textRun->getFont()->setBold(true);
+        $textRun->getFont()->setSize(12);
+
+        //row title
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(20);
+        $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'fffeb909'], ['status' => 'Low', 'color' => 'fffffe00']];
+        foreach ($val as $key => $v) {
+            $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $textRun = $cell->createTextRun($v['status']);
+            $textRun->getFont()->setBold(true);
+        }
+
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(20);
+        $value = [
+            $high_lastweek_enhancement,
+            $medium_lastweek_enhancement,
+            $low_lastweek_enhancement
+        ];
+        foreach ($value as $key => $v) {
             $cell = $rowShape->nextCell();
             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
             $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $cell->setColSpan(3);
-            $textRun = $cell->createTextRun($enhancement_count . "\n" . truncateString('Enhancement'));
-            $textRun->getFont()->setBold(true);
-            $textRun->getFont()->setSize(12);
+            $cell->createTextRun($v);
+        }
 
-            //row title
-            $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(20);
-            $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'fffeb909'], ['status' => 'Low', 'color' => 'fffffe00']];
-            foreach ($val as $key => $v) {
-                $cell = $rowShape->nextCell();
-                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $textRun = $cell->createTextRun($v['status']);
-                $textRun->getFont()->setBold(true);
-            }
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(20);
+        $value = [
+            $high_thisweek_enhancement,
+            $medium_thisweek_enhancement,
+            $low_thisweek_enhancement
+        ];
 
-            $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(20);
-            $value = [
-                $high_lastweek_enhancement,
-                $medium_lastweek_enhancement,
-                $low_lastweek_enhancement
-            ];
-            foreach ($value as $key => $v) {
-                $cell = $rowShape->nextCell();
-                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $cell->createTextRun($v);
-            }
+        foreach ($value as $key => $v) {
+            $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $cell->createTextRun($v);
+        }
 
-            $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(20);
-            $value = [
-                $high_thisweek_enhancement,
-                $medium_thisweek_enhancement,
-                $low_thisweek_enhancement
-            ];
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(20);
+        $value = [
+            $high_closed_thisweek_enhancement,
+            $medium_closed_thisweek_enhancement,
+            $low_closed_thisweek_enhancement
+        ];
 
-            foreach ($value as $key => $v) {
-                $cell = $rowShape->nextCell();
-                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $cell->createTextRun($v);
-            }
-
-            $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(20);
-            $value = [
-                $high_closed_thisweek_enhancement,
-                $medium_closed_thisweek_enhancement,
-                $low_closed_thisweek_enhancement
-            ];
-
-            foreach ($value as $key => $v) {
-                $cell = $rowShape->nextCell();
-                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $cell->createTextRun($v);
-            }
+        foreach ($value as $key => $v) {
+            $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $cell->createTextRun($v);
+        }
 
         // ---------- SLIDE TAMBAHAN (Detail Ticket RCA & Pending) ----------------
 
