@@ -1241,7 +1241,7 @@ class WeeklyController extends Controller
         $tableShape->setHeight(210);
         $tableShape->setWidth(810);
         $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(100);
+        $tableShape->setOffsetY(110);
 
         // GET DATA FROM DATABASE
         $data_table = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
@@ -1359,6 +1359,156 @@ class WeeklyController extends Controller
             }
         }
 
+        // Detail High, Medium, Low Enhancement
+        $high_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'High')
+            ->whereIn('status', ['Root Cause Identified', 'Pending'])
+            ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
+                ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
+                ->where('problem', '=', 'Enhancement')
+                ->where('priority', '=', 'High')
+                ->where('status', '=', 'Closed'))
+            ->count();
+
+        $medium_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Medium')
+            ->whereIn('status', ['Root Cause Identified', 'Pending'])
+            ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
+                ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
+                ->where('problem', '=', 'Enhancement')
+                ->where('priority', '=', 'Medium')
+                ->where('status', '=', 'Closed'))
+            ->count();
+
+        $low_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Low')
+            ->whereIn('status', ['Root Cause Identified', 'Pending'])
+            ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
+                ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
+                ->where('problem', '=', 'Enhancement')
+                ->where('priority', '=', 'Low')
+                ->where('status', '=', 'Closed'))
+            ->count();
+
+        $high_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'High')
+            ->count();
+
+        $medium_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Medium')
+            ->count();
+
+        $low_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Low')
+            ->count();
+
+        $high_closed_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'High')
+            ->where('status', '=', 'Closed')
+            ->count();
+
+        $medium_closed_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Medium')
+            ->where('status', '=', 'Closed')
+            ->count();
+
+        $low_closed_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Low')
+            ->where('status', '=', 'Closed')
+            ->count();
+
+        // Count Enhancement
+        $enhancement_high = $high_lastweek_enhancement + $high_thisweek_enhancement - $high_closed_thisweek_enhancement;
+        $enhancement_medium = $medium_lastweek_enhancement + $medium_thisweek_enhancement - $medium_closed_thisweek_enhancement;
+        $enhancement_low = $low_lastweek_enhancement + $low_thisweek_enhancement - $low_closed_thisweek_enhancement;
+        $enhancement_count = $enhancement_high + $enhancement_medium + $enhancement_low;
+
+        $tableShape = $slideEnhancement->createTableShape(3);
+            $tableShape->setHeight(100);
+            $tableShape->setWidth(144);
+            $tableShape->setOffsetX(1100);
+            $tableShape->setOffsetY(80);
+
+            //row judul
+            $rowShape = $tableShape->createRow();
+            $rowShape->setHeight(40);
+            $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $cell->setColSpan(3);
+            $textRun = $cell->createTextRun($enhancement_count . "\n" . truncateString('Enhancement'));
+            $textRun->getFont()->setBold(true);
+            $textRun->getFont()->setSize(12);
+
+            //row title
+            $rowShape = $tableShape->createRow();
+            $rowShape->setHeight(20);
+            $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'fffeb909'], ['status' => 'Low', 'color' => 'fffffe00']];
+            foreach ($val as $key => $v) {
+                $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $textRun = $cell->createTextRun($v['status']);
+                $textRun->getFont()->setBold(true);
+            }
+
+            $rowShape = $tableShape->createRow();
+            $rowShape->setHeight(20);
+            $value = [
+                $high_lastweek_enhancement,
+                $medium_lastweek_enhancement,
+                $low_lastweek_enhancement
+            ];
+            foreach ($value as $key => $v) {
+                $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->createTextRun($v);
+            }
+
+            $rowShape = $tableShape->createRow();
+            $rowShape->setHeight(20);
+            $value = [
+                $high_thisweek_enhancement,
+                $medium_thisweek_enhancement,
+                $low_thisweek_enhancement
+            ];
+
+            foreach ($value as $key => $v) {
+                $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->createTextRun($v);
+            }
+
+            $rowShape = $tableShape->createRow();
+            $rowShape->setHeight(20);
+            $value = [
+                $high_closed_thisweek_enhancement,
+                $medium_closed_thisweek_enhancement,
+                $low_closed_thisweek_enhancement
+            ];
+
+            foreach ($value as $key => $v) {
+                $cell = $rowShape->nextCell();
+                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->createTextRun($v);
+            }
 
         // ---------- SLIDE TAMBAHAN (Detail Ticket RCA & Pending) ----------------
 
