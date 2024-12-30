@@ -1248,33 +1248,33 @@ class WeeklyController extends Controller
             // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time')
             ->union(
                 Data::
                     // whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
                     where('problem', '=', 'Enhancement')
                     ->where('status', '=', 'Closed')
-                    ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
+                    ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time')
             )
             ->get();
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'Category', 'Summary', 'Created Date', 'Created-RCA Time', 'Resolved Time', 'Status & Complete Time'],
+            ['', 'Category', 'Summary', 'Created Date', 'Target Version', 'Team', 'Status'],
         ];
 
         // ADD ARRAY DATA
         foreach ($data_table as $key => $value) {
-            $tempstatus = $value->status;
+            $status = $value->status;
             if ($value->status == 'Root Cause Identified') {
-                $tempstatus = 'RC Identified';
+                $status = 'RC Identified';
             }
 
-            if ($value->status == 'Closed') {
-                $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
-            } else {
-                $status = $tempstatus . "\n" . '-';
-            }
+            // if ($value->status == 'Closed') {
+            //     $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+            // } else {
+            //     $status = $tempstatus . "\n" . '-';
+            // }
 
             $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
 
@@ -1282,6 +1282,8 @@ class WeeklyController extends Controller
             $created = Carbon::parse($value->created);
             $rcatime = Carbon::parse($value->rca_time);
             $closed_time = Carbon::parse($value->closed_time);
+
+            $target_version = $value->target_version;
 
             //declare rca time
             if ($value->rca_time == null) {
@@ -1301,7 +1303,7 @@ class WeeklyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, $value->category, $summary,  $created->format('d/m/y'), $rca_time,  $completion_time, $status];
+            $tempdata[] = [$value->problem, $value->category, $summary,  $created->format('d/m/y'), $target_version,  $completion_time, $status];
         }
 
         // INSERT ARRAY TO TABLE
