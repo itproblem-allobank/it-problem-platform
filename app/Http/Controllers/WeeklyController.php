@@ -1404,12 +1404,9 @@ class WeeklyController extends Controller
         $textRun->getFont()->setSize(14);
 
         // Define data
-        $detaildata = Data::where('status', '=', 'Pending')
-            ->union(Data::where('status',  '=', 'Root Cause Identified'))
-            ->where('problem', '!=', 'Enhancement')
+        $detaildata = Data::where('problem', '!=', 'Enhancement')->where('status', '=', 'Pending')
+            ->union(Data::where('problem', '!=', 'Enhancement')->where('status',  '=', 'Root Cause Identified'))
             ->get();
-
-        // dd($detaildata);
 
         // ----------------- Create Table ------------------------------ 
         $columns = 4;
