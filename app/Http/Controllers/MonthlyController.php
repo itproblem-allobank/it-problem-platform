@@ -616,7 +616,7 @@ class MonthlyController extends Controller
         // Chart 1 Ticket by Category
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(250)
-            ->setWidth(410)
+            ->setWidth(820)
             ->setOffsetX(25)
             ->setOffsetY(225);
         // Define tipe chart
@@ -651,9 +651,9 @@ class MonthlyController extends Controller
             ->get();
         $resultdata_chart2 = [];
         foreach ($data_chart2 as $key => $value) {
-            $closed = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), Carbon::parse($end_date)->subMonths(1)])->where('status', '=', 'Closed')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
-            $rcidentified = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), Carbon::parse($end_date)->subMonths(1)])->where('status', '=', 'Root Cause Identified')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
-            $pending = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), Carbon::parse($end_date)->subMonths(1)])->where('status', '=', 'Pending')->where(DB::raw('MONTH(created)'), '=', $value->month)->get()->count();
+            $closed = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), Carbon::parse($end_date)->subMonths(1)])->where('status', '=', 'Closed')->where(DB::raw('MONTH(created)'), '=', $value->month)->where('problem', '!=', 'Enhancement')->get()->count();
+            $rcidentified = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), Carbon::parse($end_date)->subMonths(1)])->where('status', '=', 'Root Cause Identified')->where(DB::raw('MONTH(created)'), '=', $value->month)->where('problem', '!=', 'Enhancement')->get()->count();
+            $pending = Data::whereBetween(DB::raw('DATE(created)'), [Carbon::parse($start_date)->subMonths(3), Carbon::parse($end_date)->subMonths(1)])->where('status', '=', 'Pending')->where(DB::raw('MONTH(created)'), '=', $value->month)->where('problem', '!=', 'Enhancement')->get()->count();
             $totalCount = $data_chart2->sum('count');
             $totalValue = $closed + $pending;
             $number = ($totalValue / $totalCount) * 100;
@@ -670,10 +670,10 @@ class MonthlyController extends Controller
 
         // Chart 2
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(250)
-            ->setWidth(410)
-            ->setOffsetX(435)
-            ->setOffsetY(225);
+        $chartShape->setHeight(215)
+            ->setWidth(820)
+            ->setOffsetX(25)
+            ->setOffsetY(475);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -712,112 +712,6 @@ class MonthlyController extends Controller
         $chartType->addSeries($series);
         $chartType->addSeries($series1);
         $chartType->addSeries($series2);
-
-        // Chart 3 Ticket Service Request Jira
-        $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))
-            ->groupBy('issue_type')->get();
-        $resultdata_chart3 = [];
-        foreach ($data_chart3 as $key => $value) {
-            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Closed')->get()->count();
-            $status_pending = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Pending')->get()->count();
-            $resultdata_chart3[] =
-                [
-                    'issue_type' => $value->issue_type,
-                    'total' => $value->count,
-                    'count_closed' => $status_closed,
-                    'count_pending' => $status_pending,
-                ];
-        }
-
-        // Set Size Chart
-        $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(215)
-            ->setWidth(410)
-            ->setOffsetX(845)
-            ->setOffsetY(475);
-        // Define tipe chart
-        $chartType = new Bar();
-        $chartShape->getPlotArea()->setType($chartType);
-        // Set judul chart
-        $chartShape->getTitle()->setText('Ticket Jira Service Request');
-        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
-        // Mendapatkan objek sumbu
-        $xAxis = $chartShape->getPlotArea()->getAxisX();
-        $yAxis = $chartShape->getPlotArea()->getAxisY();
-        // Mengatur judul sumbu menjadi kosong
-        $xAxis->setTitle('');
-        $yAxis->setTitle('');
-
-        // Chart Bordered
-        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
-        $chartShape->getBorder()->setLineWidth(1);
-
-        // Tambahkan seri data ke chart
-        foreach ($resultdata_chart3 as $key => $value) {
-            $series = new Series($value['issue_type'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
-            $chartType->addSeries($series);
-        }
-
-        //Chart 5 Problem by Assignee & Status
-        $data_chart5 = Data::select('nickname', DB::raw('count(*) as count'))
-            ->where('problem', '!=', 'Enhancement')
-            ->groupBy('nickname')
-            ->get();
-        $resultdata_chart5 = [];
-        foreach ($data_chart5 as $key => $value) {
-            $closed = Data::whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Closed')->get()->count();
-            $rcidentified = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Root Cause Identified')->get()->count();
-            $pending = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Pending')->get()->count();
-            $resultdata_chart5[] = [
-                'nickname' => $value->nickname,
-                'count' => $value->count,
-                'closed' => $closed,
-                'rcidentified' => $rcidentified,
-                'pending' => $pending
-            ];
-        }
-        // dd($data_chart5);
-        $data_closed = [];
-        foreach ($resultdata_chart5 as $key => $value) {
-            $data_closed[$value['nickname']] = $value['closed'];
-        }
-        $data_rcidentified = [];
-        foreach ($resultdata_chart5 as $key => $value) {
-            $data_rcidentified[$value['nickname']] = $value['rcidentified'];
-        }
-        $data_pending = [];
-        foreach ($resultdata_chart5 as $key => $value) {
-            $data_pending[$value['nickname']] = $value['pending'];
-        }
-        $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(215)
-            ->setWidth(410)
-            ->setOffsetX(435)
-            ->setOffsetY(475);
-        // Define tipe chartsss
-        $chartType = new Bar();
-        $chartShape->getPlotArea()->setType($chartType);
-        // Set judul chart
-        $chartShape->getTitle()->setText('Problem By Assignee & Status');
-        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
-        // Mendapatkan objek sumbu
-        $xAxis = $chartShape->getPlotArea()->getAxisX();
-        $yAxis = $chartShape->getPlotArea()->getAxisY();
-        // Mengatur judul sumbu menjadi kosong
-        $xAxis->setTitle('');
-        $yAxis->setTitle('');
-        // Tambahkan seri data ke chart
-        $series1 = new Series('Closed', $data_closed);
-        $series2 = new Series('Root Cause Identified', $data_rcidentified);
-        $series3 = new Series('Pending', $data_pending);
-        $chartType->addSeries($series1);
-        $chartType->addSeries($series2);
-        $chartType->addSeries($series3);
-        // Chart Bordered
-        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
-        $chartShape->getBorder()->setLineWidth(1);
 
 
         //Chart 6 Container
@@ -900,7 +794,7 @@ class MonthlyController extends Controller
         $chartShape = $slide3->createChartShape();
         $chartShape->setHeight(215)
             ->setWidth(410)
-            ->setOffsetX(25)
+            ->setOffsetX(845)
             ->setOffsetY(475);
         // Define tipe chart
         $chartType = new Line();
@@ -961,42 +855,29 @@ class MonthlyController extends Controller
             ->setSize(30);
 
 
-        // -------------- SET CHART --------------------------
-        // set title chart
-        $titleTable = $additionalslide->createRichTextShape();
-        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $titleTable->setHeight(50);
-        $titleTable->setWidth(410);
-        $titleTable->setOffsetX(25);
-        $titleTable->setOffsetY(100);
-        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
-        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
-        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        $textRun1 = $titleTable->createTextRun('IT Problem Ticket RCA Time');
-        $textRun1->getFont()->setBold(true);
-        $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nCounting IT Problem Tickets by RCA Time Identified (8 Sept - Present)");
-        $textRun2->getFont()->setSize(9);
+        // -------------- SET CHART RCA TIME --------------------------
 
         // Define data
-        $days1 = Data::where('created', '>=', '2024-09-01')
-            ->where('rca_time', '!=', null)->where('rca_days', '=', 1)
+        $days1 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->where('rca_days', '=', 1)
             ->count();
-        $days2 = Data::where('created', '>=', '2024-09-01')
-            ->where('rca_time', '!=', null)->where('rca_days', '=', 2)
+        $days2 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->where('rca_days', '=', 2)
             ->count();
-        $days3 = Data::where('created', '>=', '2024-09-01')
-            ->where('rca_time', '!=', null)->where('rca_days', '=', 3)
+        $days3 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->where('rca_days', '=', 3)
             ->count();
-        $days4 = Data::where('created', '>=', '2024-09-01')
-            ->where('rca_time', '!=', null)->where('rca_days', '=', 4)
+        $days4 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->where('rca_days', '=', 4)
             ->count();
-        $days5 = Data::where('created', '>=', '2024-09-01')
-            ->where('rca_time', '!=', null)->where('rca_days', '=', 5)
+        $days5 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->where('rca_days', '=', 5)
             ->count();
-        // $daysover5 = Data::where('rca_time', '!=', null)->where('rca_days', '>', 5)->count();
-
         $pie_data = ['1 Day' => $days1, '2 Days' => $days2, '3 Days' => $days3, '4 Days' => $days4, '5 Days' => $days5];
 
         // Create pie chart & Insert to slide
@@ -1017,12 +898,13 @@ class MonthlyController extends Controller
         /* Create a shape (chart) */
         $shape = $additionalslide->createChartShape();
         $shape->setResizeProportional(false)
-            ->setHeight(215)
-            ->setWidth(410)
+            ->setHeight(275)
+            ->setWidth(600)
             ->setOffsetX(25)
-            ->setOffsetY(150);
-        $shape->getTitle()->setText('RCA Time');
-        $shape->getTitle()->setVisible(false);
+            ->setOffsetY(100);
+        // Set judul chart
+        $shape->getTitle()->setText('Ticket RCA Time');
+        $shape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
         $shape->getPlotArea()->setType($pie3DChart);
         $shape->getView3D()->setRotationX(40);
         $shape->getView3D()->setPerspective(10);
@@ -1033,6 +915,224 @@ class MonthlyController extends Controller
         $shape->getPlotArea()->getAxisY()->setIsVisible(false);
         $shape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
         //
+
+        // ------------ DETAIL LIST RCA TIME TICKET ------------------
+        $columns = 6; // Number of columns
+        $tableShape = $additionalslide->createTableShape($columns);
+        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $tableShape->setHeight(275);
+        $tableShape->setWidth(600);
+        $tableShape->setOffsetX(25);
+        $tableShape->setOffsetY(350);
+
+        // QUERY
+        $data_table = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+            ->whereNotNull('rca_time')
+            ->Orderby('rca_days', 'desc')
+            ->get();
+
+        // DEFINE ARRAY
+        $tempdata = [
+            ['', 'Category', 'Summary', 'Created Date', 'Created-RCA Time', 'Resolved Time', 'Status & Complete Time'],
+        ];
+
+        // ADD ARRAY DATA
+        foreach ($data_table as $key => $value) {
+            $tempstatus = $value->status;
+            if ($value->status == 'Root Cause Identified') {
+                $tempstatus = 'RC Iden';
+            }
+
+            if ($value->status == 'Closed') {
+                $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+            } else {
+                $status = $tempstatus . "\n" . '-';
+            }
+
+            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+            //convert date to carbon parse
+            $created = Carbon::parse($value->created);
+            $rcatime = Carbon::parse($value->rca_time);
+            $closed_time = Carbon::parse($value->closed_time);
+
+            //declare rca time
+            if ($value->rca_time == null) {
+                $rca_time = '-';
+            } else {
+                $rca_days = intval($created->diffInDays($rcatime));
+                $rca_days_string = strval($rca_days) . ' days';
+                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+            }
+
+            //declare completion time
+            if ($value->closed_time == null) {
+                $completion_time = '-';
+            } else {
+                $completion_days = intval($created->diffInDays($closed_time));
+                $completion_days_string = strval($completion_days) . ' Days';
+                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
+            }
+
+            $tempdata[] = [$value->problem, $value->category, $summary,  $created->format('d/m/y'), $rca_time,  $completion_time, $status];
+        }
+
+
+        // INSERT ARRAY TO TABLE
+        foreach ($tempdata as $rowIndex => $row) {
+            $tableRow = $tableShape->createRow();
+            $tableRow->setHeight(25); // Set the height of the row
+            foreach ($row as $cellIndex => $cellText) {
+                if ($cellIndex == 0) {
+                    continue; // Lewati kolom yang disembunyikan
+                }
+
+                //set width
+                $cell = $tableRow->nextCell();
+                if ($cellIndex == 1) {
+                    $cell->setWidth(80);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(240);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 6) {
+                    $cell->setWidth(70);
+                }
+
+                //set status
+                $problem = $row[0];
+                $status = explode("\n", $row[6]);
+                $firstStatus = $status[0];
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setSize(8);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                //
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } else {
+                    $cell->getFill()->setStartColor(new Color('ff95b3d7'));
+                }
+            }
+        }
+
+        // --------- CHART PROBLEM BY ASSIGNEE & STATUS --------------
+        $data_chart5 = Data::select('nickname', DB::raw('count(*) as count'))
+            ->where('problem', '!=', 'Enhancement')
+            ->groupBy('nickname')     
+            ->get();
+
+            dd($data_chart5);
+        $resultdata_chart5 = [];
+        foreach ($data_chart5 as $key => $value) {
+            $closed = Data::whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Closed')->where('problem', '!=', 'Enhancement')->get()->count();
+            $rcidentified = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Root Cause Identified')->where('problem', '!=', 'Enhancement')->get()->count();
+            $pending = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Pending')->where('problem', '!=', 'Enhancement')->get()->count();
+            $resultdata_chart5[] = [
+                'nickname' => $value->nickname,
+                'count' => $value->count,
+                'closed' => $closed,
+                'rcidentified' => $rcidentified,
+                'pending' => $pending
+            ];
+        }
+        // dd($data_chart5);
+        $data_closed = [];
+        foreach ($resultdata_chart5 as $key => $value) {
+            $data_closed[$value['nickname']] = $value['closed'];
+        }
+        $data_rcidentified = [];
+        foreach ($resultdata_chart5 as $key => $value) {
+            $data_rcidentified[$value['nickname']] = $value['rcidentified'];
+        }
+        $data_pending = [];
+        foreach ($resultdata_chart5 as $key => $value) {
+            $data_pending[$value['nickname']] = $value['pending'];
+        }
+        $chartShape = $additionalslide->createChartShape();
+        $chartShape->setHeight(250)
+            ->setWidth(600)
+            ->setOffsetX(625)
+            ->setOffsetY(100);
+
+        // Define tipe chartsss
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Problem By Assignee & Status');
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+        // Tambahkan seri data ke chart
+        $series1 = new Series('Closed', $data_closed);
+        $series2 = new Series('Root Cause Identified', $data_rcidentified);
+        $series3 = new Series('Pending', $data_pending);
+        $chartType->addSeries($series1);
+        $chartType->addSeries($series2);
+        $chartType->addSeries($series3);
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+
+        // --------- CHART JIRA SERVICE REQUEST --------------
+        $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))
+            ->groupBy('issue_type')->get();
+        $resultdata_chart3 = [];
+        foreach ($data_chart3 as $key => $value) {
+            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Closed')->get()->count();
+            $status_pending = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Pending')->get()->count();
+            $resultdata_chart3[] =
+                [
+                    'issue_type' => $value->issue_type,
+                    'total' => $value->count,
+                    'count_closed' => $status_closed,
+                    'count_pending' => $status_pending,
+                ];
+        }
+
+        // Set Size Chart
+        $chartShape = $additionalslide->createChartShape();
+        $chartShape->setHeight(250)
+            ->setWidth(600)
+            ->setOffsetX(625)
+            ->setOffsetY(350);
+        // Define tipe chart
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Ticket Jira Service Request');
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+
+        // Tambahkan seri data ke chart
+        foreach ($resultdata_chart3 as $key => $value) {
+            $series = new Series($value['issue_type'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
+            $chartType->addSeries($series);
+        }
+
+
 
 
 
@@ -1145,6 +1245,8 @@ class MonthlyController extends Controller
                 $lineShape->getBorder()->setLineWidth(2);
             }
         }
+
+
 
         //Slide 5
         $slide5 = $objPHPPresentation->createSlide();

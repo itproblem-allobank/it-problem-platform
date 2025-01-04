@@ -31,12 +31,12 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
     public function model(array $row)
     {
         // convert hyperlink to code jira
-        $hyperlink = $row[0];// Gunakan regular expression untuk mendapatkan kode Jira
+        $hyperlink = $row[0]; // Gunakan regular expression untuk mendapatkan kode Jira
         preg_match('/browse\/([A-Z]+-\d+)/', $hyperlink, $matches);
-        
+
         // $matches[1] akan berisi 'DIPM-3681'
         $code_jira = $matches[1];
-        
+
         $row17 = ($row[17] - 25569) * 86400;
         $created = gmdate("Y-m-d H:i:s", $row17);
         $row18 = ($row[18] - 25569) * 86400;
@@ -142,6 +142,10 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
         } else if ($assignee_too == 'Alexander Lucas') {
             $data = array_merge($data, [
                 'nickname' => 'Lucas',
+            ]);
+        } else if ($assignee_too == 'Fachri Fachri') {
+            $data = array_merge($data, [
+                'nickname' => 'Fachri',
             ]);
         }
 
