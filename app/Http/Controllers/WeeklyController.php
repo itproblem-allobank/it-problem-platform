@@ -1229,7 +1229,7 @@ class WeeklyController extends Controller
             ->setOffsetY(60);
         $startdate = Carbon::parse($start_date)->format('d F Y');
         $enddate = Carbon::parse($end_date)->format('d F Y');
-        $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
+        $textRun = $shape->createTextRun('As of ' . $date);
         $textRun->getFont()->setSize(14);
 
         //TABLE
@@ -1248,13 +1248,13 @@ class WeeklyController extends Controller
             // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
             ->union(
                 Data::
                     // whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
                     where('problem', '=', 'Enhancement')
                     ->where('status', '=', 'Closed')
-                    ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time')
+                    ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
             )
             ->get();
 
@@ -1289,6 +1289,13 @@ class WeeklyController extends Controller
                 $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
             }
 
+            //declare team
+            if ($value->team == null) {
+                $team = '-';
+            } else {
+                $team = $value->team;
+            }
+
             //declare completion time
             if ($value->closed_time == null) {
                 $completion_time = '-';
@@ -1298,9 +1305,11 @@ class WeeklyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version,  $completion_time, $status];
+            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version,  $team, $status];
             $i++;
         }
+
+        // dd($tempdata);
 
         // INSERT ARRAY TO TABLE
         foreach ($tempdata as $rowIndex => $row) {
