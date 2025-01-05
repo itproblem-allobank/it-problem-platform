@@ -107,7 +107,8 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
             'rca_time'          => $rca_time,
             'closed_time'       => $closed_time,
             'resolved_days'     => $resolved_days,
-            'rca_days'          => $rca_fix
+            'rca_days'          => $rca_fix,
+            'team'              => $row[22],
         ];
 
         $assignee_too = $row[13];
