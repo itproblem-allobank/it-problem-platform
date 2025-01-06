@@ -2179,7 +2179,10 @@ class WeeklyController extends Controller
         $textRun2->getFont()->setSize(9);
 
         // create chart
-        $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->groupBy('problem')->get();
+        $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
+        ->where('problem', '!=', 'Enhancement')
+        ->select('problem', DB::raw('count(*) as count'))->groupBy('problem')
+        ->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
             $status_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
