@@ -168,13 +168,13 @@ class MonthlyController extends Controller
         $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
 
         // Create the bold text run for "Iswibowo Isakar"
-        $boldTextRun = $textShape1->createTextRun("Iswibowo Isakar\n");
+        $boldTextRun = $textShape1->createTextRun("Tri Intan Siska P.\n");
         $boldTextRun->getFont()->setSize(15);
         $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
         // Create the text run for "IT infra Operation"
-        $textRun3 = $textShape1->createTextRun("Information Technology\nInfrastructure & Operations");
+        $textRun3 = $textShape1->createTextRun("Plt. IT Operations Dept. Head");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
@@ -192,13 +192,13 @@ class MonthlyController extends Controller
         $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
 
         // Create the bold text run for "Tri Intan Siska Permatasari"
-        $boldTextRun = $textShape2->createTextRun("Tri Intan Siska Permatasari\n");
+        $boldTextRun = $textShape2->createTextRun("Fachri\n");
         $boldTextRun->getFont()->setSize(15);
         $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
         // Create the text run for "IT Problem Lead"
-        $textRun3 = $textShape2->createTextRun("IT Problem Lead");
+        $textRun3 = $textShape2->createTextRun("IT Problem Section Head");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
