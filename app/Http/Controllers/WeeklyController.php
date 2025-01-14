@@ -244,7 +244,7 @@ class WeeklyController extends Controller
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('IT Problem - Status Rootcause Identified & Pending');
+        $textRun = $shape->createTextRun('IT Problem');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -1218,7 +1218,7 @@ class WeeklyController extends Controller
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('IT Problem - Enhancement');
+        $textRun = $shape->createTextRun('Product Enhancement');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -1551,7 +1551,7 @@ class WeeklyController extends Controller
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('Detail ticket RCA & Pending');
+        $textRun = $shape->createTextRun('IT Problem List');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -1571,19 +1571,19 @@ class WeeklyController extends Controller
             ->get();
 
         // ----------------- Create Table ------------------------------ 
-        $columns = 6;
+        $columns = 7;
         $table = $slide_additional->createTableShape($columns);
         $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
         // Set table position & Size
         $table->setheight(210);
-        $table->setwidth(730);
+        $table->setwidth(1200);
         $table->setOffsetX(25);
         $table->setOffsetY(100);
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'Category', 'Summary', 'Target Version',  'Team',  'Status' . "\n" . 'Created Date', 'Created-RCA Time'],
+            ['', 'Category', 'Summary', 'Level', 'Target Version',  'Team',  'Status' . "\n" . 'Created Date', 'Created-RCA Time'],
         ];
 
         // ADD ARRAY DATA
@@ -1596,6 +1596,8 @@ class WeeklyController extends Controller
             $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
 
             $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+            $level = $value->priority;
 
             //convert date to carbon parse
             $created = Carbon::parse($value->created);
@@ -1634,7 +1636,7 @@ class WeeklyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, $value->category, $summary, $target_version, $team,  $status, $rca_time];
+            $tempdata[] = [$value->problem, $value->category, $summary, $level, $target_version, $team,  $status, $rca_time];
         }
 
 
@@ -1650,22 +1652,24 @@ class WeeklyController extends Controller
                 //set width
                 $cell = $tableRow->nextCell();
                 if ($cellIndex == 1) {
-                    $cell->setWidth(70);
+                    $cell->setWidth(100);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(260);
+                    $cell->setWidth(600);
                 } else if ($cellIndex == 3) {
-                    $cell->setWidth(80);
+                    $cell->setWidth(100);
                 } else if ($cellIndex == 4) {
-                    $cell->setWidth(60);
+                    $cell->setWidth(100);
                 } else if ($cellIndex == 5) {
-                    $cell->setWidth(80);
+                    $cell->setWidth(100);
                 } else if ($cellIndex == 6) {
-                    $cell->setWidth(60);
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 7) {
+                    $cell->setWidth(100);
                 }
 
                 //set status
                 $problem = $row[0];
-                $status = explode("\n", $row[5]);
+                $status = explode("\n", $row[6]);
                 $firstStatus = $status[0];
                 // $cell = $tableRow->nextCell();
                 $textRun = $cell->createTextRun($cellText);
@@ -1678,7 +1682,7 @@ class WeeklyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex != 5) {
+                    if ($cellIndex != 6) {
                         //coloring by problem
                         if ($problem == 'Core & Surrounding') {
                             $cell->getFill()->setStartColor(new Color('ff89a64e'));
@@ -1699,7 +1703,7 @@ class WeeklyController extends Controller
                         } else {
                             $cell->getFill()->setStartColor(new Color('ffffffff'));
                         }
-                    } else if ($cellIndex == 5) {
+                    } else if ($cellIndex == 6) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
                             $cell->getFill()->setStartColor(new Color('fff6f610'));
@@ -1718,401 +1722,401 @@ class WeeklyController extends Controller
         }
 
 
-        // ----------- SLIDE 4 ----------------------------------
-        $slide4 = $objPHPPresentation->createSlide();
-        $backgroundImagePath = storage_path('image/background.png');
-        $backgroundImage = new File();
-        $backgroundImage->setPath($backgroundImagePath);
-        $backgroundImage->setWidth(1280);
-        $backgroundImage->setOffsetX(0);
-        $backgroundImage->setOffsetY(0);
-        $slide4->addShape($backgroundImage);
+        // // ----------- SLIDE 4 ----------------------------------
+        // $slide4 = $objPHPPresentation->createSlide();
+        // $backgroundImagePath = storage_path('image/background.png');
+        // $backgroundImage = new File();
+        // $backgroundImage->setPath($backgroundImagePath);
+        // $backgroundImage->setWidth(1280);
+        // $backgroundImage->setOffsetX(0);
+        // $backgroundImage->setOffsetY(0);
+        // $slide4->addShape($backgroundImage);
 
 
-        $imagePath = storage_path('image/allobank.png');
-        $pictureShape = new File();
-        $pictureShape->setPath($imagePath);
-        $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
-        $pictureShape->setOffsetX(1050); // Posisi horizontal gambars
-        $pictureShape->setOffsetY(20); // Posisi vertikal gambar
-        $slide4->addShape($pictureShape);
+        // $imagePath = storage_path('image/allobank.png');
+        // $pictureShape = new File();
+        // $pictureShape->setPath($imagePath);
+        // $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
+        // $pictureShape->setOffsetX(1050); // Posisi horizontal gambars
+        // $pictureShape->setOffsetY(20); // Posisi vertikal gambar
+        // $slide4->addShape($pictureShape);
 
-        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
-            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
-            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+        // $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+        //     ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+        //     ->setCY(700, DocumentLayout::UNIT_PIXEL);
 
-        // Tambahkan teks judul slide
-        $shape = $slide4->createRichTextShape()
-            ->setHeight(50)
-            ->setWidth(1000)
-            ->setOffsetX(25)
-            ->setOffsetY(15);
-        $textRun = $shape->createTextRun('Priority High this Week');
-        $textRun->getFont()->setBold(true)
-            ->setSize(30);
+        // // Tambahkan teks judul slide
+        // $shape = $slide4->createRichTextShape()
+        //     ->setHeight(50)
+        //     ->setWidth(1000)
+        //     ->setOffsetX(25)
+        //     ->setOffsetY(15);
+        // $textRun = $shape->createTextRun('Priority High this Week');
+        // $textRun->getFont()->setBold(true)
+        //     ->setSize(30);
 
-        $shape = $slide4->createRichTextShape()
-            ->setHeight(25)
-            ->setWidth(400)
-            ->setOffsetX(25)
-            ->setOffsetY(60);
-        $startdate = Carbon::parse($start_date)->format('d F Y');
-        $enddate = Carbon::parse($end_date)->format('d F Y');
-        $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
-        $textRun->getFont()->setSize(14);
-
-
-        // ------------------- TABLE TICKET IT PROBLEM HIGH CREATED ---------------------
-        $data_created = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-            ->where('priority', '=', 'High')
-            ->where('status', '!=', 'Closed')
-            ->orderBy('problem', 'asc')
-            ->get();
-
-        $created_list = [];
-
-        foreach ($data_created as $key => $value) {
-            // set pending reason
-            if ($value->pending_reason == null) {
-                $pending_reason = 'No Schedule Yet';
-            } else {
-                $pending_reason = $value->pending_reason;
-            }
-
-            // set target version
-            if ($value->target_version == null) {
-                $target_version = 'No Schedule Yet';
-            } else {
-                $target_version = $value->target_version;
-            }
-
-            // set root cause
-            $rootcause = $value->root_cause ?? ' - ';
-
-            // set created date
-            $created_date = Carbon::parse($value->created)->format('d/m/y');
-
-            // set RCA days
-            // $created = Carbon::parse($value->created);
-            $rca = Carbon::parse($value->rca_time);
-            $rca_days = intval($rca->diffInDays($rca));
-            $rca_days_string = $rca_days . ' days';
-            $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/Y');
-
-            // set Completion days
-            $created = Carbon::parse($value->created);
-            $completion = '-';
-            $status = $value->status . "\n" . ' - ';
-
-            $created_list[] = [
-                $value->code_jira,
-                $value->problem,
-                $value->summary,
-                $pending_reason,
-                $target_version,
-                $rootcause,
-                $created_date,
-                $rca_time,
-                $completion,
-                $status
-            ];
-        }
-
-        // set title
-        $shape = $slide4->createRichTextShape()
-            ->setHeight(30)
-            ->setWidth(1000)
-            ->setOffsetX(25)
-            ->setOffsetY(100);
-        $textRun = $shape->createTextRun('Ticket problem - High Created');
-        $textRun->getFont()->setBold(true)
-            ->setSize(15);
-
-        // set to table
-        $columns = 10;
-        $table_created = $slide4->createTableShape($columns);
-        $table_created->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $table_created->setHeight(300);
-        $table_created->setWidth(1200);
-        $table_created->setOffsetX(25);
-        $table_created->setOffsetY(135);
-        $header_created = $table_created->createRow();
-        $header_created->setHeight(25);
-        //header 
-        $header = [
-            'Code Jira',
-            'Problem',
-            'Summary',
-            'Pending Reason',
-            'Target Version',
-            'Root Cause',
-            'Created Date',
-            'Created-RCA' . "\n" . 'Time',
-            'Resolved Time',
-            'Status' . "\n" . 'Completed Time'
-        ];
-        foreach ($header as $cellIndex => $cellText) {
-            $cell = $header_created->nextCell();
-            if ($cellIndex == 0) {
-                $cell->setWidth(50);
-            } else if ($cellIndex == 1) {
-                $cell->setWidth(120);
-            } else if ($cellIndex == 2) {
-                $cell->setWidth(300);
-            } else if ($cellIndex == 3) {
-                $cell->setWidth(89);
-            } else if ($cellIndex == 4) {
-                $cell->setWidth(89);
-            } else if ($cellIndex == 5) {
-                $cell->setWidth(276);
-            } else if ($cellIndex == 6) {
-                $cell->setWidth(74);
-            } else if ($cellIndex == 7) {
-                $cell->setWidth(74);
-            } else if ($cellIndex == 8) {
-                $cell->setWidth(74);
-            } else if ($cellIndex == 9) {
-                $cell->setWidth(74);
-            }
-            $textRun = $cell->createTextRun($cellText);
-            $textRun->getFont()->setBold(true);
-            $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
-            $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-            $cell->getFill()->setFillType(Fill::FILL_SOLID);
-            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        }
-        //data
-        foreach ($created_list as $rowIndex => $row) {
-            $tableRow = $table_created->createRow();
-            $tableRow->setHeight(25);
-            foreach ($row as $cellIndex => $cellText) {
-                $cell = $tableRow->nextCell();
-                if ($cellIndex == 0) {
-                    $cell->setWidth(50);
-                } else if ($cellIndex == 1) {
-                    $cell->setWidth(120);
-                } else if ($cellIndex == 2) {
-                    $cell->setWidth(300);
-                } else if ($cellIndex == 3) {
-                    $cell->setWidth(89);
-                } else if ($cellIndex == 4) {
-                    $cell->setWidth(89);
-                } else if ($cellIndex == 5) {
-                    $cell->setWidth(276);
-                } else if ($cellIndex == 6) {
-                    $cell->setWidth(74);
-                } else if ($cellIndex == 7) {
-                    $cell->setWidth(74);
-                } else if ($cellIndex == 8) {
-                    $cell->setWidth(74);
-                } else if ($cellIndex == 9) {
-                    $cell->setWidth(74);
-                }
-                $textRun = $cell->createTextRun($cellText);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                //coloring by problem
-                if ($row[1] == 'Core & Surrounding') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
-                } else if ($row[1] == 'Ekosistem MPC') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00b0f0'));
-                } else if ($row[1] == 'Loan') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
-                } else if ($row[1] == 'Onboarding') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff81ff63'));
-                } else if ($row[1] == 'Online Payment') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff09b1a7'));
-                } else if ($row[1] == 'Switching & 3rdparty') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
-                } else if ($row[1] == 'Transaction') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8380ee'));
-                } else if ($row[1] == 'Wholesale Banking') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
-                } else {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
-                }
-            }
-        }
+        // $shape = $slide4->createRichTextShape()
+        //     ->setHeight(25)
+        //     ->setWidth(400)
+        //     ->setOffsetX(25)
+        //     ->setOffsetY(60);
+        // $startdate = Carbon::parse($start_date)->format('d F Y');
+        // $enddate = Carbon::parse($end_date)->format('d F Y');
+        // $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
+        // $textRun->getFont()->setSize(14);
 
 
-        // ------------------- TABLE TICKET IT PROBLEM HIGH CLOSED ---------------------
-        $data_closed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-            ->where('priority', '=', 'High')
-            ->where('status', '=', 'Closed')
-            ->orderBy('problem', 'asc')
-            ->get();
+        // // ------------------- TABLE TICKET IT PROBLEM HIGH CREATED ---------------------
+        // $data_created = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+        //     ->where('priority', '=', 'High')
+        //     ->where('status', '!=', 'Closed')
+        //     ->orderBy('problem', 'asc')
+        //     ->get();
 
-        $closed_list = [];
+        // $created_list = [];
 
-        foreach ($data_closed as $key => $value) {
-            // set pending reason
-            if ($value->pending_reason == null) {
-                $pending_reason = 'No Schedule Yet';
-            } else {
-                $pending_reason = $value->pending_reason;
-            }
+        // foreach ($data_created as $key => $value) {
+        //     // set pending reason
+        //     if ($value->pending_reason == null) {
+        //         $pending_reason = 'No Schedule Yet';
+        //     } else {
+        //         $pending_reason = $value->pending_reason;
+        //     }
 
-            // set target version
-            if ($value->target_version == null) {
-                $target_version = 'No Schedule Yet';
-            } else {
-                $target_version = $value->target_version;
-            }
+        //     // set target version
+        //     if ($value->target_version == null) {
+        //         $target_version = 'No Schedule Yet';
+        //     } else {
+        //         $target_version = $value->target_version;
+        //     }
 
-            // set root cause
-            $rootcause = $value->root_cause ?? ' - ';
+        //     // set root cause
+        //     $rootcause = $value->root_cause ?? ' - ';
 
-            // set created date
-            $created_date = Carbon::parse($value->created)->format('d/m/y');
+        //     // set created date
+        //     $created_date = Carbon::parse($value->created)->format('d/m/y');
 
-            // set RCA days
-            // $created = Carbon::parse($value->created);
-            $rca = Carbon::parse($value->rca_time);
-            $rca_days = intval($rca->diffInDays($rca));
-            $rca_days_string = $rca_days . ' days';
-            $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/Y');
+        //     // set RCA days
+        //     // $created = Carbon::parse($value->created);
+        //     $rca = Carbon::parse($value->rca_time);
+        //     $rca_days = intval($rca->diffInDays($rca));
+        //     $rca_days_string = $rca_days . ' days';
+        //     $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/Y');
 
-            // set Completion days
-            $created = Carbon::parse($value->created);
-            $completion = Carbon::parse($value->changed_at);
-            $completion_nod = intval($created->diffInDays($completion));
-            $completion_nod_string = strval($completion_nod) . ' days';
-            $completion_time = $completion_nod_string . "\n" . Carbon::parse($value->changed_at)->format('d/m/Y');
+        //     // set Completion days
+        //     $created = Carbon::parse($value->created);
+        //     $completion = '-';
+        //     $status = $value->status . "\n" . ' - ';
 
-            // set status
-            $status = $value->status . "\n" . Carbon::parse($value->closed_time)->format('d/m/Y');
+        //     $created_list[] = [
+        //         $value->code_jira,
+        //         $value->problem,
+        //         $value->summary,
+        //         $pending_reason,
+        //         $target_version,
+        //         $rootcause,
+        //         $created_date,
+        //         $rca_time,
+        //         $completion,
+        //         $status
+        //     ];
+        // }
 
-            $closed_list[] = [
-                $value->code_jira,
-                $value->problem,
-                $value->summary,
-                $pending_reason,
-                $target_version,
-                $rootcause,
-                $created_date,
-                $rca_time,
-                $completion_time,
-                $status
-            ];
-        }
+        // // set title
+        // $shape = $slide4->createRichTextShape()
+        //     ->setHeight(30)
+        //     ->setWidth(1000)
+        //     ->setOffsetX(25)
+        //     ->setOffsetY(100);
+        // $textRun = $shape->createTextRun('Ticket problem - High Created');
+        // $textRun->getFont()->setBold(true)
+        //     ->setSize(15);
 
-        // set title
-        $shape = $slide4->createRichTextShape()
-            ->setHeight(30)
-            ->setWidth(1000)
-            ->setOffsetX(25)
-            ->setOffsetY(400);
-        $textRun = $shape->createTextRun('Ticket problem - High Closed');
-        $textRun->getFont()->setBold(true)
-            ->setSize(15);
+        // // set to table
+        // $columns = 10;
+        // $table_created = $slide4->createTableShape($columns);
+        // $table_created->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        // $table_created->setHeight(300);
+        // $table_created->setWidth(1200);
+        // $table_created->setOffsetX(25);
+        // $table_created->setOffsetY(135);
+        // $header_created = $table_created->createRow();
+        // $header_created->setHeight(25);
+        // //header 
+        // $header = [
+        //     'Code Jira',
+        //     'Problem',
+        //     'Summary',
+        //     'Pending Reason',
+        //     'Target Version',
+        //     'Root Cause',
+        //     'Created Date',
+        //     'Created-RCA' . "\n" . 'Time',
+        //     'Resolved Time',
+        //     'Status' . "\n" . 'Completed Time'
+        // ];
+        // foreach ($header as $cellIndex => $cellText) {
+        //     $cell = $header_created->nextCell();
+        //     if ($cellIndex == 0) {
+        //         $cell->setWidth(50);
+        //     } else if ($cellIndex == 1) {
+        //         $cell->setWidth(120);
+        //     } else if ($cellIndex == 2) {
+        //         $cell->setWidth(300);
+        //     } else if ($cellIndex == 3) {
+        //         $cell->setWidth(89);
+        //     } else if ($cellIndex == 4) {
+        //         $cell->setWidth(89);
+        //     } else if ($cellIndex == 5) {
+        //         $cell->setWidth(276);
+        //     } else if ($cellIndex == 6) {
+        //         $cell->setWidth(74);
+        //     } else if ($cellIndex == 7) {
+        //         $cell->setWidth(74);
+        //     } else if ($cellIndex == 8) {
+        //         $cell->setWidth(74);
+        //     } else if ($cellIndex == 9) {
+        //         $cell->setWidth(74);
+        //     }
+        //     $textRun = $cell->createTextRun($cellText);
+        //     $textRun->getFont()->setBold(true);
+        //     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+        //     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+        //     $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        //     $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        //     $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        // }
+        // //data
+        // foreach ($created_list as $rowIndex => $row) {
+        //     $tableRow = $table_created->createRow();
+        //     $tableRow->setHeight(25);
+        //     foreach ($row as $cellIndex => $cellText) {
+        //         $cell = $tableRow->nextCell();
+        //         if ($cellIndex == 0) {
+        //             $cell->setWidth(50);
+        //         } else if ($cellIndex == 1) {
+        //             $cell->setWidth(120);
+        //         } else if ($cellIndex == 2) {
+        //             $cell->setWidth(300);
+        //         } else if ($cellIndex == 3) {
+        //             $cell->setWidth(89);
+        //         } else if ($cellIndex == 4) {
+        //             $cell->setWidth(89);
+        //         } else if ($cellIndex == 5) {
+        //             $cell->setWidth(276);
+        //         } else if ($cellIndex == 6) {
+        //             $cell->setWidth(74);
+        //         } else if ($cellIndex == 7) {
+        //             $cell->setWidth(74);
+        //         } else if ($cellIndex == 8) {
+        //             $cell->setWidth(74);
+        //         } else if ($cellIndex == 9) {
+        //             $cell->setWidth(74);
+        //         }
+        //         $textRun = $cell->createTextRun($cellText);
+        //         $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        //         $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        //         //coloring by problem
+        //         if ($row[1] == 'Core & Surrounding') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
+        //         } else if ($row[1] == 'Ekosistem MPC') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00b0f0'));
+        //         } else if ($row[1] == 'Loan') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
+        //         } else if ($row[1] == 'Onboarding') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff81ff63'));
+        //         } else if ($row[1] == 'Online Payment') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff09b1a7'));
+        //         } else if ($row[1] == 'Switching & 3rdparty') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
+        //         } else if ($row[1] == 'Transaction') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8380ee'));
+        //         } else if ($row[1] == 'Wholesale Banking') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
+        //         } else {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
+        //         }
+        //     }
+        // }
 
-        // set to table
-        $columns = 10;
-        $table_closed = $slide4->createTableShape($columns);
-        $table_closed->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $table_closed->setHeight(300);
-        $table_closed->setWidth(1200);
-        $table_closed->setOffsetX(25);
-        $table_closed->setOffsetY(435);
-        $header_closed = $table_closed->createRow();
-        $header_closed->setHeight(25);
-        //header 
-        $header = [
-            'Code Jira',
-            'Problem',
-            'Summary',
-            'Pending Reason',
-            'Target Version',
-            'Root Cause',
-            'Created Date',
-            'Created-RCA' . "\n" . 'Time',
-            'Resolved Time',
-            'Status' . "\n" . 'Completed Time'
-        ];
-        foreach ($header as $cellIndex => $cellText) {
-            $cell = $header_closed->nextCell();
-            if ($cellIndex == 0) {
-                $cell->setWidth(50);
-            } else if ($cellIndex == 1) {
-                $cell->setWidth(120);
-            } else if ($cellIndex == 2) {
-                $cell->setWidth(300);
-            } else if ($cellIndex == 3) {
-                $cell->setWidth(89);
-            } else if ($cellIndex == 4) {
-                $cell->setWidth(89);
-            } else if ($cellIndex == 5) {
-                $cell->setWidth(276);
-            } else if ($cellIndex == 6) {
-                $cell->setWidth(74);
-            } else if ($cellIndex == 7) {
-                $cell->setWidth(74);
-            } else if ($cellIndex == 8) {
-                $cell->setWidth(74);
-            } else if ($cellIndex == 9) {
-                $cell->setWidth(74);
-            }
-            $textRun = $cell->createTextRun($cellText);
-            $textRun->getFont()->setBold(true);
-            $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
-            $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-            $cell->getFill()->setFillType(Fill::FILL_SOLID);
-            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        }
-        //data
-        foreach ($closed_list as $rowIndex => $row) {
-            $tableRow = $table_closed->createRow();
-            $tableRow->setHeight(25);
-            foreach ($row as $cellIndex => $cellText) {
-                $cell = $tableRow->nextCell();
-                if ($cellIndex == 0) {
-                    $cell->setWidth(50);
-                } else if ($cellIndex == 1) {
-                    $cell->setWidth(120);
-                } else if ($cellIndex == 2) {
-                    $cell->setWidth(300);
-                } else if ($cellIndex == 3) {
-                    $cell->setWidth(89);
-                } else if ($cellIndex == 4) {
-                    $cell->setWidth(89);
-                } else if ($cellIndex == 5) {
-                    $cell->setWidth(276);
-                } else if ($cellIndex == 6) {
-                    $cell->setWidth(74);
-                } else if ($cellIndex == 7) {
-                    $cell->setWidth(74);
-                } else if ($cellIndex == 8) {
-                    $cell->setWidth(74);
-                } else if ($cellIndex == 9) {
-                    $cell->setWidth(74);
-                }
-                $textRun = $cell->createTextRun($cellText);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                //coloring by problem
-                if ($row[1] == 'Core & Surrounding') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
-                } else if ($row[1] == 'Ekosistem MPC') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00b0f0'));
-                } else if ($row[1] == 'Loan') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
-                } else if ($row[1] == 'Onboarding') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff81ff63'));
-                } else if ($row[1] == 'Online Payment') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff09b1a7'));
-                } else if ($row[1] == 'Switching & 3rdparty') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
-                } else if ($row[1] == 'Transaction') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8380ee'));
-                } else if ($row[1] == 'Wholesale Banking') {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
-                } else {
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
-                }
-            }
-        }
+
+        // // ------------------- TABLE TICKET IT PROBLEM HIGH CLOSED ---------------------
+        // $data_closed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+        //     ->where('priority', '=', 'High')
+        //     ->where('status', '=', 'Closed')
+        //     ->orderBy('problem', 'asc')
+        //     ->get();
+
+        // $closed_list = [];
+
+        // foreach ($data_closed as $key => $value) {
+        //     // set pending reason
+        //     if ($value->pending_reason == null) {
+        //         $pending_reason = 'No Schedule Yet';
+        //     } else {
+        //         $pending_reason = $value->pending_reason;
+        //     }
+
+        //     // set target version
+        //     if ($value->target_version == null) {
+        //         $target_version = 'No Schedule Yet';
+        //     } else {
+        //         $target_version = $value->target_version;
+        //     }
+
+        //     // set root cause
+        //     $rootcause = $value->root_cause ?? ' - ';
+
+        //     // set created date
+        //     $created_date = Carbon::parse($value->created)->format('d/m/y');
+
+        //     // set RCA days
+        //     // $created = Carbon::parse($value->created);
+        //     $rca = Carbon::parse($value->rca_time);
+        //     $rca_days = intval($rca->diffInDays($rca));
+        //     $rca_days_string = $rca_days . ' days';
+        //     $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/Y');
+
+        //     // set Completion days
+        //     $created = Carbon::parse($value->created);
+        //     $completion = Carbon::parse($value->changed_at);
+        //     $completion_nod = intval($created->diffInDays($completion));
+        //     $completion_nod_string = strval($completion_nod) . ' days';
+        //     $completion_time = $completion_nod_string . "\n" . Carbon::parse($value->changed_at)->format('d/m/Y');
+
+        //     // set status
+        //     $status = $value->status . "\n" . Carbon::parse($value->closed_time)->format('d/m/Y');
+
+        //     $closed_list[] = [
+        //         $value->code_jira,
+        //         $value->problem,
+        //         $value->summary,
+        //         $pending_reason,
+        //         $target_version,
+        //         $rootcause,
+        //         $created_date,
+        //         $rca_time,
+        //         $completion_time,
+        //         $status
+        //     ];
+        // }
+
+        // // set title
+        // $shape = $slide4->createRichTextShape()
+        //     ->setHeight(30)
+        //     ->setWidth(1000)
+        //     ->setOffsetX(25)
+        //     ->setOffsetY(400);
+        // $textRun = $shape->createTextRun('Ticket problem - High Closed');
+        // $textRun->getFont()->setBold(true)
+        //     ->setSize(15);
+
+        // // set to table
+        // $columns = 10;
+        // $table_closed = $slide4->createTableShape($columns);
+        // $table_closed->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        // $table_closed->setHeight(300);
+        // $table_closed->setWidth(1200);
+        // $table_closed->setOffsetX(25);
+        // $table_closed->setOffsetY(435);
+        // $header_closed = $table_closed->createRow();
+        // $header_closed->setHeight(25);
+        // //header 
+        // $header = [
+        //     'Code Jira',
+        //     'Problem',
+        //     'Summary',
+        //     'Pending Reason',
+        //     'Target Version',
+        //     'Root Cause',
+        //     'Created Date',
+        //     'Created-RCA' . "\n" . 'Time',
+        //     'Resolved Time',
+        //     'Status' . "\n" . 'Completed Time'
+        // ];
+        // foreach ($header as $cellIndex => $cellText) {
+        //     $cell = $header_closed->nextCell();
+        //     if ($cellIndex == 0) {
+        //         $cell->setWidth(50);
+        //     } else if ($cellIndex == 1) {
+        //         $cell->setWidth(120);
+        //     } else if ($cellIndex == 2) {
+        //         $cell->setWidth(300);
+        //     } else if ($cellIndex == 3) {
+        //         $cell->setWidth(89);
+        //     } else if ($cellIndex == 4) {
+        //         $cell->setWidth(89);
+        //     } else if ($cellIndex == 5) {
+        //         $cell->setWidth(276);
+        //     } else if ($cellIndex == 6) {
+        //         $cell->setWidth(74);
+        //     } else if ($cellIndex == 7) {
+        //         $cell->setWidth(74);
+        //     } else if ($cellIndex == 8) {
+        //         $cell->setWidth(74);
+        //     } else if ($cellIndex == 9) {
+        //         $cell->setWidth(74);
+        //     }
+        //     $textRun = $cell->createTextRun($cellText);
+        //     $textRun->getFont()->setBold(true);
+        //     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+        //     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+        //     $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        //     $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        //     $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        // }
+        // //data
+        // foreach ($closed_list as $rowIndex => $row) {
+        //     $tableRow = $table_closed->createRow();
+        //     $tableRow->setHeight(25);
+        //     foreach ($row as $cellIndex => $cellText) {
+        //         $cell = $tableRow->nextCell();
+        //         if ($cellIndex == 0) {
+        //             $cell->setWidth(50);
+        //         } else if ($cellIndex == 1) {
+        //             $cell->setWidth(120);
+        //         } else if ($cellIndex == 2) {
+        //             $cell->setWidth(300);
+        //         } else if ($cellIndex == 3) {
+        //             $cell->setWidth(89);
+        //         } else if ($cellIndex == 4) {
+        //             $cell->setWidth(89);
+        //         } else if ($cellIndex == 5) {
+        //             $cell->setWidth(276);
+        //         } else if ($cellIndex == 6) {
+        //             $cell->setWidth(74);
+        //         } else if ($cellIndex == 7) {
+        //             $cell->setWidth(74);
+        //         } else if ($cellIndex == 8) {
+        //             $cell->setWidth(74);
+        //         } else if ($cellIndex == 9) {
+        //             $cell->setWidth(74);
+        //         }
+        //         $textRun = $cell->createTextRun($cellText);
+        //         $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        //         $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        //         //coloring by problem
+        //         if ($row[1] == 'Core & Surrounding') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff89a64e'));
+        //         } else if ($row[1] == 'Ekosistem MPC') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00b0f0'));
+        //         } else if ($row[1] == 'Loan') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffa6a6a6'));
+        //         } else if ($row[1] == 'Onboarding') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff81ff63'));
+        //         } else if ($row[1] == 'Online Payment') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff09b1a7'));
+        //         } else if ($row[1] == 'Switching & 3rdparty') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffee52e1'));
+        //         } else if ($row[1] == 'Transaction') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8380ee'));
+        //         } else if ($row[1] == 'Wholesale Banking') {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff8064a2'));
+        //         } else {
+        //             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffffffff'));
+        //         }
+        //     }
+        // }
 
 
         //Slide 5
