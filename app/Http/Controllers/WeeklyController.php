@@ -880,17 +880,17 @@ class WeeklyController extends Controller
         // GET DATA FROM DATABASE
         $data_table = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
+            ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             ->union(
                 Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
                     ->where('status', '=', 'Closed')
-                    ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
+                    ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             )
             ->get();
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'Category', 'Summary', 'Created Date', 'Created-RCA Time', 'Resolved Time', 'Status & Complete Time'],
+            ['', 'Category', 'Summary', 'Level', 'Created Date', 'Created-RCA Time', 'Status & Complete Time'],
         ];
 
         // ADD ARRAY DATA
@@ -907,6 +907,9 @@ class WeeklyController extends Controller
             }
 
             $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+            //priority
+            $level = $value->priority;
 
             //convert date to carbon parse
             $created = Carbon::parse($value->created);
@@ -931,7 +934,7 @@ class WeeklyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, $value->category, $summary,  $created->format('d/m/y'), $rca_time,  $completion_time, $status];
+            $tempdata[] = [$value->problem, $value->category, $summary, $level, $created->format('d/m/y'), $rca_time,  $status];
         }
 
 
@@ -1053,17 +1056,17 @@ class WeeklyController extends Controller
         $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
         $data_table_lastweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
+            ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             ->union(
                 Data::whereBetween(DB::raw('DATE(changed_at)'), $lastweek)
                     ->where('status', '=', 'Closed')
-                    ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
+                    ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             )
             ->get();
 
         //SET TABLE HEADER
         $tempdata = [
-            ['', 'Category', 'Summary', 'Created Date', 'Created-RCA Time', 'Resolved Time', 'Status & Complete Time'],
+            ['', 'Category', 'Summary', 'Level','Created Date',  'Created-RCA Time', 'Status & Complete Time'],
         ];
 
         //SET TABLE DATA
@@ -1080,6 +1083,9 @@ class WeeklyController extends Controller
             }
 
             $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+            //priority
+            $level = $value->priority;
 
             //convert date to carbon parse
             $created = Carbon::parse($value->created);
@@ -1104,7 +1110,7 @@ class WeeklyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, $value->category, $summary,  $created->format('d/m/y'), $rca_time,  $completion_time, $status];
+            $tempdata[] = [$value->problem, $value->category, $summary, $level,  $created->format('d/m/y'), $rca_time, $status];
         }
 
         // dd($tempdata);
