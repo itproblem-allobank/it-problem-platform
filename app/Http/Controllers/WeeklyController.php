@@ -93,7 +93,7 @@ class WeeklyController extends Controller
         $textRun1 = $shape->createTextRun('Information Technology Infrastructure & Operations No ');
         $textRun1->getFont()->setBold(true)
             ->setSize(24);
-        $textRun2 = $shape->createTextRun('002/ITIO-DOC/XI/2023');
+        $textRun2 = $shape->createTextRun('002/ITIO-DOC/XI/2025');
         $textRun2->getFont()->setBold(true)
             ->setSize(24)->setColor(new Color('FFFF0000'));
 
