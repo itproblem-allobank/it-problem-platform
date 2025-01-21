@@ -58,36 +58,85 @@
                 </a>
             </li>
 
-            <!-- Nav Item - Jira -->
-            <li class="nav-item {{ Nav::isRoute('jira.index') }}">
-                <a class="nav-link" href="{{ route('jira.index') }}">
-                    <i class="fas fa-fw fa-ticket"></i>
-                    <span>{{ __('Ticket Jira') }}</span>
+            
+             <!-- IT PROBLEM -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsProblem"
+                    aria-expanded="true" aria-controls="collapsProblem">
+                    <i class="fas fa-fw fa-tasks"></i>
+                    <span>{{ __('IT Problem') }}</span>
                 </a>
+                <div id="collapsProblem" class="collapse" aria-labelledby="headingTickets"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">{{ __('List') }}</h6>
+
+                        <!-- Sub Menu Item - Ticket Jira -->
+                        <a class="collapse-item {{ Nav::isRoute('jira.index') }}" href="{{ route('jira.index') }}">
+                            <i class="fas fa-fw fa-ticket"></i> {{ __('Ticket Problem') }}
+                        </a>
+
+                        <!-- Sub Menu Item - Service Request -->
+                        <a class="collapse-item {{ Nav::isRoute('service.index') }}"
+                            href="{{ route('service.index') }}">
+                            <i class="fas fa-fw fa-envelope-square"></i> {{ __('Ticket Service') }}
+                        </a>
+
+                        <!-- Sub Menu Item - Service Request -->
+                        <a class="collapse-item {{ Nav::isRoute('weekly.index') }}"
+                            href="{{ route('weekly.index') }}">
+                            <i class="fas fa-fw fa-file-powerpoint"></i> {{ __('Generate Weekly') }}
+                        </a>
+
+                        <!-- Sub Menu Item - Service Request -->
+                        <a class="collapse-item {{ Nav::isRoute('monthly.index') }}"
+                            href="{{ route('monthly.index') }}">
+                            <i class="fas fa-fw fa-file-powerpoint"></i> {{ __('Generate Monthly') }}
+                        </a>
+
+
+                    </div>
+                </div>
             </li>
 
-            <!-- Nav Item - Service -->
-            <li class="nav-item {{ Nav::isRoute('service.index') }}">
-                <a class="nav-link" href="{{ route('service.index') }}">
-                    <i class="fas fa-fw fa-envelope-square"></i>
-                    <span>{{ __('Service Request') }}</span>
+             <!-- IT INCIDENT -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsIncident"
+                    aria-expanded="true" aria-controls="collapsIncident">
+                    <i class="fas fa-fw fa-tasks"></i>
+                    <span>{{ __('IT Incident') }}</span>
                 </a>
-            </li>
+                <div id="collapsIncident" class="collapse" aria-labelledby="headingTickets"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">{{ __('List') }}</h6>
 
-            <!-- Nav Item - Generate -->
-            <li class="nav-item {{ Nav::isRoute('weekly.index') }}">
-                <a class="nav-link" href="{{ route('weekly.index') }}">
-                    <i class="fas fa-fw fa-file-powerpoint"></i>
-                    <span>{{ __('Weekly Report') }}</span>
-                </a>
-            </li>
+                        <!-- Sub Menu Item - Ticket Jira -->
+                        <a class="collapse-item {{ Nav::isRoute('jira.index') }}" href="{{ route('jira.index') }}">
+                            <i class="fas fa-fw fa-ticket"></i> {{ __('Ticket Incident') }}
+                        </a>
 
-            <!-- Nav Item - Generate -->
-            <li class="nav-item {{ Nav::isRoute('monthly.index') }}">
-                <a class="nav-link" href="{{ route('monthly.index') }}">
-                    <i class="fas fa-fw fa-file-powerpoint"></i>
-                    <span>{{ __('Monthly Report') }}</span>
-                </a>
+                        <!-- Sub Menu Item - Service Request -->
+                        <a class="collapse-item {{ Nav::isRoute('service.index') }}"
+                            href="{{ route('service.index') }}">
+                            <i class="fas fa-fw fa-envelope-square"></i> {{ __('Ticket Service') }}
+                        </a>
+
+                        <!-- Sub Menu Item - Service Request -->
+                        <a class="collapse-item {{ Nav::isRoute('weekly.index') }}"
+                            href="{{ route('weekly.index') }}">
+                            <i class="fas fa-fw fa-file-powerpoint"></i> {{ __('Generate Weekly') }}
+                        </a>
+
+                        <!-- Sub Menu Item - Service Request -->
+                        <a class="collapse-item {{ Nav::isRoute('monthly.index') }}"
+                            href="{{ route('monthly.index') }}">
+                            <i class="fas fa-fw fa-file-powerpoint"></i> {{ __('Generate Monthly') }}
+                        </a>
+
+
+                    </div>
+                </div>
             </li>
 
             <!-- Divider -->
