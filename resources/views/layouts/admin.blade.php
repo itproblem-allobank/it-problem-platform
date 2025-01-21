@@ -39,16 +39,11 @@
                     {{-- <i class="fas fa-laugh-wink"></i> --}}
                     {{-- <i class="fa-solid fa-mosquito"></i> --}}
                 </div>
-                <div class="sidebar-brand-text mx-3">IT Problem</div>
+                <div class="sidebar-brand-text mx-3">IT Operations</div>
             </a>
 
             <!-- Divider -->
             <hr class="sidebar-divider">
-
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                {{ __('Settings') }}
-            </div>
 
             <!-- Nav Item - Profile -->
             <li class="nav-item {{ Nav::isRoute('profile') }}">
@@ -58,8 +53,8 @@
                 </a>
             </li>
 
-            
-             <!-- IT PROBLEM -->
+
+            <!-- IT PROBLEM -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsProblem"
                     aria-expanded="true" aria-controls="collapsProblem">
@@ -69,7 +64,6 @@
                 <div id="collapsProblem" class="collapse" aria-labelledby="headingTickets"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">{{ __('List') }}</h6>
 
                         <!-- Sub Menu Item - Ticket Jira -->
                         <a class="collapse-item {{ Nav::isRoute('jira.index') }}" href="{{ route('jira.index') }}">
@@ -99,7 +93,7 @@
                 </div>
             </li>
 
-             <!-- IT INCIDENT -->
+            <!-- IT INCIDENT -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsIncident"
                     aria-expanded="true" aria-controls="collapsIncident">
@@ -109,17 +103,10 @@
                 <div id="collapsIncident" class="collapse" aria-labelledby="headingTickets"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">{{ __('List') }}</h6>
 
                         <!-- Sub Menu Item - Ticket Jira -->
                         <a class="collapse-item {{ Nav::isRoute('jira.index') }}" href="{{ route('jira.index') }}">
                             <i class="fas fa-fw fa-ticket"></i> {{ __('Ticket Incident') }}
-                        </a>
-
-                        <!-- Sub Menu Item - Service Request -->
-                        <a class="collapse-item {{ Nav::isRoute('service.index') }}"
-                            href="{{ route('service.index') }}">
-                            <i class="fas fa-fw fa-envelope-square"></i> {{ __('Ticket Service') }}
                         </a>
 
                         <!-- Sub Menu Item - Service Request -->
@@ -129,10 +116,10 @@
                         </a>
 
                         <!-- Sub Menu Item - Service Request -->
-                        <a class="collapse-item {{ Nav::isRoute('monthly.index') }}"
+                        {{-- <a class="collapse-item {{ Nav::isRoute('monthly.index') }}"
                             href="{{ route('monthly.index') }}">
                             <i class="fas fa-fw fa-file-powerpoint"></i> {{ __('Generate Monthly') }}
-                        </a>
+                        </a> --}}
 
 
                     </div>
