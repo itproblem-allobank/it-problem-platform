@@ -99,7 +99,8 @@
                     name: 'resolved_time'
                 },
             ],
-            responsive: true
+            responsive: true,
+            order: [[6, 'desc']] // Kolom 6 (created_time) secara descending
         });
     });
 </script>

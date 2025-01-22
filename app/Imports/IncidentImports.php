@@ -37,10 +37,17 @@ class IncidentImports implements ToModel, WithStartRow, WithMultipleSheets
         // $matches[1] akan berisi 'DIPM-3681'
         $no_jira = $matches[1];
 
+        // dd($row[6], $row[7]);
         $created = ($row[6] - 25569) * 86400;
         $created_time = gmdate("Y-m-d H:i:s", $created);
-        $resolved = ($row[7] - 25569) * 86400;
-        $resolved_time = gmdate("Y-m-d H:i:s", $resolved);
+
+        // resolved time
+        if ($row[7] == null) {
+            $resolved_time = null;
+        } else {
+            $resolved = ($row[7] - 25569) * 86400;
+            $resolved_time = gmdate("Y-m-d H:i:s", $resolved);
+        }
 
         $data = [
             'no_jira'         => $no_jira,
@@ -51,7 +58,7 @@ class IncidentImports implements ToModel, WithStartRow, WithMultipleSheets
             'mitigation'      => $row[5],
             'created_time'    => $created_time,
             'resolved_time'   => $resolved_time
-            
+
         ];
 
         return new Incident($data);
