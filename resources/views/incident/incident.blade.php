@@ -39,15 +39,13 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Problem</th>
                     <th>Summary</th>
-                    <th>Priority</th>
                     <th>Status</th>
-                    <th>Impact Analyst</th>
-                    <th>Root Cause</th>
-                    <th>Work Around</th>
-                    <th>Assignee</th>
-                    <th>Updated</th>
+                    <th>Disruption</th>
+                    <th>Rootcause</th>
+                    <th>Mitigation</th>
+                    <th>Created Time</th>
+                    <th>Closed Time</th>
                 </tr>
             </thead>
         </table>
@@ -67,46 +65,38 @@
         $('#getTables').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ route('jira.index') }}",
+            ajax: "{{ route('incident.index') }}",
             columns: [{
-                    data: 'id',
-                    name: 'id'
-                },
-                {
-                    data: 'problem',
-                    name: 'problem'
+                    data: 'no_jira',
+                    name: 'no_jira'
                 },
                 {
                     data: 'summary',
                     name: 'summary'
                 },
                 {
-                    data: 'priority',
-                    name: 'priority'
+                    data: 'status_ticket',
+                    name: 'status_ticket'
                 },
                 {
-                    data: 'status',
-                    name: 'status'
+                    data: 'disruption',
+                    name: 'disruption'
                 },
                 {
-                    data: 'impact_analyst',
-                    name: 'impact_analyst'
+                    data: 'rootcause',
+                    name: 'rootcause'
                 },
                 {
-                    data: 'root_cause',
-                    name: 'root_cause'
+                    data: 'mitigation',
+                    name: 'mitigation'
                 },
                 {
-                    data: 'work_around',
-                    name: 'work_around'
+                    data: 'created_time',
+                    name: 'created_time'
                 },
                 {
-                    data: 'assignee_to',
-                    name: 'assignee_to'
-                },
-                {
-                    data: 'updated',
-                    name: 'updated'
+                    data: 'resolved_time',
+                    name: 'resolved_time'
                 },
             ],
             responsive: true
@@ -125,7 +115,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('jira.import') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('incident.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
@@ -152,7 +142,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('jira.delete') }}" method="POST">
+            <form action="{{ route('incident.delete') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
