@@ -24,20 +24,20 @@ Route::get('/profile', 'ProfileController@index')->name('profile');
 Route::put('/profile', 'ProfileController@update')->name('profile.update');
 
 // Page Jiras
-Route::get('/jira', 'JiraController@index')->name('jira.index');
-Route::post('jira/import', 'JiraController@import')->name('jira.import');
-Route::post('/jira/delete', 'JiraController@delete')->name('jira.delete');
+Route::get('/jira', 'Problem\JiraController@index')->name('jira.index');
+Route::post('jira/import', 'Problem\JiraController@import')->name('jira.import');
+Route::post('/jira/delete', 'Problem\JiraController@delete')->name('jira.delete');
 
 // Page Service Request
-Route::get('/service', 'ServiceController@index')->name('service.index');
-Route::post('/service/import', 'ServiceController@import')->name('service.import');
-Route::post('/service/delete', 'ServiceController@delete')->name('service.delete');
+Route::get('/service', 'Problem\ServiceController@index')->name('service.index');
+Route::post('/service/import', 'Problem\ServiceController@import')->name('service.import');
+Route::post('/service/delete', 'Problem\ServiceController@delete')->name('service.delete');
 
 // Page weekly Powerpoint
-Route::get('/weekly', 'WeeklyController@index')->name('weekly.index');
-Route::get('/weekly/download', 'WeeklyController@download')->name('weekly.download');
+Route::get('/weekly', 'Problem\WeeklyController@index')->name('weekly.index');
+Route::get('/weekly/download', 'Problem\WeeklyController@download')->name('weekly.download');
 
 // Page monthly Powerpoint
-Route::get('/monthly', 'MonthlyController@index')->name('monthly.index');
-Route::get('/monthly/download', 'MonthlyController@download')->name('monthly.download');
+Route::get('/monthly', 'Problem\MonthlyController@index')->name('monthly.index');
+Route::get('/monthly/download', 'Problem\MonthlyController@download')->name('monthly.download');
 

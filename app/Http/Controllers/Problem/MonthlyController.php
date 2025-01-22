@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Problem;
 
+use App\Http\Controllers\Controller;
 use App\Models\Data;
 use App\Models\Service;
 use Illuminate\Support\Carbon;

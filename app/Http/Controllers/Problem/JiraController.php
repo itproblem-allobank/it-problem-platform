@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Problem;
 
+use App\Http\Controllers\Controller;
 use App\Models\Data;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
