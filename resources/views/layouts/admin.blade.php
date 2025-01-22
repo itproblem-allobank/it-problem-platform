@@ -105,7 +105,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
 
                         <!-- Sub Menu Item - Ticket Jira -->
-                        <a class="collapse-item {{ Nav::isRoute('jira.index') }}" href="{{ route('jira.index') }}">
+                        <a class="collapse-item {{ Nav::isRoute('incident.index') }}" href="{{ route('incident.index') }}">
                             <i class="fas fa-fw fa-ticket"></i> {{ __('Ticket Incident') }}
                         </a>
 

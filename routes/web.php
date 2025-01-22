@@ -19,25 +19,28 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-
 Route::get('/profile', 'ProfileController@index')->name('profile');
 Route::put('/profile', 'ProfileController@update')->name('profile.update');
 
-// Page Jiras
+// ---------------------------- IT Problem Page -----------------------------
+// Add Ticket Problem
 Route::get('/jira', 'Problem\JiraController@index')->name('jira.index');
 Route::post('jira/import', 'Problem\JiraController@import')->name('jira.import');
 Route::post('/jira/delete', 'Problem\JiraController@delete')->name('jira.delete');
-
-// Page Service Request
+// Add Service Request
 Route::get('/service', 'Problem\ServiceController@index')->name('service.index');
 Route::post('/service/import', 'Problem\ServiceController@import')->name('service.import');
 Route::post('/service/delete', 'Problem\ServiceController@delete')->name('service.delete');
-
-// Page weekly Powerpoint
+// Generate Weekly
 Route::get('/weekly', 'Problem\WeeklyController@index')->name('weekly.index');
 Route::get('/weekly/download', 'Problem\WeeklyController@download')->name('weekly.download');
-
-// Page monthly Powerpoint
+// Generate Monthly
 Route::get('/monthly', 'Problem\MonthlyController@index')->name('monthly.index');
 Route::get('/monthly/download', 'Problem\MonthlyController@download')->name('monthly.download');
+
+// ---------------------------- IT Incident Page ------------------------------
+// Add Ticket Incident
+Route::get('/incident', 'Incident\IncidentController@index')->name('incident.index');
+Route::post('/incident/import', 'Incident\IncidentController@import')->name('incident.import');
+Route::post('/incident/delete', 'Incident\IncidentController@delete')->name('incident.delete');
 
