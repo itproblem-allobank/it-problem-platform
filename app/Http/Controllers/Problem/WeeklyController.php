@@ -1263,6 +1263,7 @@ class WeeklyController extends Controller
                     ->where('status', '=', 'Closed')
                     ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
             )
+            ->orderBy('category') 
             ->get();
 
         // DEFINE ARRAY
