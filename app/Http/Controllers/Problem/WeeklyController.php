@@ -8,7 +8,7 @@ use App\Models\Service;
 use App\Exports\DataExport;
 use App\Exports\allDataExport;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Carbon;  
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
@@ -880,10 +880,12 @@ class WeeklyController extends Controller
 
         // GET DATA FROM DATABASE
         $data_table = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->where('problem', '!=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
             ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             ->union(
                 Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+                    ->where('problem', '!=', 'Enhancement')
                     ->where('status', '=', 'Closed')
                     ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             )
@@ -1056,10 +1058,12 @@ class WeeklyController extends Controller
         // Define the data for the table
         $lastweek = [Carbon::parse($start_date)->subDays(7), Carbon::parse($start_date)->subDays(1)];
         $data_table_lastweek = Data::whereBetween(DB::raw('DATE(created)'), $lastweek)
+            ->where('problem', '!=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
             ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             ->union(
                 Data::whereBetween(DB::raw('DATE(changed_at)'), $lastweek)
+                    ->where('problem', '!=', 'Enhancement')
                     ->where('status', '=', 'Closed')
                     ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             )
@@ -1067,7 +1071,7 @@ class WeeklyController extends Controller
 
         //SET TABLE HEADER
         $tempdata = [
-            ['', 'Category', 'Summary', 'Level','Created Date',  'Created-RCA Time', 'Status & Complete Time'],
+            ['', 'Category', 'Summary', 'Level', 'Created Date',  'Created-RCA Time', 'Status & Complete Time'],
         ];
 
         //SET TABLE DATA
@@ -1263,7 +1267,7 @@ class WeeklyController extends Controller
                     ->where('status', '=', 'Closed')
                     ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
             )
-            ->orderBy('category') 
+            ->orderBy('category')
             ->get();
 
         // DEFINE ARRAY
@@ -2192,9 +2196,9 @@ class WeeklyController extends Controller
 
         // create chart
         $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
-        ->where('problem', '!=', 'Enhancement')
-        ->select('problem', DB::raw('count(*) as count'))->groupBy('problem')
-        ->get();
+            ->where('problem', '!=', 'Enhancement')
+            ->select('problem', DB::raw('count(*) as count'))->groupBy('problem')
+            ->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
             $status_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
