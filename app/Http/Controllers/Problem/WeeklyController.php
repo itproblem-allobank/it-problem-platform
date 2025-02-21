@@ -1456,6 +1456,11 @@ class WeeklyController extends Controller
         $enhancement_low = $low_lastweek_enhancement + $low_thisweek_enhancement - $low_closed_thisweek_enhancement;
         $enhancement_count = $enhancement_high + $enhancement_medium + $enhancement_low;
 
+        // Counting existing, this week, closed
+        $total_existing_enhancement = $low_lastweek_enhancement + $medium_lastweek_enhancement + $high_lastweek_enhancement;
+        $total_thisweek_enhancement = $low_thisweek_enhancement + $medium_thisweek_enhancement + $high_thisweek_enhancement;
+        $total_closed_enhancement = $low_closed_thisweek_enhancement + $medium_closed_thisweek_enhancement + $high_closed_thisweek_enhancement;
+
         $tableShape = $slideEnhancement->createTableShape(3);
         $tableShape->setHeight(100);
         $tableShape->setWidth(144);
@@ -1533,6 +1538,68 @@ class WeeklyController extends Controller
             $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $cell->createTextRun($v);
         }
+
+        // Icon +
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(-5)
+            ->setOffsetY(175);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun('+');
+        $textRun->getFont()->setBold(true)
+            ->setSize(16)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Icon -
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(-5)
+            ->setOffsetY(195);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun('-');
+        $textRun->getFont()->setBold(true)
+            ->setSize(16)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Total Existing
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(155);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_existing_enhancement);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        //Total Created
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(175);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_thisweek_enhancement);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        //Total Closed
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(195);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_closed_enhancement);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+
 
         // ---------- SLIDE TAMBAHAN (Detail Ticket RCA & Pending) ----------------
 
