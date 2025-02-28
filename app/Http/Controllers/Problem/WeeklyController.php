@@ -58,8 +58,17 @@ class WeeklyController extends Controller
         $end_date = $request->end_date;
 
         $objPHPPresentation = new PhpPresentation();
+
+
         //Slide 1
         $slide1 = $objPHPPresentation->getActiveSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide1->addShape($backgroundImage);
 
         $imagePath = storage_path('image/allobank.png');
         $pictureShape = new File();
@@ -75,12 +84,12 @@ class WeeklyController extends Controller
             ->setWidth(700)
             ->setOffsetX(50)
             ->setOffsetY(300);
-        $textRun = $shape->createTextRun('Report Weekly IT Problem');
+        $textRun = $shape->createTextRun('Weekly Report IT Problem');
         $textRun->getFont()->setBold(true)
-            ->setSize(32);
+            ->setSize(28);
 
         //Divider
-        $lineShape1 = $slide1->createLineShape(50, 370, 1150, 370);
+        $lineShape1 = $slide1->createLineShape(50, 355, 1150, 355);
         $lineShape1->getBorder()->setColor(new Color('FF000000'));
         $lineShape1->getBorder()->setLineWidth(2);
 
@@ -90,13 +99,13 @@ class WeeklyController extends Controller
             ->setHeight(50)
             ->setWidth(1150)
             ->setOffsetX(50)
-            ->setOffsetY(380);
+            ->setOffsetY(360);
         $textRun1 = $shape->createTextRun('Information Technology Infrastructure & Operations No ');
         $textRun1->getFont()->setBold(true)
-            ->setSize(24);
-        $textRun2 = $shape->createTextRun('002/ITIO-DOC/XI/2025');
+            ->setSize(20);
+        $textRun2 = $shape->createTextRun('047/ITMG-ITIO/25');
         $textRun2->getFont()->setBold(true)
-            ->setSize(24)->setColor(new Color('FFFF0000'));
+            ->setSize(20)->setColor(new Color('FFFF0000'));
 
         //Text
         $shape = $slide1->createRichTextShape()
@@ -109,6 +118,13 @@ class WeeklyController extends Controller
 
         //Slide 2
         $slide2 = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide2->addShape($backgroundImage);
 
 
         // Tambahkan teks judul slide
@@ -194,12 +210,12 @@ class WeeklyController extends Controller
         $textShape2 = $slide2->createRichTextShape();
         $textShape2->setHeight(250);
         $textShape2->setWidth(300);
-        $textShape2->setOffsetX(800);
+        $textShape2->setOffsetX(480);
         $textShape2->setOffsetY(420);
         $textShape2->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         // Create the text run for the left-aligned text
-        $textRun2 = $textShape2->createTextRun("\n\nDibuat oleh,\n\n\n\n\n");
+        $textRun2 = $textShape2->createTextRun("\n\nDiperiksa oleh,\n\n\n\n\n");
         $textRun2->getFont()->setSize(15);
         $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
 
@@ -211,6 +227,30 @@ class WeeklyController extends Controller
 
         // Create the text run for "IT Problem Lead"
         $textRun3 = $textShape2->createTextRun("IT Problem Section Head");
+        $textRun3->getFont()->setSize(15);
+        $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
+
+        //Text Shape 3
+        $textShape2 = $slide2->createRichTextShape();
+        $textShape2->setHeight(250);
+        $textShape2->setWidth(300);
+        $textShape2->setOffsetX(900);
+        $textShape2->setOffsetY(420);
+        $textShape2->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+        // Create the text run for the left-aligned text
+        $textRun2 = $textShape2->createTextRun("\n\nDibuat oleh,\n\n\n\n\n");
+        $textRun2->getFont()->setSize(15);
+        $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
+
+        // Create the bold text run for "Tri Intan Siska Permatasari"
+        $boldTextRun = $textShape2->createTextRun("Ahmad Syauqi\n");
+        $boldTextRun->getFont()->setSize(15);
+        $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
+        $boldTextRun->getFont()->setBold(true); // Set the text to bold
+
+        // Create the text run for "IT Problem Lead"
+        $textRun3 = $textShape2->createTextRun("IT Problem Engineer");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
