@@ -1200,407 +1200,6 @@ class WeeklyController extends Controller
             }
         }
 
-        // ----------- SLIDE ENHANCEMENT ------------------------
-        $slideEnhancement = $objPHPPresentation->createSlide();
-        $backgroundImagePath = storage_path('image/background.png');
-        $backgroundImage = new File();
-        $backgroundImage->setPath($backgroundImagePath);
-        $backgroundImage->setWidth(1280);
-        $backgroundImage->setOffsetX(0);
-        $backgroundImage->setOffsetY(0);
-        $slideEnhancement->addShape($backgroundImage);
-
-
-        $imagePath = storage_path('image/allobank.png');
-        $pictureShape = new File();
-        $pictureShape->setPath($imagePath);
-        $pictureShape->setWidth(200);
-        $pictureShape->setOffsetX(1050);
-        $pictureShape->setOffsetY(20);
-        $slideEnhancement->addShape($pictureShape);
-
-        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
-            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
-            ->setCY(700, DocumentLayout::UNIT_PIXEL);
-
-        // Tambahkan teks judul slide
-        $shape = $slideEnhancement->createRichTextShape()
-            ->setHeight(50)
-            ->setWidth(1000)
-            ->setOffsetX(25)
-            ->setOffsetY(15);
-        $textRun = $shape->createTextRun('Product Enhancement');
-        $textRun->getFont()->setBold(true)
-            ->setSize(30);
-
-        $shape = $slideEnhancement->createRichTextShape()
-            ->setHeight(25)
-            ->setWidth(400)
-            ->setOffsetX(25)
-            ->setOffsetY(60);
-        $startdate = Carbon::parse($start_date)->format('d F Y');
-        $enddate = Carbon::parse($end_date)->format('d F Y');
-        $textRun = $shape->createTextRun('As of ' . $date);
-        $textRun->getFont()->setSize(14);
-
-        //TABLE
-        $columns = 7; // Number of columns
-        $tableShape = $slideEnhancement->createTableShape($columns);
-        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-
-        // Set the table's position and size
-        $tableShape->setHeight(210);
-        $tableShape->setWidth(810);
-        $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(110);
-
-        // GET DATA FROM DATABASE
-        $data_table = Data::
-            // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-            where('problem', '=', 'Enhancement')
-            ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
-            ->union(
-                Data::
-                    // whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-                    where('problem', '=', 'Enhancement')
-                    ->where('status', '=', 'Closed')
-                    ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
-            )
-            ->orderBy('category')
-            ->get();
-
-        // DEFINE ARRAY
-        $tempdata = [
-            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Team', 'Status'],
-        ];
-
-        // ADD ARRAY DATA
-        $i = 1;
-        foreach ($data_table as $key => $value) {
-            $status = $value->status;
-            if ($value->status == 'Root Cause Identified') {
-                $status = 'RC Identified';
-            }
-
-            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
-
-            //convert date to carbon parse
-            $created = Carbon::parse($value->created);
-            $rcatime = Carbon::parse($value->rca_time);
-            $closed_time = Carbon::parse($value->closed_time);
-
-            $target_version = $value->target_version;
-
-            //declare rca time
-            if ($value->rca_time == null) {
-                $rca_time = '-';
-            } else {
-                $rca_days = intval($created->diffInDays($rcatime));
-                $rca_days_string = strval($rca_days) . ' days';
-                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
-            }
-
-            //declare team
-            if ($value->team == null) {
-                $team = '-';
-            } else {
-                $team = $value->team;
-            }
-
-            //declare completion time
-            if ($value->closed_time == null) {
-                $completion_time = '-';
-            } else {
-                $completion_days = intval($created->diffInDays($closed_time));
-                $completion_days_string = strval($completion_days) . ' Days';
-                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
-            }
-
-            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version,  $team, $status];
-            $i++;
-        }
-
-        // dd($tempdata);
-
-        // INSERT ARRAY TO TABLE
-        foreach ($tempdata as $rowIndex => $row) {
-            $tableRow = $tableShape->createRow();
-            $tableRow->setHeight(25); // Set the height of the row
-            foreach ($row as $cellIndex => $cellText) {
-                if ($cellIndex == 0) {
-                    continue; // Lewati kolom yang disembunyikan
-                }
-
-                //set width
-                $cell = $tableRow->nextCell();
-                if ($cellIndex == 1) {
-                    $cell->setWidth(30);
-                } else if ($cellIndex == 2) {
-                    $cell->setWidth(70);
-                } else if ($cellIndex == 3) {
-                    $cell->setWidth(310);
-                } else if ($cellIndex == 4) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 5) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 6) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 7) {
-                    $cell->setWidth(100);
-                }
-
-                //set status
-                $problem = $row[0];
-                $status = explode("\n", $row[7]);
-                $firstStatus = $status[0];
-                // $cell = $tableRow->nextCell();
-                $textRun = $cell->createTextRun($cellText);
-                $textRun->getFont()->setBold($rowIndex == 0);
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                //
-                if ($rowIndex == 0) {
-                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
-                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-                } else {
-                    if ($cellIndex == 7) {
-                        //coloring by status
-                        if ($firstStatus == 'Pending') {
-                            $cell->getFill()->setStartColor(new Color('fff6f610'));
-                        } elseif ($firstStatus == 'Closed') {
-                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
-                        } elseif ($firstStatus == 'RC Identified') {
-                            $cell->getFill()->setStartColor(new Color('fff85208'));
-                        } else {
-                            $cell->getFill()->setFillType(Fill::FILL_NONE);
-                        }
-                    } else {
-                        $cell->getFill()->setFillType(Fill::FILL_NONE);
-                    }
-                }
-            }
-        }
-
-        // Detail High, Medium, Low Enhancement
-        $high_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
-            ->where('problem', '=', 'Enhancement')
-            ->where('priority', '=', 'High')
-            ->whereIn('status', ['Root Cause Identified', 'Pending'])
-            ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
-                ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
-                ->where('problem', '=', 'Enhancement')
-                ->where('priority', '=', 'High')
-                ->where('status', '=', 'Closed'))
-            ->count();
-
-        $medium_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
-            ->where('problem', '=', 'Enhancement')
-            ->where('priority', '=', 'Medium')
-            ->whereIn('status', ['Root Cause Identified', 'Pending'])
-            ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
-                ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
-                ->where('problem', '=', 'Enhancement')
-                ->where('priority', '=', 'Medium')
-                ->where('status', '=', 'Closed'))
-            ->count();
-
-        $low_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
-            ->where('problem', '=', 'Enhancement')
-            ->where('priority', '=', 'Low')
-            ->whereIn('status', ['Root Cause Identified', 'Pending'])
-            ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
-                ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
-                ->where('problem', '=', 'Enhancement')
-                ->where('priority', '=', 'Low')
-                ->where('status', '=', 'Closed'))
-            ->count();
-
-        $high_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-            ->where('problem', '=', 'Enhancement')
-            ->where('priority', '=', 'High')
-            ->count();
-
-        $medium_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-            ->where('problem', '=', 'Enhancement')
-            ->where('priority', '=', 'Medium')
-            ->count();
-
-        $low_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-            ->where('problem', '=', 'Enhancement')
-            ->where('priority', '=', 'Low')
-            ->count();
-
-        $high_closed_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-            ->where('problem', '=', 'Enhancement')
-            ->where('priority', '=', 'High')
-            ->where('status', '=', 'Closed')
-            ->count();
-
-        $medium_closed_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-            ->where('problem', '=', 'Enhancement')
-            ->where('priority', '=', 'Medium')
-            ->where('status', '=', 'Closed')
-            ->count();
-
-        $low_closed_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-            ->where('problem', '=', 'Enhancement')
-            ->where('priority', '=', 'Low')
-            ->where('status', '=', 'Closed')
-            ->count();
-
-        // Count Enhancement
-        $enhancement_high = $high_lastweek_enhancement + $high_thisweek_enhancement - $high_closed_thisweek_enhancement;
-        $enhancement_medium = $medium_lastweek_enhancement + $medium_thisweek_enhancement - $medium_closed_thisweek_enhancement;
-        $enhancement_low = $low_lastweek_enhancement + $low_thisweek_enhancement - $low_closed_thisweek_enhancement;
-        $enhancement_count = $enhancement_high + $enhancement_medium + $enhancement_low;
-
-        // Counting existing, this week, closed
-        $total_existing_enhancement = $low_lastweek_enhancement + $medium_lastweek_enhancement + $high_lastweek_enhancement;
-        $total_thisweek_enhancement = $low_thisweek_enhancement + $medium_thisweek_enhancement + $high_thisweek_enhancement;
-        $total_closed_enhancement = $low_closed_thisweek_enhancement + $medium_closed_thisweek_enhancement + $high_closed_thisweek_enhancement;
-
-        $tableShape = $slideEnhancement->createTableShape(3);
-        $tableShape->setHeight(100);
-        $tableShape->setWidth(144);
-        $tableShape->setOffsetX(1100);
-        $tableShape->setOffsetY(80);
-
-        //row judul
-        $rowShape = $tableShape->createRow();
-        $rowShape->setHeight(40);
-        $cell = $rowShape->nextCell();
-        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        $cell->setColSpan(3);
-        $textRun = $cell->createTextRun($enhancement_count . "\n" . truncateString('Enhancement'));
-        $textRun->getFont()->setBold(true);
-        $textRun->getFont()->setSize(12);
-
-        //row title
-        $rowShape = $tableShape->createRow();
-        $rowShape->setHeight(20);
-        $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'fffeb909'], ['status' => 'Low', 'color' => 'fffffe00']];
-        foreach ($val as $key => $v) {
-            $cell = $rowShape->nextCell();
-            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
-            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $textRun = $cell->createTextRun($v['status']);
-            $textRun->getFont()->setBold(true);
-        }
-
-        $rowShape = $tableShape->createRow();
-        $rowShape->setHeight(20);
-        $value = [
-            $high_lastweek_enhancement,
-            $medium_lastweek_enhancement,
-            $low_lastweek_enhancement
-        ];
-        foreach ($value as $key => $v) {
-            $cell = $rowShape->nextCell();
-            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $cell->createTextRun($v);
-        }
-
-        $rowShape = $tableShape->createRow();
-        $rowShape->setHeight(20);
-        $value = [
-            $high_thisweek_enhancement,
-            $medium_thisweek_enhancement,
-            $low_thisweek_enhancement
-        ];
-
-        foreach ($value as $key => $v) {
-            $cell = $rowShape->nextCell();
-            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $cell->createTextRun($v);
-        }
-
-        $rowShape = $tableShape->createRow();
-        $rowShape->setHeight(20);
-        $value = [
-            $high_closed_thisweek_enhancement,
-            $medium_closed_thisweek_enhancement,
-            $low_closed_thisweek_enhancement
-        ];
-
-        foreach ($value as $key => $v) {
-            $cell = $rowShape->nextCell();
-            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
-            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $cell->createTextRun($v);
-        }
-
-        // Icon +
-        $shape = $slideEnhancement->createRichTextShape();
-        $shape->setHeight(25)
-            ->setWidth(40)
-            ->setOffsetX(-5)
-            ->setOffsetY(175);
-        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $shape->createTextRun('+');
-        $textRun->getFont()->setBold(true)
-            ->setSize(16)
-            ->setColor(new Color(Color::COLOR_BLACK));
-
-        // Icon -
-        $shape = $slideEnhancement->createRichTextShape();
-        $shape->setHeight(25)
-            ->setWidth(40)
-            ->setOffsetX(-5)
-            ->setOffsetY(195);
-        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $shape->createTextRun('-');
-        $textRun->getFont()->setBold(true)
-            ->setSize(16)
-            ->setColor(new Color(Color::COLOR_BLACK));
-
-        // Total Existing
-        $shape = $slideEnhancement->createRichTextShape();
-        $shape->setHeight(25)
-            ->setWidth(40)
-            ->setOffsetX(1247)
-            ->setOffsetY(155);
-        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $shape->createTextRun($total_existing_enhancement);
-        $textRun->getFont()->setBold(true)
-            ->setSize(12)
-            ->setColor(new Color(Color::COLOR_BLACK));
-
-        //Total Created
-        $shape = $slideEnhancement->createRichTextShape();
-        $shape->setHeight(25)
-            ->setWidth(40)
-            ->setOffsetX(1247)
-            ->setOffsetY(175);
-        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $shape->createTextRun($total_thisweek_enhancement);
-        $textRun->getFont()->setBold(true)
-            ->setSize(12)
-            ->setColor(new Color(Color::COLOR_BLACK));
-
-        //Total Closed
-        $shape = $slideEnhancement->createRichTextShape();
-        $shape->setHeight(25)
-            ->setWidth(40)
-            ->setOffsetX(1247)
-            ->setOffsetY(195);
-        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $shape->createTextRun($total_closed_enhancement);
-        $textRun->getFont()->setBold(true)
-            ->setSize(12)
-            ->setColor(new Color(Color::COLOR_BLACK));
-
-
-
         // ---------- SLIDE TAMBAHAN (Detail Ticket RCA & Pending) ----------------
 
         // Set mockup 
@@ -1799,6 +1398,401 @@ class WeeklyController extends Controller
                 }
             }
         }
+
+
+
+        // ----------- SLIDE ENHANCEMENT ------------------------
+        $slideEnhancement = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slideEnhancement->addShape($backgroundImage);
+
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20);
+        $slideEnhancement->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        // Tambahkan teks judul slide
+        $shape = $slideEnhancement->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('Product Enhancement');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slideEnhancement->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(60);
+        $startdate = Carbon::parse($start_date)->format('d F Y');
+        $enddate = Carbon::parse($end_date)->format('d F Y');
+        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun->getFont()->setSize(14);
+
+        //TABLE
+        $columns = 7; // Number of columns
+        $tableShape = $slideEnhancement->createTableShape($columns);
+        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        // Set the table's position and size
+        $tableShape->setHeight(210);
+        $tableShape->setWidth(1030);
+        $tableShape->setOffsetX(25);
+        $tableShape->setOffsetY(110);
+
+        // GET DATA FROM DATABASE
+        $data_table = Data::
+            // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            where('problem', '=', 'Enhancement')
+            ->whereIn('status', ['Pending', 'Root Cause Identified'])
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
+            ->orderBy('category')
+            ->get();
+
+        // DEFINE ARRAY
+        $tempdata = [
+            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Team', 'Status'],
+        ];
+
+        // ADD ARRAY DATA
+        $i = 1;
+        foreach ($data_table as $key => $value) {
+            $status = $value->status;
+            if ($value->status == 'Root Cause Identified') {
+                $status = 'RC Identified';
+            }
+
+            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+            //convert date to carbon parse
+            $created = Carbon::parse($value->created);
+            $rcatime = Carbon::parse($value->rca_time);
+            $closed_time = Carbon::parse($value->closed_time);
+
+            $target_version = $value->target_version;
+
+            //declare rca time
+            if ($value->rca_time == null) {
+                $rca_time = '-';
+            } else {
+                $rca_days = intval($created->diffInDays($rcatime));
+                $rca_days_string = strval($rca_days) . ' days';
+                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+            }
+
+            //declare team
+            if ($value->team == null) {
+                $team = '-';
+            } else {
+                $team = $value->team;
+            }
+
+            //declare completion time
+            if ($value->closed_time == null) {
+                $completion_time = '-';
+            } else {
+                $completion_days = intval($created->diffInDays($closed_time));
+                $completion_days_string = strval($completion_days) . ' Days';
+                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
+            }
+
+            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version,  $team, $status];
+            $i++;
+        }
+
+        // dd($tempdata);
+
+        // INSERT ARRAY TO TABLE
+        foreach ($tempdata as $rowIndex => $row) {
+            $tableRow = $tableShape->createRow();
+            $tableRow->setHeight(25); // Set the height of the row
+            foreach ($row as $cellIndex => $cellText) {
+                if ($cellIndex == 0) {
+                    continue; // Lewati kolom yang disembunyikan
+                }
+
+                //set width
+                $cell = $tableRow->nextCell();
+                if ($cellIndex == 1) {
+                    $cell->setWidth(30);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(120);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(480);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 6) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 7) {
+                    $cell->setWidth(100);
+                }
+
+                //set status
+                $problem = $row[0];
+                $status = explode("\n", $row[7]);
+                $firstStatus = $status[0];
+                // $cell = $tableRow->nextCell();
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->getFill()->setStartColor(new Color('ffffffff'));
+                //
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } else {
+                    if ($cellIndex == 7) {
+                        //coloring by status
+                        if ($firstStatus == 'Pending') {
+                            $cell->getFill()->setStartColor(new Color('fff6f610'));
+                        } elseif ($firstStatus == 'Closed') {
+                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                        } elseif ($firstStatus == 'RC Identified') {
+                            $cell->getFill()->setStartColor(new Color('fff85208'));
+                        } else {
+                            $cell->getFill()->setFillType(Fill::FILL_NONE);
+                        }
+                    } else {
+                        $cell->getFill()->setStartColor(new Color('ffffffff'));
+                    }
+                }
+            }
+        }
+
+        // Detail High, Medium, Low Enhancement
+        $high_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'High')
+            ->whereIn('status', ['Root Cause Identified', 'Pending'])
+            ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
+                ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
+                ->where('problem', '=', 'Enhancement')
+                ->where('priority', '=', 'High')
+                ->where('status', '=', 'Closed'))
+            ->count();
+
+        $medium_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Medium')
+            ->whereIn('status', ['Root Cause Identified', 'Pending'])
+            ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
+                ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
+                ->where('problem', '=', 'Enhancement')
+                ->where('priority', '=', 'Medium')
+                ->where('status', '=', 'Closed'))
+            ->count();
+
+        $low_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Low')
+            ->whereIn('status', ['Root Cause Identified', 'Pending'])
+            ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
+                ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
+                ->where('problem', '=', 'Enhancement')
+                ->where('priority', '=', 'Low')
+                ->where('status', '=', 'Closed'))
+            ->count();
+
+        $high_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'High')
+            ->count();
+
+        $medium_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Medium')
+            ->count();
+
+        $low_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Low')
+            ->count();
+
+        $high_closed_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'High')
+            ->where('status', '=', 'Closed')
+            ->count();
+
+        $medium_closed_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Medium')
+            ->where('status', '=', 'Closed')
+            ->count();
+
+        $low_closed_thisweek_enhancement = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            ->where('problem', '=', 'Enhancement')
+            ->where('priority', '=', 'Low')
+            ->where('status', '=', 'Closed')
+            ->count();
+
+        // Count Enhancement
+        $enhancement_high = $high_lastweek_enhancement + $high_thisweek_enhancement - $high_closed_thisweek_enhancement;
+        $enhancement_medium = $medium_lastweek_enhancement + $medium_thisweek_enhancement - $medium_closed_thisweek_enhancement;
+        $enhancement_low = $low_lastweek_enhancement + $low_thisweek_enhancement - $low_closed_thisweek_enhancement;
+        $enhancement_count = $enhancement_high + $enhancement_medium + $enhancement_low;
+
+        // Counting existing, this week, closed
+        $total_existing_enhancement = $low_lastweek_enhancement + $medium_lastweek_enhancement + $high_lastweek_enhancement;
+        $total_thisweek_enhancement = $low_thisweek_enhancement + $medium_thisweek_enhancement + $high_thisweek_enhancement;
+        $total_closed_enhancement = $low_closed_thisweek_enhancement + $medium_closed_thisweek_enhancement + $high_closed_thisweek_enhancement;
+
+        $tableShape = $slideEnhancement->createTableShape(3);
+        $tableShape->setHeight(100);
+        $tableShape->setWidth(144);
+        $tableShape->setOffsetX(1100);
+        $tableShape->setOffsetY(80);
+
+        //row judul
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(40);
+        $cell = $rowShape->nextCell();
+        $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $cell->setColSpan(3);
+        $textRun = $cell->createTextRun($enhancement_count . "\n" . truncateString('Enhancement'));
+        $textRun->getFont()->setBold(true);
+        $textRun->getFont()->setSize(12);
+
+        //row title
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(20);
+        $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'fffeb909'], ['status' => 'Low', 'color' => 'fffffe00']];
+        foreach ($val as $key => $v) {
+            $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $textRun = $cell->createTextRun($v['status']);
+            $textRun->getFont()->setBold(true);
+        }
+
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(20);
+        $value = [
+            $high_lastweek_enhancement,
+            $medium_lastweek_enhancement,
+            $low_lastweek_enhancement
+        ];
+        foreach ($value as $key => $v) {
+            $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $cell->createTextRun($v);
+        }
+
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(20);
+        $value = [
+            $high_thisweek_enhancement,
+            $medium_thisweek_enhancement,
+            $low_thisweek_enhancement
+        ];
+
+        foreach ($value as $key => $v) {
+            $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $cell->createTextRun($v);
+        }
+
+        $rowShape = $tableShape->createRow();
+        $rowShape->setHeight(20);
+        $value = [
+            $high_closed_thisweek_enhancement,
+            $medium_closed_thisweek_enhancement,
+            $low_closed_thisweek_enhancement
+        ];
+
+        foreach ($value as $key => $v) {
+            $cell = $rowShape->nextCell();
+            $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFFFF'));
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $cell->createTextRun($v);
+        }
+
+        // Icon +
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1070)
+            ->setOffsetY(155);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun('+');
+        $textRun->getFont()->setBold(true)
+            ->setSize(16)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Icon -
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1070)
+            ->setOffsetY(175);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun('-');
+        $textRun->getFont()->setBold(true)
+            ->setSize(16)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Total Existing
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1235)
+            ->setOffsetY(135);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_existing_enhancement);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        //Total Created
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1235)
+            ->setOffsetY(155);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_thisweek_enhancement);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        //Total Closed
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1235)
+            ->setOffsetY(175);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_closed_enhancement);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
 
 
         // // ----------- SLIDE 4 ----------------------------------
