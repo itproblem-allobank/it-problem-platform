@@ -511,6 +511,19 @@ class WeeklyController extends Controller
                 ->setSize(12);
         }
 
+        // Total All IT Problem 
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(70);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_high + $total_medium + $total_low);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+
 
         // Icon +
         $shape = $slide3->createRichTextShape();
