@@ -47,8 +47,17 @@ class MonthlyController extends Controller
         $end_date = $request->end_date;
         // dd($request->end_date);
         $objPHPPresentation = new PhpPresentation();
+
+
         //Slide 1
         $slide1 = $objPHPPresentation->getActiveSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide1->addShape($backgroundImage);
 
         $imagePath = storage_path('image/allobank.png');
         $pictureShape = new File();
@@ -64,12 +73,12 @@ class MonthlyController extends Controller
             ->setWidth(700)
             ->setOffsetX(50)
             ->setOffsetY(300);
-        $textRun = $shape->createTextRun('Report Monthly IT Problem');
+        $textRun = $shape->createTextRun('Monthly Report IT Problem');
         $textRun->getFont()->setBold(true)
-            ->setSize(32);
+            ->setSize(28);
 
         //Divider
-        $lineShape1 = $slide1->createLineShape(50, 370, 1150, 370);
+        $lineShape1 = $slide1->createLineShape(50, 355, 1150, 355);
         $lineShape1->getBorder()->setColor(new Color('FF000000'));
         $lineShape1->getBorder()->setLineWidth(2);
 
@@ -79,13 +88,13 @@ class MonthlyController extends Controller
             ->setHeight(50)
             ->setWidth(1150)
             ->setOffsetX(50)
-            ->setOffsetY(380);
+            ->setOffsetY(360);
         $textRun1 = $shape->createTextRun('Information Technology Infrastructure & Operations No ');
         $textRun1->getFont()->setBold(true)
-            ->setSize(24);
-        $textRun2 = $shape->createTextRun('002/ITIO-DOC/XI/2025');
+            ->setSize(20);
+        $textRun2 = $shape->createTextRun('047/ITMG-ITIO/25');
         $textRun2->getFont()->setBold(true)
-            ->setSize(24)->setColor(new Color('FFFF0000'));
+            ->setSize(20)->setColor(new Color('FFFF0000'));
 
         //Text
         $shape = $slide1->createRichTextShape()
@@ -98,6 +107,13 @@ class MonthlyController extends Controller
 
         //Slide 2
         $slide2 = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide2->addShape($backgroundImage);
 
 
         // Tambahkan teks judul slide
@@ -152,7 +168,8 @@ class MonthlyController extends Controller
         $cell = $row->nextCell();
         setCellText($row, $cell, 'Review date', 15);
         $cell = $row->nextCell();
-        setCellText($row, $cell, Carbon::parse($end_date)->format('d F Y'), 15);
+        // setCellText($row, $cell, Carbon::parse($end_date)->format('d F Y'), 15);
+        setCellText($row, $cell, Carbon::now()->format('d F Y'), 15);
 
         //Text Shape 1
         $textShape1 = $slide2->createRichTextShape();
@@ -163,12 +180,13 @@ class MonthlyController extends Controller
         $textShape1->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         // Create the text run for the left-aligned text
-        $date = Carbon::parse($end_date)->format('d F Y');
+        // $date = Carbon::parse($end_date)->format('d F Y');
+        $date = Carbon::now()->format('d F Y');
         $textRun2 = $textShape1->createTextRun("Jakarta, " . $date . "\n\nDisetujui oleh,\n\n\n\n\n");
         $textRun2->getFont()->setSize(15);
         $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
 
-        // Create the bold text run for "Iswibowo Isakar"
+        // Create the bold text run for "Tri Intan Siska P."
         $boldTextRun = $textShape1->createTextRun("Tri Intan Siska P.\n");
         $boldTextRun->getFont()->setSize(15);
         $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
@@ -183,12 +201,12 @@ class MonthlyController extends Controller
         $textShape2 = $slide2->createRichTextShape();
         $textShape2->setHeight(250);
         $textShape2->setWidth(300);
-        $textShape2->setOffsetX(800);
+        $textShape2->setOffsetX(480);
         $textShape2->setOffsetY(420);
         $textShape2->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         // Create the text run for the left-aligned text
-        $textRun2 = $textShape2->createTextRun("\n\nDibuat oleh,\n\n\n\n\n");
+        $textRun2 = $textShape2->createTextRun("\n\nDiperiksa oleh,\n\n\n\n\n");
         $textRun2->getFont()->setSize(15);
         $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
 
@@ -203,6 +221,29 @@ class MonthlyController extends Controller
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
+        //Text Shape 3
+        $textShape2 = $slide2->createRichTextShape();
+        $textShape2->setHeight(250);
+        $textShape2->setWidth(300);
+        $textShape2->setOffsetX(900);
+        $textShape2->setOffsetY(420);
+        $textShape2->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+        // Create the text run for the left-aligned text
+        $textRun2 = $textShape2->createTextRun("\n\nDibuat oleh,\n\n\n\n\n");
+        $textRun2->getFont()->setSize(15);
+        $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
+
+        // Create the bold text run for "Tri Intan Siska Permatasari"
+        $boldTextRun = $textShape2->createTextRun("Ahmad Syauqi\n");
+        $boldTextRun->getFont()->setSize(15);
+        $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
+        $boldTextRun->getFont()->setBold(true); // Set the text to bold
+
+        // Create the text run for "IT Problem Lead"
+        $textRun3 = $textShape2->createTextRun("IT Problem Engineer");
+        $textRun3->getFont()->setSize(15);
+        $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
 
         //Slide 3
@@ -821,6 +862,7 @@ class MonthlyController extends Controller
         $closed = new Series('Closed', ['Week1' => $cl1, 'Week2' => $cl2, 'Week3' => $cl3, 'Week4' => $cl4]);
         $chartType->addSeries($closed);
 
+
         // ----------- SLIDE ENHANCEMENT ------------------------
         $slideEnhancement = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
@@ -850,7 +892,7 @@ class MonthlyController extends Controller
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('IT Problem - Enhancement');
+        $textRun = $shape->createTextRun('Product Enhancement');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -871,7 +913,7 @@ class MonthlyController extends Controller
 
         // Set the table's position and size
         $tableShape->setHeight(210);
-        $tableShape->setWidth(810);
+        $tableShape->setWidth(1030);
         $tableShape->setOffsetX(25);
         $tableShape->setOffsetY(110);
 
@@ -881,13 +923,7 @@ class MonthlyController extends Controller
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
             ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
-            ->union(
-                Data::
-                    // whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
-                    where('problem', '=', 'Enhancement')
-                    ->where('status', '=', 'Closed')
-                    ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
-            )
+            ->orderBy('category')
             ->get();
 
         // DEFINE ARRAY
@@ -957,9 +993,9 @@ class MonthlyController extends Controller
                 if ($cellIndex == 1) {
                     $cell->setWidth(30);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(70);
+                    $cell->setWidth(120);
                 } else if ($cellIndex == 3) {
-                    $cell->setWidth(310);
+                    $cell->setWidth(480);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(100);
                 } else if ($cellIndex == 5) {
@@ -980,6 +1016,7 @@ class MonthlyController extends Controller
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->getFill()->setStartColor(new Color('ffffffff'));
                 //
                 if ($rowIndex == 0) {
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
@@ -997,7 +1034,7 @@ class MonthlyController extends Controller
                             $cell->getFill()->setFillType(Fill::FILL_NONE);
                         }
                     } else {
-                        $cell->getFill()->setFillType(Fill::FILL_NONE);
+                        $cell->getFill()->setStartColor(new Color('ffffffff'));
                     }
                 }
             }
@@ -1076,6 +1113,11 @@ class MonthlyController extends Controller
         $enhancement_low = $low_lastweek_enhancement + $low_thisweek_enhancement - $low_closed_thisweek_enhancement;
         $enhancement_count = $enhancement_high + $enhancement_medium + $enhancement_low;
 
+        // Counting existing, this week, closed
+        $total_existing_enhancement = $low_lastweek_enhancement + $medium_lastweek_enhancement + $high_lastweek_enhancement;
+        $total_thisweek_enhancement = $low_thisweek_enhancement + $medium_thisweek_enhancement + $high_thisweek_enhancement;
+        $total_closed_enhancement = $low_closed_thisweek_enhancement + $medium_closed_thisweek_enhancement + $high_closed_thisweek_enhancement;
+
         $tableShape = $slideEnhancement->createTableShape(3);
         $tableShape->setHeight(100);
         $tableShape->setWidth(144);
@@ -1153,6 +1195,67 @@ class MonthlyController extends Controller
             $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $cell->createTextRun($v);
         }
+
+        // Icon +
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1070)
+            ->setOffsetY(155);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun('+');
+        $textRun->getFont()->setBold(true)
+            ->setSize(16)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Icon -
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1070)
+            ->setOffsetY(175);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun('-');
+        $textRun->getFont()->setBold(true)
+            ->setSize(16)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        // Total Existing
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1235)
+            ->setOffsetY(135);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_existing_enhancement);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        //Total Created
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1235)
+            ->setOffsetY(155);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_thisweek_enhancement);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
+        //Total Closed
+        $shape = $slideEnhancement->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1235)
+            ->setOffsetY(175);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_closed_enhancement);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
 
         // ----------------- ADDITIONAL SLIDE ----------------
         $additionalslide = $objPHPPresentation->createSlide();
