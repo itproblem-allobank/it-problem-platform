@@ -2715,27 +2715,27 @@ class WeeklyController extends Controller
         $textRun1 = $titleTable->createTextRun('IT Problem Ticket RCA Time');
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nCounting IT Problem Tickets by RCA Time Identified (Last 30 Days)");
+        $textRun2 = $titleTable->createTextRun("\nCounting IT Problem Tickets by RCA Time Identified (Last 7 Days)");
         $textRun2->getFont()->setSize(9);
 
         // Define data
-        $days1 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+        $days1 = Data::where('created', '>=', Carbon::now()->subWeek()->format('Y-m-d'))
             ->whereNotNull('rca_time')
             ->where('rca_days', '=', 1)
             ->count();
-        $days2 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+        $days2 = Data::where('created', '>=', Carbon::now()->subWeek()->format('Y-m-d'))
             ->whereNotNull('rca_time')
             ->where('rca_days', '=', 2)
             ->count();
-        $days3 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+        $days3 = Data::where('created', '>=', Carbon::now()->subWeek()->format('Y-m-d'))
             ->whereNotNull('rca_time')
             ->where('rca_days', '=', 3)
             ->count();
-        $days4 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+        $days4 = Data::where('created', '>=', Carbon::now()->subWeek()->format('Y-m-d'))
             ->whereNotNull('rca_time')
             ->where('rca_days', '=', 4)
             ->count();
-        $days5 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+        $days5 = Data::where('created', '>=', Carbon::now()->subWeek()->format('Y-m-d'))
             ->whereNotNull('rca_time')
             ->where('rca_days', '=', 5)
             ->count();
