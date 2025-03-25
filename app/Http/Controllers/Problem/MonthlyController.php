@@ -92,9 +92,11 @@ class MonthlyController extends Controller
         $textRun1 = $shape->createTextRun('Information Technology Infrastructure & Operations No ');
         $textRun1->getFont()->setBold(true)
             ->setSize(20);
-        $textRun2 = $shape->createTextRun('047/ITMG-ITIO/25');
+        $textRun2 = $shape->createTextRun('013/DIV-IFO/REP/25');
         $textRun2->getFont()->setBold(true)
-            ->setSize(20)->setColor(new Color('FFFF0000'));
+            ->setSize(20)
+            // ->setColor(new Color('FFFF0000'))
+            ;
 
         //Text
         $shape = $slide1->createRichTextShape()
@@ -923,8 +925,27 @@ class MonthlyController extends Controller
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
             ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
-            ->orderBy('category')
+            ->orderByRaw("
+            CASE 
+                WHEN target_version NOT IN ('Backlog', 'Pending') THEN 1 
+                ELSE 2 
+            END, target_version ASC
+        ")
+            ->orderByRaw("
+            CASE category
+                WHEN 'Loan' THEN 1
+                WHEN 'Onboarding' THEN 2
+                WHEN 'Core & Surrounding' THEN 3
+                ELSE 4 
+            END
+        ")
             ->get();
+        // ->orderByRaw("
+        //         CASE 
+        //             WHEN target_version NOT IN ('Backlog', 'Pending') THEN 1 
+        //             ELSE 2 
+        //         END, target_version ASC
+        // ")->get();
 
         // DEFINE ARRAY
         $tempdata = [

@@ -1299,7 +1299,24 @@ class WeeklyController extends Controller
         // Define data
         $detaildata = Data::where('problem', '!=', 'Enhancement')->where('status', '=', 'Pending')
             ->union(Data::where('problem', '!=', 'Enhancement')->where('status',  '=', 'Root Cause Identified'))
+            ->orderByRaw("
+        CASE 
+            WHEN target_version = '' THEN 3  -- Kosong di paling bawah
+            WHEN target_version = 'Backlog' THEN 2  -- Backlog di atas kosong
+            ELSE 1  -- Lainnya di atas semua
+            END, target_version ASC
+            ")
+            ->orderByRaw("
+            CASE problem
+            WHEN 'Loan' THEN 1
+            WHEN 'Onboarding' THEN 2
+            WHEN 'Core & Surrounding' THEN 3
+            ELSE 4 
+        END
+    ")
             ->get();
+
+        // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
 
         // ----------------- Create Table ------------------------------ 
         $columns = 7;
@@ -1514,7 +1531,20 @@ class WeeklyController extends Controller
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
             ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
-            ->orderBy('category')
+            ->orderByRaw("
+            CASE 
+                WHEN target_version NOT IN ('Backlog', 'Pending') THEN 1 
+                ELSE 2 
+            END, target_version ASC
+        ")
+            ->orderByRaw("
+            CASE category
+                WHEN 'Loan' THEN 1
+                WHEN 'Onboarding' THEN 2
+                WHEN 'Core & Surrounding' THEN 3
+                ELSE 4 
+            END
+        ")
             ->get();
 
         // DEFINE ARRAY
