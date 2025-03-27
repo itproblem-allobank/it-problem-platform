@@ -2535,10 +2535,29 @@ class WeeklyController extends Controller
         $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
         // Tambahkan seri data ke chart
+        // foreach ($resultdata_chart3 as $key => $value) {
+        //     $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Review' => $value['count_review'], 'User Confirmation' => $value['count_userconfirmation']]);
+        //     $chartType->addSeries($series);
+        // }
         foreach ($resultdata_chart3 as $key => $value) {
-            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Declined' => $value['count_declined'], 'Review' => $value['count_review'], 'User Confirmation' => $value['count_userconfirmation']]);
-            $chartType->addSeries($series);
+            // Filter hanya nilai yang lebih dari 0
+            $filteredData = array_filter([
+                'Total' => $value['total'],
+                'Closed' => $value['count_closed'],
+                'Declined' => $value['count_declined'],
+                'Review' => $value['count_review'],
+                'User Confirmation' => $value['count_userconfirmation'],
+            ], function ($v) {
+                return $v > 0; // Hanya ambil nilai yang lebih dari 0
+            });
+        
+            // Pastikan hanya menambahkan series jika ada data yang tersisa
+            if (!empty($filteredData)) {
+                $series = new Series($value['sub_category'], $filteredData);
+                $chartType->addSeries($series);
+            }
         }
+        
 
 
         // ------------ DETAIL LIST RCA TIME TICKET ------------------
@@ -2656,19 +2675,21 @@ class WeeklyController extends Controller
         $data_chart4 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
         $resultdata_chart4 = [];
         foreach ($data_chart4 as $key => $value) {
-            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
-            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
-            $status_pending = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Pending')->get()->count();
-            $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
-            $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%' . 'Approval' . '%')->get()->count();
-            $status_inprogress = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'In Progress')->get()->count();
-            $status_userconfirmation = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
-            $status_assignedtoDBA = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Assigned to DBA')->get()->count();
+            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->count();
+            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->count();
+            $status_resolved = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Resolved')->count();
+            $status_pending = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Pending')->count();
+            $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->count();
+            $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%' . 'Approval' . '%')->count();
+            $status_inprogress = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'In Progress')->count();
+            $status_userconfirmation = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->count();
+            $status_assignedtoDBA = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Assigned to DBA')->count();
             $resultdata_chart4[] =
                 [
                     'sub_category' => $value->sub_category,
                     'total' => $total,
                     'count_closed' => $status_closed,
+                    'count_resolved' => $status_resolved,
                     'count_pending' => $status_pending,
                     'count_declined' => $status_declined,
                     'count_approval' => $status_approval,
@@ -2678,6 +2699,8 @@ class WeeklyController extends Controller
 
                 ];
         }
+
+        // dd(json_encode($resultdata_chart4, JSON_PRETTY_PRINT));
 
         // set title table
         $titleTable = $slide5->createRichTextShape();
@@ -2725,11 +2748,33 @@ class WeeklyController extends Controller
         $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
         // Tambahkan seri data ke chart
-        foreach ($resultdata_chart4 as $key => $value) {
-            $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Pending' => $value['count_pending'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'Process on DBA' => $value['count_assignedtoDBA'], 'Process on Problem' => $value['count_inprogress'], 'User Confirmation' => $value['count_userconfirmation']]);
-            $chartType->addSeries($series);
-        }
+        // foreach ($resultdata_chart4 as $key => $value) {
+        //     $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Resolved' => $value['count_resolved'], 'Pending' => $value['count_pending'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'Process on DBA' => $value['count_assignedtoDBA'], 'Process on Problem' => $value['count_inprogress'], 'User Confirmation' => $value['count_userconfirmation']]);
+        //     $chartType->addSeries($series);
+        // }
 
+        foreach ($resultdata_chart4 as $key => $value) {
+            // Filter hanya nilai yang tidak kosong (tidak nol)
+            $filteredData = array_filter([
+                'Total' => $value['total'],
+                'Closed' => $value['count_closed'],
+                'Resolved' => $value['count_resolved'],
+                'Pending' => $value['count_pending'],
+                'Declined' => $value['count_declined'],
+                'Approval' => $value['count_approval'],
+                'Process on DBA' => $value['count_assignedtoDBA'],
+                'Process on Problem' => $value['count_inprogress'],
+                'User Confirmation' => $value['count_userconfirmation'],
+            ], function ($v) {
+                return $v > 0; // Hanya menyertakan nilai yang lebih dari 0
+            });
+        
+            // Hanya tambahkan jika ada data yang tersisa setelah filter
+            if (!empty($filteredData)) {
+                $series = new Series($value['sub_category'], $filteredData);
+                $chartType->addSeries($series);
+            }
+        }
 
         // ------------ CHART 4 / RCA Time ----------------
 
