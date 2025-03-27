@@ -2552,10 +2552,12 @@ class WeeklyController extends Controller
         $tableShape->setOffsetY(365);
 
         // QUERY
-        $data_table = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
+        $data_table = Data::where('created', '>=', Carbon::now()->subWeek()->format('Y-m-d'))
             ->whereNotNull('rca_time')
             ->Orderby('rca_days', 'desc')
             ->get();
+
+        // dd(json_encode($data_table, JSON_PRETTY_PRINT));
 
         // DEFINE ARRAY
         $tempdata = [
