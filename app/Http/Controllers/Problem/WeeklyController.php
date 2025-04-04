@@ -19,13 +19,13 @@ use PhpOffice\PhpPresentation\Style\Alignment;
 use PhpOffice\PhpPresentation\Style\Color;
 use PhpOffice\PhpPresentation\DocumentLayout;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Bar;
-use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie3D;
 use PhpOffice\PhpPresentation\Shape\Chart\Series;
 use PhpOffice\PhpPresentation\Shape\Drawing\File;
 use PhpOffice\PhpPresentation\Style\Border;
 use PhpOffice\PhpPresentation\Style\Fill;
-use Exception;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie;
+use PhpOffice\PhpPresentation\Shape\Chart\Series as ChartSeries;
+use Exception;
 use Termwind\Components\Raw;
 
 class WeeklyController extends Controller
@@ -2550,14 +2550,14 @@ class WeeklyController extends Controller
             ], function ($v) {
                 return $v > 0; // Hanya ambil nilai yang lebih dari 0
             });
-        
+
             // Pastikan hanya menambahkan series jika ada data yang tersisa
             if (!empty($filteredData)) {
                 $series = new Series($value['sub_category'], $filteredData);
                 $chartType->addSeries($series);
             }
         }
-        
+
 
 
         // ------------ DETAIL LIST RCA TIME TICKET ------------------
@@ -2768,7 +2768,7 @@ class WeeklyController extends Controller
             ], function ($v) {
                 return $v > 0; // Hanya menyertakan nilai yang lebih dari 0
             });
-        
+
             // Hanya tambahkan jika ada data yang tersisa setelah filter
             if (!empty($filteredData)) {
                 $series = new Series($value['sub_category'], $filteredData);
@@ -2822,7 +2822,7 @@ class WeeklyController extends Controller
         // dd($pie_data);
 
         // Create pie chart & Insert to slide
-        $pie3DChart = new Pie3D();
+        $pie3DChart = new Pie();
         $pie3DChart->setExplosion(0);
         $series = new Series('RCA Time', $pie_data);
         $series->setShowPercentage(true);
@@ -2890,7 +2890,7 @@ class WeeklyController extends Controller
 
         // dd($pie_data, $closed);
         // Create pie chart & Insert to slide
-        $pie3DChart = new Pie3D();
+        $pie3DChart = new Pie();
         $pie3DChart->setExplosion(0);
         $series = new Series('Resolved Time', $pie_data);
         $series->setShowPercentage(true);
@@ -2904,7 +2904,8 @@ class WeeklyController extends Controller
         $series->getDataPointFill(5)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFCFB84'));
         $pie3DChart->addSeries($series);
 
-        /* Create a shape (chart) */
+
+
         $shape = $slide5->createChartShape();
         $shape->setResizeProportional(false)
             ->setHeight(215)
