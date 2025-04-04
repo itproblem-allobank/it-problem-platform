@@ -103,9 +103,9 @@ class WeeklyController extends Controller
         $textRun1 = $shape->createTextRun('Information Technology Infrastructure & Operations No ');
         $textRun1->getFont()->setBold(true)
             ->setSize(20);
-        $textRun2 = $shape->createTextRun('047/ITMG-ITIO/25');
+        $textRun2 = $shape->createTextRun('013/DIV-IFO/REP/25');
         $textRun2->getFont()->setBold(true)
-            ->setSize(20)->setColor(new Color('FFFF0000'));
+            ->setSize(20);
 
         //Text
         $shape = $slide1->createRichTextShape()
