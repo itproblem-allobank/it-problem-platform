@@ -109,6 +109,8 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
             'resolved_days'     => $resolved_days,
             'rca_days'          => $rca_fix,
             'team'              => $row[22],
+            'aspect'          => $row[23],
+            'zoho_ticket'          => $row[24],
         ];
 
         $assignee_too = $row[13];
