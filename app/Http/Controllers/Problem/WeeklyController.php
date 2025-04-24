@@ -59,7 +59,6 @@ class WeeklyController extends Controller
 
         $objPHPPresentation = new PhpPresentation();
 
-
         //Slide 1
         $slide1 = $objPHPPresentation->getActiveSlide();
         $backgroundImagePath = storage_path('image/background.png');
@@ -285,7 +284,7 @@ class WeeklyController extends Controller
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('IT Problem');
+        $textRun = $shape->createTextRun('Problem Management');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -293,11 +292,19 @@ class WeeklyController extends Controller
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(25)
-            ->setOffsetY(60);
+            ->setOffsetY(65);
         $startdate = Carbon::parse($start_date)->format('d F Y');
         $enddate = Carbon::parse($end_date)->format('d F Y');
         $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
         $textRun->getFont()->setSize(14);
+
+        $shape = $slide3->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(110);
+        $textRun = $shape->createTextRun('PROBLEM OVERVIEW');
+        $textRun->getFont()->setSize(10)->setBold(true);
 
         // NEW
         $problem = Data::select('problem', DB::raw('count(*) as count'))
@@ -428,7 +435,7 @@ class WeeklyController extends Controller
 
         //set tempat
         $offsetx = 25;
-        $offsety = 100;
+        $offsety = 135;
         //loop category data
         foreach ($total as $key => $data) {
             // Tambahkan tabel dengan 4 baris dan 3 kolom
@@ -625,8 +632,13 @@ class WeeklyController extends Controller
             ->setSize(12)
             ->setColor(new Color(Color::COLOR_BLACK));
 
-
-
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $slide3->addShape($pictureShape);
 
         // -------------------- CHART 1 ---------------------
         $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
@@ -681,10 +693,10 @@ class WeeklyController extends Controller
 
         // set chart shape
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(200)
+        $chartShape->setHeight(165)
             ->setWidth(610)
             ->setOffsetX(25)
-            ->setOffsetY(225);
+            ->setOffsetY(260);
 
         // Define tipe chart
         $chartType = new Bar();
@@ -857,10 +869,10 @@ class WeeklyController extends Controller
 
         // set chart shape
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(200)
+        $chartShape->setHeight(165)
             ->setWidth(610)
             ->setOffsetX(645)
-            ->setOffsetY(225);
+            ->setOffsetY(260);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -1282,7 +1294,7 @@ class WeeklyController extends Controller
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('IT Problem List');
+        $textRun = $shape->createTextRun('Problem Management');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -1290,12 +1302,27 @@ class WeeklyController extends Controller
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(25)
-            ->setOffsetY(60);
+            ->setOffsetY(65);
         $startdate = Carbon::parse($start_date)->format('d F Y');
         $enddate = Carbon::parse($end_date)->format('d F Y');
         $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
         $textRun->getFont()->setSize(14);
 
+        $shape = $slide_additional->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(110);
+        $textRun = $shape->createTextRun('PROBLEM LIST');
+        $textRun->getFont()->setSize(10)->setBold(true);
+
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $slide_additional->addShape($pictureShape);
         // Define data
         $detaildata = Data::where('problem', '!=', 'Enhancement')->where('status', '=', 'Pending')
             ->union(Data::where('problem', '!=', 'Enhancement')->where('status',  '=', 'Root Cause Identified'))
@@ -1327,7 +1354,7 @@ class WeeklyController extends Controller
         $table->setheight(210);
         $table->setwidth(1200);
         $table->setOffsetX(25);
-        $table->setOffsetY(100);
+        $table->setOffsetY(135);
 
         // DEFINE ARRAY
         $tempdata = [
@@ -1496,13 +1523,12 @@ class WeeklyController extends Controller
             ->setCX(1280, DocumentLayout::UNIT_PIXEL)
             ->setCY(700, DocumentLayout::UNIT_PIXEL);
 
-        // Tambahkan teks judul slide
         $shape = $slideEnhancement->createRichTextShape()
             ->setHeight(50)
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('Product Enhancement');
+        $textRun = $shape->createTextRun('Problem Management');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -1510,11 +1536,27 @@ class WeeklyController extends Controller
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(25)
-            ->setOffsetY(60);
+            ->setOffsetY(65);
         $startdate = Carbon::parse($start_date)->format('d F Y');
         $enddate = Carbon::parse($end_date)->format('d F Y');
-        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
         $textRun->getFont()->setSize(14);
+
+        $shape = $slideEnhancement->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(110);
+        $textRun = $shape->createTextRun('PRODUCT ENHANCEMENT');
+        $textRun->getFont()->setSize(10)->setBold(true);
+
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $slideEnhancement->addShape($pictureShape);
 
         //TABLE
         $columns = 7; // Number of columns
@@ -1525,7 +1567,7 @@ class WeeklyController extends Controller
         $tableShape->setHeight(210);
         $tableShape->setWidth(1030);
         $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(110);
+        $tableShape->setOffsetY(135);
 
         // GET DATA FROM DATABASE
         $data_table = Data::
@@ -1745,7 +1787,7 @@ class WeeklyController extends Controller
         $tableShape->setHeight(100);
         $tableShape->setWidth(144);
         $tableShape->setOffsetX(1100);
-        $tableShape->setOffsetY(80);
+        $tableShape->setOffsetY(135);
 
         //row judul
         $rowShape = $tableShape->createRow();
@@ -1824,7 +1866,7 @@ class WeeklyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1070)
-            ->setOffsetY(155);
+            ->setOffsetY(210);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun('+');
         $textRun->getFont()->setBold(true)
@@ -1836,7 +1878,7 @@ class WeeklyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1070)
-            ->setOffsetY(175);
+            ->setOffsetY(230);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun('-');
         $textRun->getFont()->setBold(true)
@@ -1848,7 +1890,7 @@ class WeeklyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1235)
-            ->setOffsetY(135);
+            ->setOffsetY(190);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_existing_enhancement);
         $textRun->getFont()->setBold(true)
@@ -1860,7 +1902,7 @@ class WeeklyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1235)
-            ->setOffsetY(155);
+            ->setOffsetY(210);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_thisweek_enhancement);
         $textRun->getFont()->setBold(true)
@@ -1872,7 +1914,7 @@ class WeeklyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1235)
-            ->setOffsetY(175);
+            ->setOffsetY(230);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_closed_enhancement);
         $textRun->getFont()->setBold(true)
