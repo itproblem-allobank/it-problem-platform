@@ -24,9 +24,9 @@ Route::put('/profile', 'ProfileController@update')->name('profile.update');
 
 // ---------------------------- IT Problem Page -----------------------------
 // Add Ticket Problem
-Route::get('/jira', 'Problem\JiraController@index')->name('jira.index');
-Route::post('jira/import', 'Problem\JiraController@import')->name('jira.import');
-Route::post('/jira/delete', 'Problem\JiraController@delete')->name('jira.delete');
+Route::get('/jira', 'Problem\ProblemController@index')->name('jira.index');
+Route::post('jira/import', 'Problem\ProblemController@import')->name('jira.import');
+Route::post('/jira/delete', 'Problem\ProblemController@delete')->name('jira.delete');
 // Add Service Request
 Route::get('/service', 'Problem\ServiceController@index')->name('service.index');
 Route::post('/service/import', 'Problem\ServiceController@import')->name('service.import');

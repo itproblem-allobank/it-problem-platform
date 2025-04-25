@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 use Exception;
 
-class JiraController extends Controller
+class ProblemController extends Controller
 {
     public function __construct()
     {

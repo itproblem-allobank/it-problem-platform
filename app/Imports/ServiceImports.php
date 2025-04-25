@@ -18,7 +18,8 @@ class ServiceImports implements ToModel, WithStartRow, WithMultipleSheets
 
      public function startRow(): int
      {
-         return 8;
+        // return 8; kalo dari Apps
+         return 2; //kalo dari Export Excel
      }
  
      public function sheets(): array

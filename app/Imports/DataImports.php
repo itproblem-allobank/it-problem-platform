@@ -18,7 +18,8 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
 
     public function startRow(): int
     {
-        return 8;
+        // return 8; kalo dari Apps
+        return 2;  //kalo dari Export Excel
     }
 
     public function sheets(): array
@@ -31,11 +32,11 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
     public function model(array $row)
     {
         // convert hyperlink to code jira
-        $hyperlink = $row[0]; // Gunakan regular expression untuk mendapatkan kode Jira
-        preg_match('/browse\/([A-Z]+-\d+)/', $hyperlink, $matches);
+        // $hyperlink = $row[0]; // Gunakan regular expression untuk mendapatkan kode Jira
+        // preg_match('/browse\/([A-Z]+-\d+)/', $hyperlink, $matches);
 
-        // $matches[1] akan berisi 'DIPM-3681'
-        $code_jira = $matches[1];
+        // // $matches[1] akan berisi 'DIPM-3681'
+        // $code_jira = $matches[1];
 
         $row17 = ($row[17] - 25569) * 86400;
         $created = gmdate("Y-m-d H:i:s", $row17);
@@ -83,7 +84,7 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
         }
 
         $data = [
-            'code_jira'         => $code_jira,
+            'code_jira'         => $row[0],
             'environment'       => $row[1],
             'problem'           => $problem,
             'category'          => $category,
