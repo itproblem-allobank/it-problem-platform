@@ -40,12 +40,12 @@
                 <tr>
                     <th>No</th>
                     <th>Summary</th>
+                    <th>Category</th>
                     <th>Status</th>
-                    <th>Disruption</th>
+                    <th>Priority</th>
                     <th>Rootcause</th>
                     <th>Mitigation</th>
                     <th>Created Time</th>
-                    <th>Closed Time</th>
                 </tr>
             </thead>
         </table>
@@ -75,12 +75,16 @@
                     name: 'summary'
                 },
                 {
+                    data: 'category',
+                    name: 'category'
+                },
+                {
                     data: 'status_ticket',
                     name: 'status_ticket'
                 },
                 {
-                    data: 'disruption',
-                    name: 'disruption'
+                    data: 'priority',
+                    name: 'priority'
                 },
                 {
                     data: 'rootcause',
@@ -93,10 +97,6 @@
                 {
                     data: 'created_time',
                     name: 'created_time'
-                },
-                {
-                    data: 'resolved_time',
-                    name: 'resolved_time'
                 },
             ],
             responsive: true,

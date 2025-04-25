@@ -14,8 +14,10 @@ class Incident extends Model
     protected $fillable = [
         'no_jira',
         'summary',
+        'incident',
+        'category',
         'status_ticket',
-        'disruption',
+        'priority',
         'rootcause',
         'mitigation',
         'created_time',
