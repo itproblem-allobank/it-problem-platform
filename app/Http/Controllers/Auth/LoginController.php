@@ -26,7 +26,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = RouteServiceProvider::JIRA;
+    protected $redirectTo = RouteServiceProvider::PROBLEM;
 
     /**
      * Create a new controller instance.
