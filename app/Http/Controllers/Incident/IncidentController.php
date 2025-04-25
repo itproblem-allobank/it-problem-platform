@@ -26,7 +26,7 @@ class IncidentController extends Controller
         if (request()->ajax()) {
             return DataTables::make(Incident::all())->make(true);
         }
-        return view('incident/incident', compact('data'));
+        return view('incident/i-index', compact('data'));
     }
 
     public function import(Request $request)

@@ -27,7 +27,7 @@ class ServiceController extends Controller
             return DataTables::make(Service::all())->make(true);
         }
 
-        return view('problem/service', compact('data'));
+        return view('problem/p-service', compact('data'));
     }
 
     public function import(Request $request)

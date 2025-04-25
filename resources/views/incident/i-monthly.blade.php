@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('main-content')
 <!-- Page Heading -->
-<h1 class="h3 ml-4 mb-4 text-gray-800">{{ __('Weekly Report') }}</h1>
+<h1 class="h3 ml-4 mb-4 text-gray-800">{{ __('Monthly Report Incident') }}</h1>
 
 @if (session('success'))
 <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
@@ -23,7 +23,7 @@
 @endif
 
 <div class="card shadow p-4 mb-2">
-    <form method="GET" action="{{ route('weekly.download') }}">
+    <form method="GET" action="{{ route('i-monthly.download') }}">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <div class="pl-lg-4">
             <div class="row">
@@ -38,7 +38,7 @@
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label class="form-control-label">End Date</label>
-                        <input type="date" id="end_date" class="form-control" name="end_date" onchange="setStartDate()" required>
+                        <input type="date" id="end_date" class="form-control" name="end_date"required>
                     </div>
                 </div>
             </div>
@@ -62,23 +62,13 @@
 
         if (startDateInput.value) {
             const startDate = new Date(startDateInput.value);
-            startDate.setDate(startDate.getDate() + 6);
-            endDateInput.value = startDate.toISOString().split('T')[0];
-        } else {
-            endDateInput.value = '';
-        }
-    }
+            const startDay = startDate.getDate();
 
-    function setStartDate() {
-        const startDateInput = document.getElementById('start_date');
-        const endDateInput = document.getElementById('end_date');
-
-        if (endDateInput.value) {
-            const endDate = new Date(endDateInput.value);
-            endDate.setDate(endDate.getDate() - 6);
-            startDateInput.value = endDate.toISOString().split('T')[0];
-        } else {
-            startDateInput.value = '';
+            // Check if the start date is the first day of the month
+            if (startDay === 1) {
+                const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
+                endDateInput.value = endDate.toISOString().split('T')[0];
+            }
         }
     }
 </script>

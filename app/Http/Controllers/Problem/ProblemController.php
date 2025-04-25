@@ -26,7 +26,7 @@ class ProblemController extends Controller
         if (request()->ajax()) {
             return DataTables::make(Data::all())->make(true);
         }
-        return view('problem/jira', compact('data'));
+        return view('problem/p-index', compact('data'));
     }
 
     public function import(Request $request)
@@ -41,15 +41,15 @@ class ProblemController extends Controller
         $import = Excel::import(new DataImports(), storage_path('app/public/excel/' . $nama_file));
         Storage::delete($path);
         if ($import) {
-            return redirect()->route('jira.index')->with(['success' => 'Data Berhasil Diimport!']);
+            return redirect()->route('problem.index')->with(['success' => 'Data Berhasil Diimport!']);
         } else {
-            return redirect()->route('jira.index')->with(['error' => 'Data Gagal Diimport!']);
+            return redirect()->route('problem.index')->with(['error' => 'Data Gagal Diimport!']);
         }
     }
 
     public function delete()
     {
         Data::truncate();
-        return redirect()->route('jira.index')->with(['success' => 'Data Berhasil Dihapus!']);
+        return redirect()->route('problem.index')->with(['success' => 'Data Berhasil Dihapus!']);
     }
 }

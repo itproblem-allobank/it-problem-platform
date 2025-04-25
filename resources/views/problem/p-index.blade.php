@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('main-content')
 <!-- Page Heading -->
-<h1 class="h3 ml-4 mb-4 text-gray-800">{{ __('Service Request') }}</h1>
+<h1 class="h3 ml-4 mb-4 text-gray-800">{{ __('Ticket IT Problem Management') }}</h1>
 
 @if (session('success'))
 <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
@@ -39,16 +39,15 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Issue Type</th>
+                    <th>Problem</th>
                     <th>Summary</th>
-                    <th>Assignee</th>
-                    <th>Reporter</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Updated</th>
                     <th>Priority</th>
-                    <th>Sub Category</th>
-                    <th>Ticket Number</th>
+                    <th>Status</th>
+                    <th>Impact Analyst</th>
+                    <th>Root Cause</th>
+                    <th>Work Around</th>
+                    <th>Assignee</th>
+                    <th>Updated</th>
                 </tr>
             </thead>
         </table>
@@ -68,50 +67,46 @@
         $('#getTables').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ route('service.index') }}",
+            ajax: "{{ route('problem.index') }}",
             columns: [{
                     data: 'id',
                     name: 'id'
                 },
                 {
-                    data: 'issue_type',
-                    name: 'issue_type'
+                    data: 'problem',
+                    name: 'problem'
                 },
                 {
                     data: 'summary',
                     name: 'summary'
                 },
                 {
-                    data: 'assignee',
-                    name: 'assignee'
-                },
-                {
-                    data: 'reporter',
-                    name: 'reporter'
+                    data: 'priority',
+                    name: 'priority'
                 },
                 {
                     data: 'status',
                     name: 'status'
                 },
                 {
-                    data: 'created',
-                    name: 'created'
+                    data: 'impact_analyst',
+                    name: 'impact_analyst'
+                },
+                {
+                    data: 'root_cause',
+                    name: 'root_cause'
+                },
+                {
+                    data: 'work_around',
+                    name: 'work_around'
+                },
+                {
+                    data: 'assignee_to',
+                    name: 'assignee_to'
                 },
                 {
                     data: 'updated',
                     name: 'updated'
-                },
-                {
-                    data: 'priority',
-                    name: 'priority'
-                },
-                {
-                    data: 'sub_category',
-                    name: 'sub_category'
-                },
-                {
-                    data: 'ticket_number',
-                    name: 'ticket_number'
                 },
             ],
             responsive: true
@@ -130,7 +125,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('service.import') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('problem.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
@@ -157,7 +152,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('service.delete') }}" method="POST">
+            <form action="{{ route('problem.delete') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">

@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('main-content')
 <!-- Page Heading -->
-<h1 class="h3 ml-4 mb-4 text-gray-800">{{ __('Ticket Jira') }}</h1>
+<h1 class="h3 ml-4 mb-4 text-gray-800">{{ __('Ticket Service Request') }}</h1>
 
 @if (session('success'))
 <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
@@ -39,15 +39,16 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Problem</th>
+                    <th>Issue Type</th>
                     <th>Summary</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Impact Analyst</th>
-                    <th>Root Cause</th>
-                    <th>Work Around</th>
                     <th>Assignee</th>
+                    <th>Reporter</th>
+                    <th>Status</th>
+                    <th>Created</th>
                     <th>Updated</th>
+                    <th>Priority</th>
+                    <th>Sub Category</th>
+                    <th>Ticket Number</th>
                 </tr>
             </thead>
         </table>
@@ -67,46 +68,50 @@
         $('#getTables').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ route('jira.index') }}",
+            ajax: "{{ route('service.index') }}",
             columns: [{
                     data: 'id',
                     name: 'id'
                 },
                 {
-                    data: 'problem',
-                    name: 'problem'
+                    data: 'issue_type',
+                    name: 'issue_type'
                 },
                 {
                     data: 'summary',
                     name: 'summary'
                 },
                 {
-                    data: 'priority',
-                    name: 'priority'
+                    data: 'assignee',
+                    name: 'assignee'
+                },
+                {
+                    data: 'reporter',
+                    name: 'reporter'
                 },
                 {
                     data: 'status',
                     name: 'status'
                 },
                 {
-                    data: 'impact_analyst',
-                    name: 'impact_analyst'
-                },
-                {
-                    data: 'root_cause',
-                    name: 'root_cause'
-                },
-                {
-                    data: 'work_around',
-                    name: 'work_around'
-                },
-                {
-                    data: 'assignee_to',
-                    name: 'assignee_to'
+                    data: 'created',
+                    name: 'created'
                 },
                 {
                     data: 'updated',
                     name: 'updated'
+                },
+                {
+                    data: 'priority',
+                    name: 'priority'
+                },
+                {
+                    data: 'sub_category',
+                    name: 'sub_category'
+                },
+                {
+                    data: 'ticket_number',
+                    name: 'ticket_number'
                 },
             ],
             responsive: true
@@ -125,7 +130,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('jira.import') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('service.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
@@ -152,7 +157,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('jira.delete') }}" method="POST">
+            <form action="{{ route('service.delete') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">

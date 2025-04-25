@@ -66,7 +66,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
 
                         <!-- Sub Menu Item - Ticket Jira -->
-                        <a class="collapse-item {{ Nav::isRoute('jira.index') }}" href="{{ route('jira.index') }}">
+                        <a class="collapse-item {{ Nav::isRoute('problem.index') }}" href="{{ route('problem.index') }}">
                             <i class="fas fa-fw fa-ticket"></i> {{ __('Ticket Problem') }}
                         </a>
 
@@ -77,14 +77,14 @@
                         </a>
 
                         <!-- Sub Menu Item - Service Request -->
-                        <a class="collapse-item {{ Nav::isRoute('weekly.index') }}"
-                            href="{{ route('weekly.index') }}">
+                        <a class="collapse-item {{ Nav::isRoute('p-weekly.index') }}"
+                            href="{{ route('p-weekly.index') }}">
                             <i class="fas fa-fw fa-file-powerpoint"></i> {{ __('Generate Weekly') }}
                         </a>
 
                         <!-- Sub Menu Item - Service Request -->
-                        <a class="collapse-item {{ Nav::isRoute('monthly.index') }}"
-                            href="{{ route('monthly.index') }}">
+                        <a class="collapse-item {{ Nav::isRoute('p-monthly.index') }}"
+                            href="{{ route('p-monthly.index') }}">
                             <i class="fas fa-fw fa-file-powerpoint"></i> {{ __('Generate Monthly') }}
                         </a>
 
@@ -110,16 +110,16 @@
                         </a>
 
                         <!-- Sub Menu Item - Service Request -->
-                        <a class="collapse-item {{ Nav::isRoute('weekly.index') }}"
-                            href="{{ route('weekly.index') }}">
+                        <a class="collapse-item {{ Nav::isRoute('p-weekly.index') }}"
+                            href="{{ route('p-weekly.index') }}">
                             <i class="fas fa-fw fa-file-powerpoint"></i> {{ __('Generate Weekly') }}
                         </a>
 
                         <!-- Sub Menu Item - Service Request -->
-                        {{-- <a class="collapse-item {{ Nav::isRoute('monthly.index') }}"
-                            href="{{ route('monthly.index') }}">
+                        <a class="collapse-item {{ Nav::isRoute('i-monthly.index') }}"
+                            href="{{ route('i-monthly.index') }}">
                             <i class="fas fa-fw fa-file-powerpoint"></i> {{ __('Generate Monthly') }}
-                        </a> --}}
+                        </a>
 
 
                     </div>

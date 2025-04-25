@@ -38,7 +38,7 @@ class WeeklyController extends Controller
     public function index()
     {
 
-        return view('problem/weekly');
+        return view('problem/p-weekly');
     }
 
     public function exceldownload(Request $request)

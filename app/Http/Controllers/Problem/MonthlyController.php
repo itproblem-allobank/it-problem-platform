@@ -38,7 +38,7 @@ class MonthlyController extends Controller
     public function index()
     {
 
-        return view('problem/monthly');
+        return view('problem/p-monthly');
     }
 
     public function download(Request $request)
