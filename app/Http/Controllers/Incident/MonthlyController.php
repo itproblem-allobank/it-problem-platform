@@ -30,7 +30,6 @@ use Exception;
 
 class MonthlyController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware('auth');
@@ -48,7 +47,15 @@ class MonthlyController extends Controller
         $end_date = $request->end_date;
         // dd($request->end_date);
         $objPHPPresentation = new PhpPresentation();
+        // Set layout custom
+        $objPHPPresentation->getLayout()->setDocumentLayout(
+            DocumentLayout::LAYOUT_CUSTOM,
+            true // true = landscape, false = portrait
+        );
 
+        // Set ukuran slide sesuai kebutuhan
+        $objPHPPresentation->getLayout()->setCX(12193200); // width: 33.87 cm
+        $objPHPPresentation->getLayout()->setCY(6886800);  // height: 19.13 cm
 
         //Slide 1
         $slide1 = $objPHPPresentation->getActiveSlide();
@@ -159,7 +166,7 @@ class MonthlyController extends Controller
         $cell = $row->nextCell();
         setCellText($row, $cell, 'Title', 15);
         $cell = $row->nextCell();
-        setCellText($row, $cell, 'Report Monthly IT Problem', 15);
+        setCellText($row, $cell, 'Report Monthly IT Incident', 15);
 
         $row = $tableShape->createRow();
         $cell = $row->nextCell();
@@ -219,8 +226,8 @@ class MonthlyController extends Controller
         $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
-        // Create the text run for "IT Problem Lead"
-        $textRun3 = $textShape2->createTextRun("IT Problem Section Head");
+        // Create the text run for "IT Incident Lead"
+        $textRun3 = $textShape2->createTextRun("IT Incident Section Head");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
@@ -243,25 +250,41 @@ class MonthlyController extends Controller
         $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
-        // Create the text run for "IT Problem Lead"
-        $textRun3 = $textShape2->createTextRun("IT Problem Engineer");
+        // Create the text run for "IT Incident Lead"
+        $textRun3 = $textShape2->createTextRun("IT Incident Engineer");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
 
 
+        //Slide 5
+        $slide5 = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background_end.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setHeight(723);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide5->addShape($backgroundImage);
 
-
-
+        $shape = $slide5->createRichTextShape()
+            ->setHeight(100)
+            ->setWidth(400)
+            ->setOffsetX(120)
+            ->setOffsetY(300);
+        $textRun = $shape->createTextRun('Thankyou');
+        $textRun->getFont()->setBold(true)
+            ->setSize(60)->setColor(new Color('FFFFFF'));
 
         // Simpan presentasi ke dalam file
-        $filename = 'Report Monthly IT Problem' . ' - ' . Carbon::parse($start_date)->format('F Y') . '.pptx';
+        $filename = 'Report Monthly IT Incident' . ' - ' . Carbon::parse($start_date)->format('F Y') . '.pptx';
         $savePath = storage_path($filename);
         $writer = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
         $writer->save($savePath);
 
         // Simpan file Excel sementara
-        $excelPath = 'exports/List Problem Monthly - ' .  Carbon::parse($start_date)->format('F Y') . '.xlsx';
+        $excelPath = 'exports/List Incident Monthly - ' .  Carbon::parse($start_date)->format('F Y') . '.xlsx';
         Excel::store(new DataExport($start_date, $end_date), $excelPath, 'local');
 
         // 3. Buat file ZIP yang berisi kedua file tersebut
@@ -269,7 +292,7 @@ class MonthlyController extends Controller
         $zipFilePath = storage_path('app/exports/' . $zipFilename);
         $zip = new ZipArchive;
         if ($zip->open($zipFilePath, ZipArchive::CREATE) === TRUE) {
-            $zip->addFile(storage_path('app/' . $excelPath), 'List Problem Monthly - ' .  Carbon::parse($start_date)->format('F Y') . '.xlsx');
+            $zip->addFile(storage_path('app/' . $excelPath), 'List Incident Monthly - ' .  Carbon::parse($start_date)->format('F Y') . '.xlsx');
             $zip->addFile($savePath, $filename);
             $zip->close();
         }
@@ -281,4 +304,5 @@ class MonthlyController extends Controller
         // 5. Unduh file ZIP dan hapus setelah diunduh
         return response()->download($zipFilePath)->deleteFileAfterSend(true);
     }
+    //
 }

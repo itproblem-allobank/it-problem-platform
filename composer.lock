@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d57dc9939ae585bfe0af22e2bef0b5e",
+    "content-hash": "fe7076935ecc9ab9cc99bd16cb7e4f9e",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -1482,16 +1482,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v11.44.4",
+            "version": "v11.44.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "6b29bb79b18474ea5265b7022ba7b0f76eebeb4f"
+                "reference": "00bc6ac91a6d577bf051c18ddaa638c0d221e1c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/6b29bb79b18474ea5265b7022ba7b0f76eebeb4f",
-                "reference": "6b29bb79b18474ea5265b7022ba7b0f76eebeb4f",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/00bc6ac91a6d577bf051c18ddaa638c0d221e1c7",
+                "reference": "00bc6ac91a6d577bf051c18ddaa638c0d221e1c7",
                 "shasum": ""
             },
             "require": {
@@ -1693,7 +1693,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-04-23T23:35:40+00:00"
+            "time": "2025-04-25T12:40:47+00:00"
         },
         {
             "name": "laravel/legacy-factories",
@@ -3627,16 +3627,16 @@
         },
         {
             "name": "phpoffice/phppresentation",
-            "version": "1.0.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PHPPresentation.git",
-                "reference": "732d029640b78b5010750949629f635ed984ee10"
+                "reference": "13c4f1f36d82a0dfb06cc46684585c1aad77f1e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/PHPPresentation/zipball/732d029640b78b5010750949629f635ed984ee10",
-                "reference": "732d029640b78b5010750949629f635ed984ee10",
+                "url": "https://api.github.com/repos/PHPOffice/PHPPresentation/zipball/13c4f1f36d82a0dfb06cc46684585c1aad77f1e4",
+                "reference": "13c4f1f36d82a0dfb06cc46684585c1aad77f1e4",
                 "shasum": ""
             },
             "require": {
@@ -3644,16 +3644,18 @@
                 "ext-zip": "*",
                 "php": "^7.1|^8.0",
                 "phpoffice/common": "^1",
-                "phpoffice/phpspreadsheet": "^1.9.0"
+                "phpoffice/phpspreadsheet": "^1.9 || ^2.0 || ^3.0"
             },
             "require-dev": {
+                "dompdf/dompdf": "^3.1",
                 "phpmd/phpmd": "2.*",
-                "phpstan/phpstan": "^0.12.88",
+                "phpstan/phpstan": "^0.12.88 || ^1.0.0",
                 "phpunit/phpunit": ">=7.0"
             },
             "suggest": {
                 "ext-gd": "Required to add images"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -3690,9 +3692,9 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PHPPresentation/issues",
-                "source": "https://github.com/PHPOffice/PHPPresentation/tree/1.0.0"
+                "source": "https://github.com/PHPOffice/PHPPresentation/tree/master"
             },
-            "time": "2021-11-25T08:43:20+00:00"
+            "time": "2025-04-24T07:30:42+00:00"
         },
         {
             "name": "phpoffice/phpspreadsheet",
@@ -10044,7 +10046,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "phpoffice/phppresentation": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

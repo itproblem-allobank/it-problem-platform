@@ -48,6 +48,16 @@ class MonthlyController extends Controller
         // dd($request->end_date);
         $objPHPPresentation = new PhpPresentation();
 
+        // Set Layout
+        $objPHPPresentation->getLayout()->setDocumentLayout(
+            DocumentLayout::LAYOUT_CUSTOM,
+            true // true = landscape, false = portrait
+        );
+
+        // Set ukuran slide sesuai kebutuhan
+        $objPHPPresentation->getLayout()->setCX(12193200); // width: 33.87 cm
+        $objPHPPresentation->getLayout()->setCY(6886800);  // height: 19.13 cm
+
 
         //Slide 1
         $slide1 = $objPHPPresentation->getActiveSlide();
@@ -96,7 +106,7 @@ class MonthlyController extends Controller
         $textRun2->getFont()->setBold(true)
             ->setSize(20)
             // ->setColor(new Color('FFFF0000'))
-            ;
+        ;
 
         //Text
         $shape = $slide1->createRichTextShape()
@@ -1720,6 +1730,7 @@ class MonthlyController extends Controller
         $backgroundImage = new File();
         $backgroundImage->setPath($backgroundImagePath);
         $backgroundImage->setWidth(1280);
+        $backgroundImage->setHeight(723);
         $backgroundImage->setOffsetX(0);
         $backgroundImage->setOffsetY(0);
         $slide5->addShape($backgroundImage);
@@ -1733,14 +1744,6 @@ class MonthlyController extends Controller
         $textRun->getFont()->setBold(true)
             ->setSize(60)->setColor(new Color('FFFFFF'));
 
-
-        // Simpan presentasi ke dalam file
-        // $filename = 'Report IT Problem ' . Carbon::parse($end_date)->format('F Y') . '.pptx';
-        // $savePath = storage_path($filename);
-        // $writer = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
-        // $writer->save($savePath);
-        // // Return file sebagai response download
-        // return response()->download($savePath)->deleteFileAfterSend(true);
 
         // Simpan presentasi ke dalam file
         $filename = 'Report Monthly IT Problem' . ' - ' . Carbon::parse($start_date)->format('F Y') . '.pptx';

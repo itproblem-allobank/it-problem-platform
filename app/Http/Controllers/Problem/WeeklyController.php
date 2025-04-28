@@ -58,6 +58,15 @@ class WeeklyController extends Controller
         $end_date = $request->end_date;
 
         $objPHPPresentation = new PhpPresentation();
+        // Set Layout
+        $objPHPPresentation->getLayout()->setDocumentLayout(
+            DocumentLayout::LAYOUT_CUSTOM,
+            true // true = landscape, false = portrait
+        );
+
+        // Set ukuran slide sesuai kebutuhan
+        $objPHPPresentation->getLayout()->setCX(12193200); // width: 33.87 cm
+        $objPHPPresentation->getLayout()->setCY(6886800);  // height: 19.13 cm
 
         //Slide 1
         $slide1 = $objPHPPresentation->getActiveSlide();
@@ -2603,6 +2612,7 @@ class WeeklyController extends Controller
         $backgroundImage = new File();
         $backgroundImage->setPath($backgroundImagePath);
         $backgroundImage->setWidth(1280);
+        $backgroundImage->setHeight(723);
         $backgroundImage->setOffsetX(0);
         $backgroundImage->setOffsetY(0);
         $slide6->addShape($backgroundImage);
