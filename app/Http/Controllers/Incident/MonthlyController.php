@@ -22,6 +22,7 @@ use PhpOffice\PhpPresentation\Shape\Chart\Type\Line;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\DataExport;
+use App\Models\Incident;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie3D;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie;
 use ZipArchive;
@@ -57,7 +58,7 @@ class MonthlyController extends Controller
         $objPHPPresentation->getLayout()->setCX(12193200); // width: 33.87 cm
         $objPHPPresentation->getLayout()->setCY(6886800);  // height: 19.13 cm
 
-        //Slide 1
+        // ---------------------------- SLIDE 1 ----------------------------------------------
         $slide1 = $objPHPPresentation->getActiveSlide();
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
@@ -115,7 +116,7 @@ class MonthlyController extends Controller
         $textRun = $shape->createTextRun('PT Allo Bank Indonesia');
         $textRun->getFont()->setSize(20);
 
-        //Slide 2
+        // ------------------------ SLIDE 2 ----------------------------------------------
         $slide2 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
@@ -255,9 +256,104 @@ class MonthlyController extends Controller
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
+        // ----------------------- SLIDE 3 -------------------------------------------------
+        $slide3 = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide3->addShape($backgroundImage);
 
 
-        //Slide 5
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20);
+        $slide3->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        // Tambahkan teks judul slide
+        $shape = $slide3->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('Report IT Incident');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slide3->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(60);
+        $date = Carbon::parse($end_date)->format('F Y');
+        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun->getFont()->setSize(14);
+
+        // Line
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);
+        $pictureShape->setOffsetX(20);
+        $pictureShape->setOffsetY(100);
+        $slide3->addShape($pictureShape);
+
+
+        // Chart 1 - Incident by Category
+        // Data
+        $incidentByCategory = Incident::select('category', DB::raw('count(*) as total'))
+            ->whereBetween('created_time', [$start_date, $end_date])
+            ->groupBy('category')
+            ->get();
+        // dd(json_encode($incidentByCategory, JSON_PRETTY_PRINT));
+
+        $jsonData = $incidentByCategory->toArray();
+        // dd($jsonData);
+
+        // Generate Chart
+        $chartShape = $slide3->createChartShape();
+        $chartShape->setHeight(250)
+            ->setWidth(820)
+            ->setOffsetX(25)
+            ->setOffsetY(225);
+        // Define tipe chart
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        // Set judul chart
+        $chartShape->getTitle()->setText('Ticket by Status');
+        // Mendapatkan objek sumbu
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        // Mengatur judul sumbu menjadi kosong
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+        // Chart Bordered
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
+
+        // Tambahkan seri data ke chart
+        foreach ($jsonData as $key => $value) {
+            $count = strval($value['total']);
+            $series = new Series($value['category'], ['Total' => $count]);
+            $chartType->addSeries($series);
+        }
+
+
+
+
+        // ----------------------- SLIDE CLOSING / SLIDE 5 ---------------------------------
         $slide5 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background_end.png');
         $backgroundImage = new File();
