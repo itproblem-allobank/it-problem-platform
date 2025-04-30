@@ -362,6 +362,15 @@ class MonthlyController extends Controller
 
 
         // Text Container 1
+        //Data
+        $MonthYear = Carbon::parse($start_date)->format('F Y');
+        $totalTicket = Incident::whereBetween('created_time', [$start_date, $end_date])->count();
+        $dominantTicket = Incident::whereBetween('created_time', [$start_date, $end_date])
+            ->select('category', DB::raw('count(*) as total'))
+            ->groupBy('category')
+            ->orderByDesc('total')
+            ->first();
+
         $shape = $slide3->createRichTextShape()
             ->setHeight(280)
             ->setWidth(610)
@@ -372,7 +381,7 @@ class MonthlyController extends Controller
         $shape->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
             ->setStartColor(new Color('FFD9E1F2'));
 
-        $textRun = $shape->createTextRun("Total Ticket Jira yang di create pada bulan Maret sebanyak 416 Tiket, dengan dominasi masih tentang Disk Capacity Alert.");
+        $textRun = $shape->createTextRun("Total Ticket Jira yang di create pada bulan " . $MonthYear . " sebanyak " . $totalTicket . " Tiket, dengan dominasi masih tentang " . $dominantTicket->category . ".");
         $textRun->getFont()->setSize(16)->setColor(new Color(Color::COLOR_BLACK));
 
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -425,6 +434,11 @@ class MonthlyController extends Controller
         $chartType->addSeries($series);
 
         // Text Container 2
+        //Data
+        $MonthYear = Carbon::parse($start_date)->format('F Y');
+        $totalcritical = Incident::whereBetween('created_time', [$start_date, $end_date])->where('priority', 'Incident Critical')->count();
+        $totalhigh = Incident::whereBetween('created_time', [$start_date, $end_date])->where('priority', 'Incident High')->count();
+        
         $shape = $slide3->createRichTextShape()
             ->setHeight(280)
             ->setWidth(610)
@@ -435,7 +449,7 @@ class MonthlyController extends Controller
         $shape->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
             ->setStartColor(new Color('FFFEE599'));
 
-        $textRun = $shape->createTextRun("Terdapat 1 Incident Critical dan 7 Incident High pada Bulan Maret 2025");
+        $textRun = $shape->createTextRun("Terdapat " . $totalcritical . " Incident Critical dan " . $totalhigh . " Incident High pada Bulan " . $MonthYear . ".");
         $textRun->getFont()->setSize(16)->setColor(new Color(Color::COLOR_BLACK));
 
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
