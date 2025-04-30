@@ -321,36 +321,125 @@ class MonthlyController extends Controller
 
         // Generate Chart
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(250)
-            ->setWidth(820)
+        $chartShape->setHeight(280)
+            ->setWidth(610)
             ->setOffsetX(25)
-            ->setOffsetY(225);
-        // Define tipe chart
+            ->setOffsetY(125);
+
+        $chartShape->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->setStartColor(new Color('FFFFFF')); // warna putih
+
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
-        // Set judul chart
-        $chartShape->getTitle()->setText('Ticket by Status');
-        // Mendapatkan objek sumbu
+
+        $chartShape->getTitle()->setText('Incident by Category');
+        $chartShape->getTitle()->setVisible(true);
+        $chartShape->getTitle()->getFont()->setName('Arial');
+        $chartShape->getTitle()->getFont()->setSize(10);
+        $chartShape->getTitle()->getFont()->setBold(true);
+        $chartShape->getLegend()->setVisible(false);
+
         $xAxis = $chartShape->getPlotArea()->getAxisX();
         $yAxis = $chartShape->getPlotArea()->getAxisY();
-        // Mengatur judul sumbu menjadi kosong
         $xAxis->setTitle('');
         $yAxis->setTitle('');
-        // Chart Bordered
-        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
-        $chartShape->getBorder()->setLineWidth(1);
-        $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
-        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
-        // Tambahkan seri data ke chart
-        foreach ($jsonData as $key => $value) {
-            $count = strval($value['total']);
-            $series = new Series($value['category'], ['Total' => $count]);
-            $chartType->addSeries($series);
+        $xAxis->getFont()->setName('Arial');
+        $xAxis->getFont()->setSize(6);
+
+        $yAxis->getFont()->setName('Arial');
+        $yAxis->getFont()->setSize(6);
+
+
+        $data = [];
+        foreach ($jsonData as $item) {
+            $data[$item['category']] = $item['total']; // <-- kunci array adalah kategori
         }
 
+        $series = new Series('Total Ticket', $data);
+        $chartType->addSeries($series);
 
+
+        // Text Container 1
+        $shape = $slide3->createRichTextShape()
+            ->setHeight(280)
+            ->setWidth(610)
+            ->setOffsetX(25)
+            ->setOffsetY(410);
+
+        $shape->getBorder()->setLineWidth(1)->setColor(new Color(Color::COLOR_BLUE));
+        $shape->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
+            ->setStartColor(new Color('FFD9E1F2'));
+
+        $textRun = $shape->createTextRun("Total Ticket Jira yang di create pada bulan Maret sebanyak 416 Tiket, dengan dominasi masih tentang Disk Capacity Alert.");
+        $textRun->getFont()->setSize(16)->setColor(new Color(Color::COLOR_BLACK));
+
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $shape->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Chart 2 - Incident by Priority
+        // Data
+        $incidentByPriority = Incident::select('priority', DB::raw('count(*) as total'))
+            ->whereBetween('created_time', [$start_date, $end_date])
+            ->groupBy('priority')
+            ->get();
+        // dd(json_encode($incidentByPriority, JSON_PRETTY_PRINT));
+
+        $jsonData = $incidentByPriority->toArray();
+
+        // Generate Chart
+        $chartShape = $slide3->createChartShape();
+        $chartShape->setHeight(280)
+            ->setWidth(610)
+            ->setOffsetX(640)
+            ->setOffsetY(410);
+
+        $chartShape->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->setStartColor(new Color('FFFFFF')); // warna putih
+
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+
+        $chartShape->getTitle()->setText('Incident by Priority');
+        $chartShape->getTitle()->setVisible(true);
+        $chartShape->getTitle()->getFont()->setName('Arial');
+        $chartShape->getTitle()->getFont()->setSize(10);
+        $chartShape->getTitle()->getFont()->setBold(true);
+        $chartShape->getLegend()->setVisible(false);
+
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+        $xAxis->getFont()->setName('Arial');
+        $yAxis->getFont()->setName('Arial');
+
+        $data = [];
+        foreach ($jsonData as $item) {
+            $data[$item['priority']] = $item['total']; // <-- kunci array adalah kategori
+        }
+
+        $series = new Series('Total Priority', $data);
+        $chartType->addSeries($series);
+
+        // Text Container 2
+        $shape = $slide3->createRichTextShape()
+            ->setHeight(280)
+            ->setWidth(610)
+            ->setOffsetX(640)
+            ->setOffsetY(125);
+
+        $shape->getBorder()->setLineWidth(1)->setColor(new Color(Color::COLOR_BLUE));
+        $shape->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
+            ->setStartColor(new Color('FFFEE599'));
+
+        $textRun = $shape->createTextRun("Terdapat 1 Incident Critical dan 7 Incident High pada Bulan Maret 2025");
+        $textRun->getFont()->setSize(16)->setColor(new Color(Color::COLOR_BLACK));
+
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $shape->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
 
         // ----------------------- SLIDE CLOSING / SLIDE 5 ---------------------------------
