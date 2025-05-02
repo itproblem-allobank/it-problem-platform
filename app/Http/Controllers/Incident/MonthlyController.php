@@ -23,6 +23,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\DataExport;
 use App\Models\Incident;
+
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie3D;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Pie;
 use ZipArchive;
@@ -438,7 +439,7 @@ class MonthlyController extends Controller
         $MonthYear = Carbon::parse($start_date)->format('F Y');
         $totalcritical = Incident::whereBetween('created_time', [$start_date, $end_date])->where('priority', 'Incident Critical')->count();
         $totalhigh = Incident::whereBetween('created_time', [$start_date, $end_date])->where('priority', 'Incident High')->count();
-        
+
         $shape = $slide3->createRichTextShape()
             ->setHeight(280)
             ->setWidth(610)
@@ -454,6 +455,164 @@ class MonthlyController extends Controller
 
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $shape->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // ----------------------- SLIDE 4 -------------------------------------------------
+        $slide4 = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide4->addShape($backgroundImage);
+
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20);
+        $slide4->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        // Tambahkan teks judul slide
+        $shape = $slide4->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('Report IT Incident');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slide4->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(60);
+        $date = Carbon::parse($end_date)->format('F Y');
+        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun->getFont()->setSize(14);
+
+        // Line
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);
+        $pictureShape->setOffsetX(20);
+        $pictureShape->setOffsetY(100);
+        $slide4->addShape($pictureShape);
+
+
+        // Data
+        $endDate = Carbon::parse($end_date);
+        $startDate = $endDate->copy()->subMonths(5)->startOfMonth(); // 6 bulan ke belakang
+
+        $monthlyStats = Incident::select(
+            DB::raw("DATE_FORMAT(created_time, '%Y-%m') as period"),
+            DB::raw("COUNT(*) as created"),
+            DB::raw("SUM(CASE WHEN resolved_time IS NOT NULL THEN 1 ELSE 0 END) as resolved"),
+            DB::raw("SUM(CASE WHEN resolved_time IS NULL THEN 1 ELSE 0 END) as unresolved")
+        )
+            ->whereBetween('created_time', [$startDate, $endDate->endOfMonth()])
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+
+        // dd($monthlyStats);
+        $statsJson = $monthlyStats->toArray();
+
+        // Data array untuk table
+        $categories = [];
+        $resolvedData = [];
+        $unresolvedData = [];
+        $tableData = [];
+
+        foreach ($monthlyStats as $stat) {
+            $monthLabel = Carbon::createFromFormat('Y-m', $stat->period)->format('F Y');
+            $categories[] = $monthLabel;
+            $resolvedData[] = (int) $stat->resolved;
+            $unresolvedData[] = (int) $stat->unresolved;
+
+            $tableData[] = [
+                $monthLabel,
+                $stat->resolved,
+                $stat->unresolved,
+                $stat->created
+            ];
+        }
+
+        // Generate Chart
+        $chartShape = $slide4->createChartShape();
+        $chartShape->setHeight(300)
+            ->setWidth(610)
+            ->setOffsetX(25)
+            ->setOffsetY(125);
+
+        $chartShape->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->setStartColor(new Color('FFFFFF')); // warna putih
+
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+
+        $chartShape->getTitle()->setText('Incident by Status');
+        $chartShape->getTitle()->setVisible(true);
+        $chartShape->getTitle()->getFont()->setName('Arial');
+        $chartShape->getTitle()->getFont()->setSize(10);
+        $chartShape->getTitle()->getFont()->setBold(true);
+        $chartShape->getLegend()->setVisible(false);
+
+        $xAxis = $chartShape->getPlotArea()->getAxisX();
+        $yAxis = $chartShape->getPlotArea()->getAxisY();
+        $xAxis->setTitle('');
+        $yAxis->setTitle('');
+        $xAxis->getFont()->setName('Arial');
+        $yAxis->getFont()->setName('Arial');
+
+        $resolvedJson = [];
+        foreach ($statsJson as $item) {
+            $month = Carbon::createFromFormat('Y-m', $item['period'])->format('F Y');
+            $resolvedJson[$month] = $item['resolved'];
+        }
+
+        $unresolvedJson = [];
+        foreach ($statsJson as $item) {
+            $month = Carbon::createFromFormat('Y-m', $item['period'])->format('F Y');
+            $unresolvedJson[$month] = $item['unresolved'];
+        }
+
+        // dd($unresolvedJson, $resolvedJson);
+
+        $seriesResolved = new Series('Resolved', $resolvedJson);
+        $seriesUnresolved = new Series('Unresolved', $unresolvedJson);
+
+        $chartType->addSeries($seriesResolved);
+        $chartType->addSeries($seriesUnresolved);
+
+
+        //Table
+        $table = $slide4->createTableShape(4);
+        $table->setHeight(300)->setWidth(400)->setOffsetX(580)->setOffsetY(100);
+
+        // Header
+        $row = $table->createRow();
+        $row->getCell(0)->createTextRun('Period');
+        $row->getCell(1)->createTextRun('Resolved');
+        $row->getCell(2)->createTextRun('Unresolved');
+        $row->getCell(3)->createTextRun('Created');
+
+        // Data rows
+        foreach ($tableData as $rowData) {
+            $row = $table->createRow();
+            foreach ($rowData as $i => $value) {
+                $row->getCell($i)->createTextRun((string) $value);
+            }
+        }
 
 
         // ----------------------- SLIDE CLOSING / SLIDE 5 ---------------------------------
