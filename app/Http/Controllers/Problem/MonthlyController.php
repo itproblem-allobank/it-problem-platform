@@ -1505,224 +1505,167 @@ class MonthlyController extends Controller
             ->groupBy('nickname')
             ->get();
 
-        // dd($data_chart5);
         $resultdata_chart5 = [];
         foreach ($data_chart5 as $key => $value) {
-            $closed = Data::whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Closed')->where('problem', '!=', 'Enhancement')->get()->count();
-            $rcidentified = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Root Cause Identified')->where('problem', '!=', 'Enhancement')->get()->count();
-            $pending = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('nickname', '=', $value->nickname)->where('status', '=', 'Pending')->where('problem', '!=', 'Enhancement')->get()->count();
+            $closed = Data::whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
+                ->where('nickname', '=', $value->nickname)
+                ->where('status', '=', 'Closed')
+                ->where('problem', '!=', 'Enhancement')
+                ->count();
+
+            $rcidentified = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+                ->where('nickname', '=', $value->nickname)
+                ->where('status', '=', 'Root Cause Identified')
+                ->where('problem', '!=', 'Enhancement')
+                ->count();
+
+            $pending = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+                ->where('nickname', '=', $value->nickname)
+                ->where('status', '=', 'Pending')
+                ->where('problem', '!=', 'Enhancement')
+                ->count();
+
+            // Filter: hanya masukkan kalau ada minimal 1 nilai yang lebih dari 0
+            if ($closed === 0 && $rcidentified === 0 && $pending === 0) {
+                continue;
+            }
+
             $resultdata_chart5[] = [
                 'nickname' => $value->nickname,
-                'count' => $value->count,
                 'closed' => $closed,
                 'rcidentified' => $rcidentified,
                 'pending' => $pending
             ];
         }
-        // dd($data_chart5);
+
+        // Siapkan array series dengan nickname sebagai key
         $data_closed = [];
-        foreach ($resultdata_chart5 as $key => $value) {
-            $data_closed[$value['nickname']] = $value['closed'];
-        }
         $data_rcidentified = [];
-        foreach ($resultdata_chart5 as $key => $value) {
-            $data_rcidentified[$value['nickname']] = $value['rcidentified'];
-        }
         $data_pending = [];
-        foreach ($resultdata_chart5 as $key => $value) {
-            $data_pending[$value['nickname']] = $value['pending'];
+
+        foreach ($resultdata_chart5 as $value) {
+            $nickname = $value['nickname'];
+
+            // Hanya tambahkan jika nilai > 0
+            if ($value['closed'] > 0) {
+                $data_closed[$nickname] = $value['closed'];
+            }
+
+            if ($value['rcidentified'] > 0) {
+                $data_rcidentified[$nickname] = $value['rcidentified'];
+            }
+
+            if ($value['pending'] > 0) {
+                $data_pending[$nickname] = $value['pending'];
+            }
         }
+
+        // Buat chart
         $chartShape = $additionalslide->createChartShape();
         $chartShape->setHeight(250)
             ->setWidth(600)
             ->setOffsetX(625)
             ->setOffsetY(100);
 
-        // Define tipe chartsss
+        // Tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
-        // Set judul chart
+
+        // Judul chart
         $chartShape->getTitle()->setText('Problem By Assignee & Status');
-        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
-        // Mendapatkan objek sumbu
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE);
+
+        // Sumbu
         $xAxis = $chartShape->getPlotArea()->getAxisX();
         $yAxis = $chartShape->getPlotArea()->getAxisY();
-        // Mengatur judul sumbu menjadi kosong
         $xAxis->setTitle('');
         $yAxis->setTitle('');
-        // Tambahkan seri data ke chart
-        $series1 = new Series('Closed', $data_closed);
-        $series2 = new Series('Root Cause Identified', $data_rcidentified);
-        $series3 = new Series('Pending', $data_pending);
-        $chartType->addSeries($series1);
-        $chartType->addSeries($series2);
-        $chartType->addSeries($series3);
-        // Chart Bordered
+
+        // Border chart
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setColor(new Color('FF000000'));
         $chartShape->getBorder()->setLineWidth(1);
 
-        // --------- CHART JIRA SERVICE REQUEST --------------
-        $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->select('issue_type', DB::raw('count(*) as count'))
-            ->groupBy('issue_type')->get();
-        $resultdata_chart3 = [];
-        foreach ($data_chart3 as $key => $value) {
-            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Closed')->get()->count();
-            $status_pending = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', $value->issue_type)->where('status', '=', 'Pending')->get()->count();
-            $resultdata_chart3[] =
-                [
-                    'issue_type' => $value->issue_type,
-                    'total' => $value->count,
-                    'count_closed' => $status_closed,
-                    'count_pending' => $status_pending,
-                ];
+        // Tambahkan series (status sebagai series, nickname sebagai kategori/data)
+        if (!empty($data_closed)) {
+            $series1 = new Series('Closed', $data_closed);
+            $chartType->addSeries($series1);
         }
 
-        // Set Size Chart
+        if (!empty($data_rcidentified)) {
+            $series2 = new Series('Root Cause Identified', $data_rcidentified);
+            $chartType->addSeries($series2);
+        }
+
+        if (!empty($data_pending)) {
+            $series3 = new Series('Pending', $data_pending);
+            $chartType->addSeries($series3);
+        }
+
+        // --------- CHART JIRA SERVICE REQUEST --------------
+        // Ambil semua status unik sebagai sumbu X
+        $all_statuses = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->select('status')
+            ->distinct()
+            ->pluck('status')
+            ->toArray();
+
+        // Ambil semua issue_type (kategori series)
+        $issue_types = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->select('issue_type')
+            ->distinct()
+            ->pluck('issue_type')
+            ->toArray();
+
+        // Buat data series untuk chart
+        $series_data = [];
+        foreach ($issue_types as $issue_type) {
+            $data = [];
+
+            foreach ($all_statuses as $status) {
+                $count = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+                    ->where('issue_type', $issue_type)
+                    ->where('status', $status)
+                    ->count();
+
+                $data[$status] = $count; // set 0 jika tidak ada
+            }
+
+            // Tambahkan ke chart hanya jika ada data
+            if (array_sum($data) > 0) {
+                $series_data[$issue_type] = $data;
+            }
+        }
+
+        // ==== Generate Chart ====
+
         $chartShape = $additionalslide->createChartShape();
         $chartShape->setHeight(250)
             ->setWidth(600)
             ->setOffsetX(625)
             ->setOffsetY(350);
+
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
+
         // Set judul chart
         $chartShape->getTitle()->setText('Ticket Jira Service Request');
-        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
-        // Mendapatkan objek sumbu
-        $xAxis = $chartShape->getPlotArea()->getAxisX();
-        $yAxis = $chartShape->getPlotArea()->getAxisY();
-        // Mengatur judul sumbu menjadi kosong
-        $xAxis->setTitle('');
-        $yAxis->setTitle('');
 
-        // Chart Bordered
+        // Styling dan Axis
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Hilangkan border legend
+        $chartShape->getPlotArea()->getAxisX()->setTitle('');
+        $chartShape->getPlotArea()->getAxisY()->setTitle('');
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $chartShape->getBorder()->setColor(new Color('FF000000')); // Black border
+        $chartShape->getBorder()->setColor(new Color('FF000000'));
         $chartShape->getBorder()->setLineWidth(1);
 
-        // Tambahkan seri data ke chart
-        foreach ($resultdata_chart3 as $key => $value) {
-            $series = new Series($value['issue_type'], ['Closed' => $value['count_closed'], 'Pending' => $value['count_pending']]);
-            $chartType->addSeries($series);
+        // Tambahkan series ke chart
+        foreach ($series_data as $issue_type => $status_counts) {
+            $chartType->addSeries(new Series($issue_type, $status_counts));
         }
 
-
-
-
-
-        //Slide 4
-        $slide4 = $objPHPPresentation->createSlide();
-        $backgroundImagePath = storage_path('image/background.png');
-        $backgroundImage = new File();
-        $backgroundImage->setPath($backgroundImagePath);
-        $backgroundImage->setWidth(1280);
-        $backgroundImage->setOffsetX(0);
-        $backgroundImage->setOffsetY(0);
-        $slide4->addShape($backgroundImage);
-
-
-        $imagePath = storage_path('image/allobank.png');
-        $pictureShape = new File();
-        $pictureShape->setPath($imagePath);
-        $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
-        $pictureShape->setOffsetX(1050); // Posisi horizontal gambar
-        $pictureShape->setOffsetY(20); // Posisi vertikal gambar
-        $slide4->addShape($pictureShape);
-
-        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
-            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
-            ->setCY(700, DocumentLayout::UNIT_PIXEL);
-
-        // Tambahkan teks judul slide
-        $shape = $slide4->createRichTextShape()
-            ->setHeight(50)
-            ->setWidth(700)
-            ->setOffsetX(50)
-            ->setOffsetY(25);
-        $textRun = $shape->createTextRun('Achievement IT Problem by Week');
-        $textRun->getFont()->setBold(true)
-            ->setSize(30);
-
-
-        // Data untuk timeline
-        $week4 = Data::select(DB::raw('DATE(created)'), 'summary')->whereBetween(DB::raw('DATE(created)'), [Carbon::parse($end_date)->subDays(7), $end_date])->get();
-        $week3 = Data::select(DB::raw('DATE(created)'), 'summary')->whereBetween(DB::raw('DATE(created)'), [Carbon::parse($end_date)->subDays(14), Carbon::parse($end_date)->subDays(7)])->get();
-        $week2 = Data::select(DB::raw('DATE(created)'), 'summary')->whereBetween(DB::raw('DATE(created)'), [Carbon::parse($end_date)->subDays(21), Carbon::parse($end_date)->subDays(14)])->get();
-        $week1 = Data::select(DB::raw('DATE(created)'), 'summary')->whereBetween(DB::raw('DATE(created)'), [Carbon::parse($end_date)->subDays(28), Carbon::parse($end_date)->subDays(21)])->get();
-
-        $data_week1 = [];
-        $data_week2 = [];
-        $data_week3 = [];
-        $data_week4 = [];
-
-        $index1 = 1;
-        foreach ($week1 as $key => $value) {
-            $data_week1[$key] = $index1 . ". " . $value->summary . "\n\n";
-            $index1++;
-        }
-        $index2 = 1;
-        foreach ($week2 as $key => $value) {
-            $data_week2[$key] = $index2 . ". " . $value->summary . "\n\n";
-            $index2++;
-        }
-        $index3 = 1;
-        foreach ($week3 as $key => $value) {
-            $data_week3[$key] = $index3 . ". " . $value->summary . "\n\n";
-            $index3++;
-        }
-        $index4 = 1;
-        foreach ($week4 as $key => $value) {
-            $data_week4[$key] = $index4 . ". " . $value->summary . "\n\n";
-            $index4++;
-        }
-
-        $implodeweek1 = implode($data_week1);
-        $implodeweek2 = implode($data_week2);
-        $implodeweek3 = implode($data_week3);
-        $implodeweek4 = implode($data_week4);
-
-        $week = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-        $descriptions = [$implodeweek1, $implodeweek2, $implodeweek3, $implodeweek4];
-        $positions = [100, 400, 700, 1000]; // X positions for the timeline elements
-
-        // Buat timeline
-        foreach ($week as $index => $w_index) {
-            // Menambahkan tahun
-            $shape = $slide4->createRichTextShape();
-            $shape->setHeight(50)
-                ->setWidth(120)
-                ->setOffsetX($positions[$index])
-                ->setOffsetY(150);
-            $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-            $textRun = $shape->createTextRun($w_index);
-            $textRun->getFont()->setBold(true)->setSize(20)->setColor(new Color('FFFFB003'));
-
-            // Menambahkan deskripsi
-            $descShape = $slide4->createRichTextShape();
-            $descShape->setHeight(450)
-                ->setWidth(250)
-                ->setOffsetX($positions[$index] - 65)
-                ->setOffsetY(200);
-            $descShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $descShape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('CCCCCC'));
-            $descShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-
-            $descTextRun = $descShape->createTextRun($descriptions[$index]);
-            $descTextRun->getFont()->setSize(12)->setColor(new Color(Color::COLOR_BLACK));
-
-            // Tambahkan garis penghubung jika bukan elemen terakhir
-            $position = [285, 585, 885];
-            if ($index < 3) {
-                $lineShape = $slide4->createLineShape($position[$index], 420, $position[$index] + 50, 420);
-                $lineShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-                $lineShape->getBorder()->setLineWidth(2);
-            }
-        }
-
-
+        // ------------------------------------------------------------------------------------
 
         //Slide 5
         $slide5 = $objPHPPresentation->createSlide();

@@ -18,6 +18,7 @@ use PhpOffice\PhpPresentation\Shape\Chart\Series;
 use PhpOffice\PhpPresentation\Shape\Drawing\File;
 use PhpOffice\PhpPresentation\Style\Border;
 use PhpOffice\PhpPresentation\Style\Fill;
+use PhpOffice\PhpPresentation\Shape\Table;
 use PhpOffice\PhpPresentation\Shape\Chart\Type\Line;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
@@ -613,6 +614,30 @@ class MonthlyController extends Controller
                 $row->getCell($i)->createTextRun((string) $value);
             }
         }
+
+
+        $table = new Table();
+        $table->setOffsetX(100);
+        $table->setOffsetY(100);
+        $table->setWidth(600);
+        $table->setHeight(300);
+
+        // Baris baru
+        $row = $table->createRow();
+        $row->setHeight(50);
+
+        // Cell 1
+        $cell1 = $row->nextCell();
+        $cell1->setWidth(300);
+        $cell1->createTextRun('Kolom 1');
+
+        // Cell 2
+        $cell2 = $row->nextCell();
+        $cell2->setWidth(300);
+        $cell2->createTextRun('Kolom 2');
+
+        // Tambahkan ke slide
+        $slide4->addShape($table);
 
 
         // ----------------------- SLIDE CLOSING / SLIDE 5 ---------------------------------
