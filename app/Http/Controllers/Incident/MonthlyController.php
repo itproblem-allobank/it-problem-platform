@@ -19,7 +19,10 @@ use PhpOffice\PhpPresentation\Shape\Drawing\File;
 use PhpOffice\PhpPresentation\Style\Border;
 use PhpOffice\PhpPresentation\Style\Fill;
 use PhpOffice\PhpPresentation\Shape\Table;
-use PhpOffice\PhpPresentation\Shape\Chart\Type\Line;
+use PhpOffice\PhpPresentation\Shape\RichText\TextElement;
+use PhpOffice\PhpPresentation\Shape\Table\Row;
+use PhpOffice\PhpPresentation\Shape\Table\Cell;
+use DateTime;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\DataExport;
@@ -527,6 +530,9 @@ class MonthlyController extends Controller
         // dd($monthlyStats);
         $statsJson = $monthlyStats->toArray();
 
+
+        // dd(json_encode($statsJson, JSON_PRETTY_PRINT));
+
         // Data array untuk table
         $categories = [];
         $resolvedData = [];
@@ -547,9 +553,9 @@ class MonthlyController extends Controller
             ];
         }
 
-        // Generate Chart
+        // ---------------- CHART ---------------------
         $chartShape = $slide4->createChartShape();
-        $chartShape->setHeight(300)
+        $chartShape->setHeight(500)
             ->setWidth(610)
             ->setOffsetX(25)
             ->setOffsetY(125);
@@ -566,7 +572,7 @@ class MonthlyController extends Controller
         $chartShape->getTitle()->getFont()->setName('Arial');
         $chartShape->getTitle()->getFont()->setSize(10);
         $chartShape->getTitle()->getFont()->setBold(true);
-        $chartShape->getLegend()->setVisible(false);
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE);
 
         $xAxis = $chartShape->getPlotArea()->getAxisX();
         $yAxis = $chartShape->getPlotArea()->getAxisY();
@@ -596,52 +602,108 @@ class MonthlyController extends Controller
         $chartType->addSeries($seriesUnresolved);
 
 
-        //Table
-        $table = $slide4->createTableShape(4);
-        $table->setHeight(300)->setWidth(400)->setOffsetX(580)->setOffsetY(100);
+        // ---------------- TABLE ----------------
+        $cols = 4;
+        $table = $slide4->createTableShape($cols);
+        $table->setHeight(300)->setWidth(600)->setOffsetX(640)->setOffsetY(125);
 
-        // Header
+        $headers = ['Period', 'Resolved', 'Unresolved', 'Created'];
+
+        // Header Row
         $row = $table->createRow();
-        $row->getCell(0)->createTextRun('Period');
-        $row->getCell(1)->createTextRun('Resolved');
-        $row->getCell(2)->createTextRun('Unresolved');
-        $row->getCell(3)->createTextRun('Created');
+        foreach ($headers as $header) {
+            $cell = $row->nextCell();
+            $cell->createTextRun($header)
+                ->getFont()->setBold(true)->setColor(new Color(Color::COLOR_WHITE))->setSize(12);
+            $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER); // Tambahkan ini;
+            $cell->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
+                ->setStartColor(new Color('FF2F75B5')); // Blue
+            $cell->getBorders()->getBottom()->setLineWidth(1)->setLineStyle(Border::LINE_SINGLE);
+        }
 
-        // Data rows
-        foreach ($tableData as $rowData) {
+        // Data Rows
+        foreach ($statsJson as $item) {
             $row = $table->createRow();
-            foreach ($rowData as $i => $value) {
-                $row->getCell($i)->createTextRun((string) $value);
+            $values = [
+                \Carbon\Carbon::createFromFormat('Y-m', $item['period'])->format('F Y'),
+                $item['resolved'],
+                $item['unresolved'],
+                $item['created'],
+            ];
+
+            foreach ($values as $val) {
+                $cell = $row->nextCell();
+                $cell->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
+                    ->setStartColor(new Color(Color::COLOR_WHITE));
+                $cell->createTextRun((string)$val)->getFont()->setSize(10)->setColor(new Color(Color::COLOR_BLACK));
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(Alignment::VERTICAL_CENTER); // Tambahkan ini;
+                $cell->getBorders()->getBottom()->setLineWidth(1)->setLineStyle(Border::LINE_SINGLE);
             }
         }
 
-
-        $table = new Table();
-        $table->setOffsetX(100);
-        $table->setOffsetY(100);
-        $table->setWidth(600);
-        $table->setHeight(300);
-
-        // Baris baru
-        $row = $table->createRow();
-        $row->setHeight(50);
-
-        // Cell 1
-        $cell1 = $row->nextCell();
-        $cell1->setWidth(300);
-        $cell1->createTextRun('Kolom 1');
-
-        // Cell 2
-        $cell2 = $row->nextCell();
-        $cell2->setWidth(300);
-        $cell2->createTextRun('Kolom 2');
-
-        // Tambahkan ke slide
-        $slide4->addShape($table);
-
-
-        // ----------------------- SLIDE CLOSING / SLIDE 5 ---------------------------------
+        // ----------------------- SLIDE 5 -------------------------------------------------
         $slide5 = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide5->addShape($backgroundImage);
+
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20);
+        $slide5->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        // Tambahkan teks judul slide
+        $shape = $slide5->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('Report IT Incident');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slide5->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(60);
+        $date = Carbon::parse($end_date)->format('F Y');
+        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun->getFont()->setSize(14);
+
+        // Line
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);
+        $pictureShape->setOffsetX(20);
+        $pictureShape->setOffsetY(100);
+        $slide5->addShape($pictureShape);
+
+        //Source Data
+        $criticalhighcategory = Incident::whereBetween('created_time', [$start_date, $end_date])->where('category', 'Incident High')->get();
+
+        dd($criticalhighcategory);
+
+
+
+
+        // ----------------------- SLIDE CLOSING  ------------------------------------------
+        $end_slide = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background_end.png');
         $backgroundImage = new File();
         $backgroundImage->setPath($backgroundImagePath);
@@ -649,9 +711,9 @@ class MonthlyController extends Controller
         $backgroundImage->setHeight(723);
         $backgroundImage->setOffsetX(0);
         $backgroundImage->setOffsetY(0);
-        $slide5->addShape($backgroundImage);
+        $end_slide->addShape($backgroundImage);
 
-        $shape = $slide5->createRichTextShape()
+        $shape = $end_slide->createRichTextShape()
             ->setHeight(100)
             ->setWidth(400)
             ->setOffsetX(120)
