@@ -226,13 +226,13 @@ class MonthlyController extends Controller
         $textRun2->getFont()->setSize(15);
         $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
 
-        // Create the bold text run for "Tri Intan Siska Permatasari"
-        $boldTextRun = $textShape2->createTextRun("Fachri\n");
+        // Create the bold text run for "Ath Thaariq Pasariboe"
+        $boldTextRun = $textShape2->createTextRun("Ath Thaariq Pasariboe\n");
         $boldTextRun->getFont()->setSize(15);
         $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
-        // Create the text run for "IT Incident Lead"
+        // Create the text run for "IT Incident Section Head"
         $textRun3 = $textShape2->createTextRun("IT Incident Section Head");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
@@ -250,13 +250,13 @@ class MonthlyController extends Controller
         $textRun2->getFont()->setSize(15);
         $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
 
-        // Create the bold text run for "Tri Intan Siska Permatasari"
+        // Create the bold text run for "Ahmad Syauqi"
         $boldTextRun = $textShape2->createTextRun("Ahmad Syauqi\n");
         $boldTextRun->getFont()->setSize(15);
         $boldTextRun->getFont()->setColor(new Color('FF000000')); // Black color
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
-        // Create the text run for "IT Incident Lead"
+        // Create the text run for "IT Incident Engineer"
         $textRun3 = $textShape2->createTextRun("IT Incident Engineer");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
@@ -623,7 +623,9 @@ class MonthlyController extends Controller
         }
 
         // Data Rows
-        foreach ($statsJson as $item) {
+        foreach ($statsJson as $index => $item) {
+
+            $bgColor = ($index % 2 == 0) ? 'FFD9E1F2' : 'FFFFFFFF'; // biru muda & putih
             $row = $table->createRow();
             $values = [
                 \Carbon\Carbon::createFromFormat('Y-m', $item['period'])->format('F Y'),
@@ -635,7 +637,7 @@ class MonthlyController extends Controller
             foreach ($values as $val) {
                 $cell = $row->nextCell();
                 $cell->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
-                    ->setStartColor(new Color(Color::COLOR_WHITE));
+                    ->setStartColor(new Color($bgColor)); // set background row
                 $cell->createTextRun((string)$val)->getFont()->setSize(10)->setColor(new Color(Color::COLOR_BLACK));
                 $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
                     ->setVertical(Alignment::VERTICAL_CENTER); // Tambahkan ini;
@@ -747,6 +749,125 @@ class MonthlyController extends Controller
                 $item['rootcause'],
                 $item['mitigation'],
                 $item['status_ticket'],
+            ];
+
+            foreach ($fields as $val) {
+                $cell = $row->nextCell();
+                $cell->setWidth($columnWidths[$i]);
+                $cell->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
+                    ->setStartColor(new Color($bgColor)); // set background row
+                $cell->createTextRun($val)->getFont()->setSize(10)->setColor(new Color(Color::COLOR_BLACK));
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->getBorders()->getBottom()->setLineWidth(1)->setLineStyle(Border::LINE_SINGLE);
+            }
+        }
+
+
+        // ----------------------- SLIDE 6 -------------------------------------------------
+        $slide6 = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide6->addShape($backgroundImage);
+
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20);
+        $slide6->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        // Tambahkan teks judul slide
+        $shape = $slide6->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('Pending and In Progress Ticket');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slide6->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(60);
+        $date = Carbon::parse($end_date)->format('F Y');
+        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun->getFont()->setSize(14);
+
+        // Line
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);
+        $pictureShape->setOffsetX(20);
+        $pictureShape->setOffsetY(100);
+        $slide6->addShape($pictureShape);
+
+        //Source Data
+        $pendingandinprogress = Incident::whereBetween('created_time', [$start_date, $end_date])
+            ->whereIn('status_ticket', ['Pending IT Problem', 'In Progress'])
+            ->select('no_jira', 'status_ticket', 'created_time', 'category', 'summary', 'priority')
+            ->orderBy('status_ticket', 'asc')
+            ->get();
+
+
+        $statsJson = $pendingandinprogress->toArray();
+
+        // dd($statsJson);
+
+        // ---------------- TABLE ----------------
+        $cols = 6;
+        $table = $slide6->createTableShape($cols);
+        $table->setHeight(300)->setWidth(950)->setOffsetX(25)->setOffsetY(125);
+
+        $headers = ['Key', 'Status', 'Created', 'Incident Category', 'Summary', 'Severity'];
+
+        // Header Row
+        $columnWidths = [100, 140, 140, 200, 500, 130]; // Disesuaikan dengan layout yang kamu mau
+
+        // Header Row
+        $row = $table->createRow();
+        $row->setHeight(30); // opsional: atur tinggi header
+
+        foreach ($headers as $i => $header) {
+            $cell = $row->nextCell();
+            $cell->setWidth($columnWidths[$i]);
+            $cell->createTextRun($header)
+                ->getFont()->setBold(true)->setColor(new Color(Color::COLOR_WHITE))->setSize(12);
+            $cell->getActiveParagraph()->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+            $cell->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
+                ->setStartColor(new Color('FF2F75B5')); // Blue
+            $cell->getBorders()->getBottom()->setLineWidth(1)->setLineStyle(Border::LINE_SINGLE);
+        }
+
+        foreach ($statsJson as $index => $item) {
+            $row = $table->createRow();
+
+            // Warna latar belakang baris: selang-seling
+            $bgColor = ($index % 2 == 0) ? 'FFD9E1F2' : 'FFFFFFFF'; // biru muda & putih
+
+            // Ambil setiap field sesuai urutan kolom
+            $fields = [
+                $item['no_jira'],
+                $item['status_ticket'],
+                Carbon::parse($item['created_time'])->format('d F Y'),
+                $item['category'],
+                $item['summary'],
+                $item['priority'],
             ];
 
             foreach ($fields as $val) {
