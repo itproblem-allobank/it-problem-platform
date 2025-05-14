@@ -489,7 +489,7 @@ class MonthlyController extends Controller
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('Report IT Incident');
+        $textRun = $shape->createTextRun('Incident Ticket Monthly');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -672,7 +672,7 @@ class MonthlyController extends Controller
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('Report IT Incident');
+        $textRun = $shape->createTextRun('Critical & High Category Incident');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -695,11 +695,71 @@ class MonthlyController extends Controller
         $slide5->addShape($pictureShape);
 
         //Source Data
-        $criticalhighcategory = Incident::whereBetween('created_time', [$start_date, $end_date])->where('category', 'Incident High')->get();
+        $criticalhighcategory = Incident::whereBetween('created_time', [$start_date, $end_date])
+            ->whereIn('priority', ['Incident Critical', 'Incident High'])
+            ->select('created_time', 'priority', 'summary', 'rootcause', 'mitigation', 'status_ticket')
+            ->orderBy('priority', 'asc')
+            ->get();
 
-        dd($criticalhighcategory);
 
+        $statsJson = $criticalhighcategory->toArray();
 
+        // dd($statsJson);
+
+        // ---------------- TABLE ----------------
+        $cols = 6;
+        $table = $slide5->createTableShape($cols);
+        $table->setHeight(300)->setWidth(950)->setOffsetX(25)->setOffsetY(125);
+
+        $headers = ['Date', 'Severity', 'Incident Summary', 'Root Cause', 'Mitigation', 'Status'];
+
+        // Header Row
+        $columnWidths = [130, 100, 280, 300, 300, 100]; // Disesuaikan dengan layout yang kamu mau
+
+        // Header Row
+        $row = $table->createRow();
+        $row->setHeight(30); // opsional: atur tinggi header
+
+        foreach ($headers as $i => $header) {
+            $cell = $row->nextCell();
+            $cell->setWidth($columnWidths[$i]);
+            $cell->createTextRun($header)
+                ->getFont()->setBold(true)->setColor(new Color(Color::COLOR_WHITE))->setSize(12);
+            $cell->getActiveParagraph()->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+            $cell->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
+                ->setStartColor(new Color('FF2F75B5')); // Blue
+            $cell->getBorders()->getBottom()->setLineWidth(1)->setLineStyle(Border::LINE_SINGLE);
+        }
+
+        foreach ($statsJson as $index => $item) {
+            $row = $table->createRow();
+
+            // Warna latar belakang baris: selang-seling
+            $bgColor = ($index % 2 == 0) ? 'FFD9E1F2' : 'FFFFFFFF'; // biru muda & putih
+
+            // Ambil setiap field sesuai urutan kolom
+            $fields = [
+                Carbon::parse($item['created_time'])->format('d F Y'),
+                $item['priority'],
+                $item['summary'],
+                $item['rootcause'],
+                $item['mitigation'],
+                $item['status_ticket'],
+            ];
+
+            foreach ($fields as $val) {
+                $cell = $row->nextCell();
+                $cell->setWidth($columnWidths[$i]);
+                $cell->getFill()->setFillType(\PhpOffice\PhpPresentation\Style\Fill::FILL_SOLID)
+                    ->setStartColor(new Color($bgColor)); // set background row
+                $cell->createTextRun($val)->getFont()->setSize(10)->setColor(new Color(Color::COLOR_BLACK));
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->getBorders()->getBottom()->setLineWidth(1)->setLineStyle(Border::LINE_SINGLE);
+            }
+        }
 
 
         // ----------------------- SLIDE CLOSING  ------------------------------------------
