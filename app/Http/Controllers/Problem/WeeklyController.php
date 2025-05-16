@@ -1574,7 +1574,7 @@ class WeeklyController extends Controller
         $pictureShape->setOffsetY(100); // Posisi vertikal gambar
         $slideEnhancement->addShape($pictureShape);
 
-        //TABLE
+        //TABLE OPEN PROBLEM ENHANCEMENT
         $columns = 7; // Number of columns
         $tableShape = $slideEnhancement->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
@@ -1720,6 +1720,130 @@ class WeeklyController extends Controller
                 }
             }
         }
+
+        //TABLE CLOSED ENHANCEMENT
+        $columns = 7; // Number of columns
+        $tableShape = $slideEnhancement->createTableShape($columns);
+        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        $tableShape->setHeight(210);
+        $tableShape->setWidth(1030);
+        $tableShape->setOffsetX(25);
+        $tableShape->setOffsetY(400);
+
+        //get lastdate
+        $last_date = Carbon::parse($end_date)->endOfDay();
+        // GET DATA FROM DATABASE
+        $data_table = Data::
+            where('problem', '=', 'Enhancement')
+            ->whereBetween('closed_time', [$start_date, $last_date])
+            ->where('status', '=', 'Closed')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
+            ->get();
+
+        // DEFINE ARRAY
+        $tempdata = [
+            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Team', 'Status'],
+        ];
+
+        // ADD ARRAY DATA
+        $i = 1;
+        foreach ($data_table as $key => $value) {
+            $status = $value->status;
+            if ($value->status == 'Root Cause Identified') {
+                $status = 'RC Identified';
+            }
+            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+            //convert date to carbon parse
+            $created = Carbon::parse($value->created);
+            $rcatime = Carbon::parse($value->rca_time);
+            $closed_time = Carbon::parse($value->closed_time);
+            $target_version = $value->target_version;
+            //declare rca time
+            if ($value->rca_time == null) {
+                $rca_time = '-';
+            } else {
+                $rca_days = intval($created->diffInDays($rcatime));
+                $rca_days_string = strval($rca_days) . ' days';
+                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+            }
+
+            //declare team
+            if ($value->team == null) {
+                $team = '-';
+            } else {
+                $team = $value->team;
+            }
+
+            //declare completion time
+            if ($value->closed_time == null) {
+                $completion_time = '-';
+            } else {
+                $completion_days = intval($created->diffInDays($closed_time));
+                $completion_days_string = strval($completion_days) . ' Days';
+                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
+            }
+
+            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version,  $team, $status];
+            $i++;
+        }
+
+        // INSERT ARRAY TO TABLE
+        foreach ($tempdata as $rowIndex => $row) {
+            $tableRow = $tableShape->createRow();
+            $tableRow->setHeight(25); // Set the height of the row
+            foreach ($row as $cellIndex => $cellText) {
+                if ($cellIndex == 0) {
+                    continue; // Lewati kolom yang disembunyikan
+                }
+                $cell = $tableRow->nextCell();
+                if ($cellIndex == 1) {
+                    $cell->setWidth(30);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(120);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(480);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 6) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 7) {
+                    $cell->setWidth(100);
+                }
+                $problem = $row[0];
+                $status = explode("\n", $row[7]);
+                $firstStatus = $status[0];
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->getFill()->setStartColor(new Color('ffffffff'));
+                //
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } else {
+                    if ($cellIndex == 7) {
+                        //coloring by status
+                        if ($firstStatus == 'Pending') {
+                            $cell->getFill()->setStartColor(new Color('fff6f610'));
+                        } elseif ($firstStatus == 'Closed') {
+                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                        } elseif ($firstStatus == 'RC Identified') {
+                            $cell->getFill()->setStartColor(new Color('fff85208'));
+                        } else {
+                            $cell->getFill()->setFillType(Fill::FILL_NONE);
+                        }
+                    } else {
+                        $cell->getFill()->setStartColor(new Color('ffffffff'));
+                    }
+                }
+            }
+        }
+
 
         // Detail High, Medium, Low Enhancement
         $high_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
