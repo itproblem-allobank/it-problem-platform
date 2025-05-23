@@ -376,19 +376,19 @@ class WeeklyController extends Controller
                 ->where('priority', '=', 'Low')
                 ->count();
 
-            $high_closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            $high_closed_thisweek = Data::whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'High')
                 ->where('status', '=', 'Closed')
                 ->count();
 
-            $medium_closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            $medium_closed_thisweek = Data::whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Medium')
                 ->where('status', '=', 'Closed')
                 ->count();
 
-            $low_closed_thisweek = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            $low_closed_thisweek = Data::whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Low')
                 ->where('status', '=', 'Closed')
@@ -593,7 +593,7 @@ class WeeklyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(-5)
-            ->setOffsetY(175);
+            ->setOffsetY(210);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun('+');
         $textRun->getFont()->setBold(true)
@@ -605,7 +605,7 @@ class WeeklyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(-5)
-            ->setOffsetY(195);
+            ->setOffsetY(230);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun('-');
         $textRun->getFont()->setBold(true)
@@ -617,7 +617,7 @@ class WeeklyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1247)
-            ->setOffsetY(155);
+            ->setOffsetY(190);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_last_week);
         $textRun->getFont()->setBold(true)
@@ -629,7 +629,7 @@ class WeeklyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1247)
-            ->setOffsetY(175);
+            ->setOffsetY(210);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_this_week);
         $textRun->getFont()->setBold(true)
@@ -641,7 +641,7 @@ class WeeklyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1247)
-            ->setOffsetY(195);
+            ->setOffsetY(230);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_closed_this_week);
         $textRun->getFont()->setBold(true)
@@ -965,7 +965,7 @@ class WeeklyController extends Controller
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
             ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             ->union(
-                Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+                Data::whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
                     ->where('problem', '!=', 'Enhancement')
                     ->where('status', '=', 'Closed')
                     ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
@@ -1143,7 +1143,7 @@ class WeeklyController extends Controller
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
             ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
             ->union(
-                Data::whereBetween(DB::raw('DATE(changed_at)'), $lastweek)
+                Data::whereBetween(DB::raw('DATE(closed_time)'), $lastweek)
                     ->where('problem', '!=', 'Enhancement')
                     ->where('status', '=', 'Closed')
                     ->select('code_jira', 'problem', 'category', 'summary', 'priority', 'status', 'created', 'changed_at', 'rca_time', 'closed_time')
