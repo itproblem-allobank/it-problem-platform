@@ -209,7 +209,7 @@ class MonthlyController extends Controller
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
         // Create the text run for "IT infra Operation"
-        $textRun3 = $textShape1->createTextRun("Plt. IT Operations Dept. Head");
+        $textRun3 = $textShape1->createTextRun("IT Operations Dept. Head");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 

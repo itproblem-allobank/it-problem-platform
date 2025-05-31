@@ -217,7 +217,7 @@ class WeeklyController extends Controller
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
         // Create the text run for "IT infra Operation"
-        $textRun3 = $textShape1->createTextRun("Plt. IT Operations Dept. Head");
+        $textRun3 = $textShape1->createTextRun("IT Operations Dept. Head");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
@@ -271,7 +271,7 @@ class WeeklyController extends Controller
 
 
 
-        //Slide 3
+        // -------------------------- SLIDE 3 ----------------------------------------------
         $slide3 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
@@ -1575,7 +1575,7 @@ class WeeklyController extends Controller
         $slideEnhancement->addShape($pictureShape);
 
         //TABLE OPEN PROBLEM ENHANCEMENT
-        $columns = 7; // Number of columns
+        $columns = 8; // Number of columns
         $tableShape = $slideEnhancement->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -1590,7 +1590,7 @@ class WeeklyController extends Controller
             // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team')
             ->orderByRaw("
             CASE 
                 WHEN target_version NOT IN ('Backlog', 'Pending') THEN 1 
@@ -1609,7 +1609,7 @@ class WeeklyController extends Controller
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Team', 'Status'],
+            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Level', 'Team', 'Status'],
         ];
 
         // ADD ARRAY DATA
@@ -1654,7 +1654,7 @@ class WeeklyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version,  $team, $status];
+            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version, $value->priority,  $team, $status];
             $i++;
         }
 
@@ -1676,20 +1676,22 @@ class WeeklyController extends Controller
                 } else if ($cellIndex == 2) {
                     $cell->setWidth(120);
                 } else if ($cellIndex == 3) {
-                    $cell->setWidth(480);
+                    $cell->setWidth(400);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(100);
                 } else if ($cellIndex == 5) {
                     $cell->setWidth(100);
                 } else if ($cellIndex == 6) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(80);
                 } else if ($cellIndex == 7) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 8) {
                     $cell->setWidth(100);
                 }
 
                 //set status
                 $problem = $row[0];
-                $status = explode("\n", $row[7]);
+                $status = explode("\n", $row[8]);
                 $firstStatus = $status[0];
                 // $cell = $tableRow->nextCell();
                 $textRun = $cell->createTextRun($cellText);
@@ -1703,7 +1705,7 @@ class WeeklyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex == 7) {
+                    if ($cellIndex == 8) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
                             $cell->getFill()->setStartColor(new Color('fff6f610'));
@@ -1722,7 +1724,7 @@ class WeeklyController extends Controller
         }
 
         //TABLE CLOSED ENHANCEMENT
-        $columns = 7; // Number of columns
+        $columns = 8; // Number of columns
         $tableShape = $slideEnhancement->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -1738,12 +1740,12 @@ class WeeklyController extends Controller
             where('problem', '=', 'Enhancement')
             ->whereBetween('closed_time', [$start_date, $last_date])
             ->where('status', '=', 'Closed')
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team')
             ->get();
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Team', 'Status'],
+            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Level', 'Team', 'Status'],
         ];
 
         // ADD ARRAY DATA
@@ -1784,7 +1786,7 @@ class WeeklyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version,  $team, $status];
+            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version, $value->priority,  $team, $status];
             $i++;
         }
 
@@ -1802,18 +1804,21 @@ class WeeklyController extends Controller
                 } else if ($cellIndex == 2) {
                     $cell->setWidth(120);
                 } else if ($cellIndex == 3) {
-                    $cell->setWidth(480);
+                    $cell->setWidth(400);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(100);
                 } else if ($cellIndex == 5) {
                     $cell->setWidth(100);
                 } else if ($cellIndex == 6) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(80);
                 } else if ($cellIndex == 7) {
                     $cell->setWidth(100);
+                }else if ($cellIndex == 8) {
+                    $cell->setWidth(100);
                 }
+
                 $problem = $row[0];
-                $status = explode("\n", $row[7]);
+                $status = explode("\n", $row[8]);
                 $firstStatus = $status[0];
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
@@ -1826,7 +1831,7 @@ class WeeklyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex == 7) {
+                    if ($cellIndex == 8) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
                             $cell->getFill()->setStartColor(new Color('fff6f610'));

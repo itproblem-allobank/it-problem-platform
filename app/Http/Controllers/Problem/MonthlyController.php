@@ -43,11 +43,11 @@ class MonthlyController extends Controller
 
     public function download(Request $request)
     {
+
         $start_date = $request->start_date;
         $end_date = $request->end_date;
-        // dd($request->end_date);
-        $objPHPPresentation = new PhpPresentation();
 
+        $objPHPPresentation = new PhpPresentation();
         // Set Layout
         $objPHPPresentation->getLayout()->setDocumentLayout(
             DocumentLayout::LAYOUT_CUSTOM,
@@ -58,8 +58,7 @@ class MonthlyController extends Controller
         $objPHPPresentation->getLayout()->setCX(12193200); // width: 33.87 cm
         $objPHPPresentation->getLayout()->setCY(6886800);  // height: 19.13 cm
 
-
-        //Slide 1
+        // ---------------------------- SLIDE 1 ----------------------------------------------
         $slide1 = $objPHPPresentation->getActiveSlide();
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
@@ -104,9 +103,7 @@ class MonthlyController extends Controller
             ->setSize(20);
         $textRun2 = $shape->createTextRun('013/DIV-IFO/REP/25');
         $textRun2->getFont()->setBold(true)
-            ->setSize(20)
-            // ->setColor(new Color('FFFF0000'))
-        ;
+            ->setSize(20);
 
         //Text
         $shape = $slide1->createRichTextShape()
@@ -117,7 +114,7 @@ class MonthlyController extends Controller
         $textRun = $shape->createTextRun('PT Allo Bank Indonesia');
         $textRun->getFont()->setSize(20);
 
-        //Slide 2
+        //------------------------ SLIDE 2 -----------------------------
         $slide2 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
@@ -128,15 +125,22 @@ class MonthlyController extends Controller
         $slide2->addShape($backgroundImage);
 
 
-        // Tambahkan teks judul slide
         $shape = $slide2->createRichTextShape()
             ->setHeight(50)
-            ->setWidth(400)
-            ->setOffsetX(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
             ->setOffsetY(25);
         $textRun = $shape->createTextRun('Document Control');
         $textRun->getFont()->setBold(true)
-            ->setSize(30)->setColor(new Color('FFFFA500'));
+            ->setSize(30);
+
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $slide2->addShape($pictureShape);
 
         // Add a table for document control details
         $tableShape = $slide2->createTableShape(2);
@@ -144,7 +148,7 @@ class MonthlyController extends Controller
 
         // Position the table on the slide
         $tableShape->setOffsetX(50);
-        $tableShape->setOffsetY(120);
+        $tableShape->setOffsetY(135);
 
         // Function to set cell text with font size
         function setCellText($row, $cell, $text, $fontSize = 12)
@@ -180,8 +184,7 @@ class MonthlyController extends Controller
         $cell = $row->nextCell();
         setCellText($row, $cell, 'Review date', 15);
         $cell = $row->nextCell();
-        // setCellText($row, $cell, Carbon::parse($end_date)->format('d F Y'), 15);
-        setCellText($row, $cell, Carbon::now()->format('d F Y'), 15);
+        setCellText($row, $cell, Carbon::parse($end_date)->format('d F Y'), 15);
 
         //Text Shape 1
         $textShape1 = $slide2->createRichTextShape();
@@ -192,8 +195,7 @@ class MonthlyController extends Controller
         $textShape1->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         // Create the text run for the left-aligned text
-        // $date = Carbon::parse($end_date)->format('d F Y');
-        $date = Carbon::now()->format('d F Y');
+        $date = Carbon::parse($end_date)->format('d F Y');
         $textRun2 = $textShape1->createTextRun("Jakarta, " . $date . "\n\nDisetujui oleh,\n\n\n\n\n");
         $textRun2->getFont()->setSize(15);
         $textRun2->getFont()->setColor(new Color('FF000000')); // Black color
@@ -205,7 +207,7 @@ class MonthlyController extends Controller
         $boldTextRun->getFont()->setBold(true); // Set the text to bold
 
         // Create the text run for "IT infra Operation"
-        $textRun3 = $textShape1->createTextRun("Plt. IT Operations Dept. Head");
+        $textRun3 = $textShape1->createTextRun("IT Operations Dept. Head");
         $textRun3->getFont()->setSize(15);
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
@@ -258,7 +260,9 @@ class MonthlyController extends Controller
         $textRun3->getFont()->setColor(new Color('FF000000')); // Black color
 
 
-        //Slide 3
+
+
+        // ------------------- SLIDE 3 --------------------------
         $slide3 = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
@@ -287,7 +291,7 @@ class MonthlyController extends Controller
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('Report IT Problem - Issues');
+        $textRun = $shape->createTextRun('Problem Management');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -295,12 +299,30 @@ class MonthlyController extends Controller
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(25)
-            ->setOffsetY(60);
+            ->setOffsetY(65);
         $date = Carbon::parse($end_date)->format('F Y');
         $textRun = $shape->createTextRun('As of ' . $date);
         $textRun->getFont()->setSize(14);
 
-        //data container category
+        $shape = $slide3->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(110);
+        $textRun = $shape->createTextRun('PROBLEM OVERVIEW');
+        $textRun->getFont()->setSize(10)->setBold(true);
+
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);
+        $pictureShape->setOffsetX(20);
+        $pictureShape->setOffsetY(100);
+        $slide3->addShape($pictureShape);
+
+
+
+        //Source Data
         $problem = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->where('problem', '!=', 'Enhancement')->get();
         // dd($problem);
         $total = [];
@@ -419,7 +441,7 @@ class MonthlyController extends Controller
 
         // dd($total);
 
-        function truncateString($string, $limit = 18)
+        function truncateString($string, $limit = 20)
         {
             if (strlen($string) > $limit) {
                 return substr($string, 0, $limit) . '...';
@@ -430,7 +452,7 @@ class MonthlyController extends Controller
 
         //set tempat
         $offsetx = 25;
-        $offsety = 100;
+        $offsety = 135;
         //loop category data
         foreach ($total as $key => $data) {
             // Tambahkan tabel dengan 4 baris dan 3 kolom
@@ -555,12 +577,24 @@ class MonthlyController extends Controller
         }
 
 
+        // Total All IT Problem 
+        $shape = $slide3->createRichTextShape();
+        $shape->setHeight(25)
+            ->setWidth(40)
+            ->setOffsetX(1247)
+            ->setOffsetY(70);
+        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $shape->createTextRun($total_high + $total_medium + $total_low);
+        $textRun->getFont()->setBold(true)
+            ->setSize(12)
+            ->setColor(new Color(Color::COLOR_BLACK));
+
         // Icon +
         $shape = $slide3->createRichTextShape();
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(-5)
-            ->setOffsetY(175);
+            ->setOffsetY(210);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun('+');
         $textRun->getFont()->setBold(true)
@@ -572,7 +606,7 @@ class MonthlyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(-5)
-            ->setOffsetY(195);
+            ->setOffsetY(230);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun('-');
         $textRun->getFont()->setBold(true)
@@ -584,7 +618,7 @@ class MonthlyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1247)
-            ->setOffsetY(155);
+            ->setOffsetY(190);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_last_month);
         $textRun->getFont()->setBold(true)
@@ -596,7 +630,7 @@ class MonthlyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1247)
-            ->setOffsetY(175);
+            ->setOffsetY(210);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_this_month);
         $textRun->getFont()->setBold(true)
@@ -608,7 +642,7 @@ class MonthlyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1247)
-            ->setOffsetY(195);
+            ->setOffsetY(230);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_closed_this_month);
         $textRun->getFont()->setBold(true)
@@ -617,8 +651,7 @@ class MonthlyController extends Controller
 
 
 
-
-        //set data chart 1
+         // -------------------- CHART 1 ---------------------
         $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->where('problem', '!=', 'Enhancement')->groupBy('problem')->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
@@ -669,10 +702,10 @@ class MonthlyController extends Controller
 
         // Chart 1 Ticket by Category
         $chartShape = $slide3->createChartShape();
-        $chartShape->setHeight(250)
+        $chartShape->setHeight(215)
             ->setWidth(820)
             ->setOffsetX(25)
-            ->setOffsetY(225);
+            ->setOffsetY(260);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -770,10 +803,10 @@ class MonthlyController extends Controller
 
         //Chart 6 Container
         $shape = $slide3->createRichTextShape()
-            ->setHeight(250)
+            ->setHeight(215)
             ->setWidth(205)
             ->setOffsetX(845)
-            ->setOffsetY(225);
+            ->setOffsetY(260);
         $shape->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFF'));
         $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
 
@@ -788,11 +821,10 @@ class MonthlyController extends Controller
 
         // Menambahkan teks ke kotak pertama
         $percentage = $shape->createTextRun("▲ " . number_format($percen_created, 2) . "%");
-        $percentage->getFont()->setBold(true)->setSize(28)->setColor(new Color('FFC00000'));
+        $percentage->getFont()->setBold(true)->setSize(24)->setColor(new Color('FFC00000'));
         $title = $shape->createTextRun("\nIssues Created");
         $title->getFont()->setBold(true)->setSize(20)->setColor(new Color('FFC00000'));
-        $c_month = $shape->createTextRun("\n\n\nCurrent Month : ");
-        $percentage->getFont()->setBold(true)->setSize(28)->setColor(new Color('FFC00000'));
+        $c_month = $shape->createTextRun("\n\nCurrent Month : ");
         $c_month->getFont()->setBold(true)->setSize(12);
         $vc_month = $shape->createTextRun("\n" . $curr_created);
         $vc_month->getFont()->setBold(true)->setSize(18);
@@ -803,19 +835,19 @@ class MonthlyController extends Controller
 
         // Menambahkan kotak kedua untuk "Issues Closed"
         $shape2 = $slide3->createRichTextShape()
-            ->setHeight(250)
+            ->setHeight(215)
             ->setWidth(205)
             ->setOffsetX(1050)
-            ->setOffsetY(225);
+            ->setOffsetY(260);
         $shape2->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFFF'));
         $shape2->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
 
         // Menambahkan teks ke kotak kedua
         $percentage2 = $shape2->createTextRun("▲ " . number_format($percen_closed, 2) . "%");
-        $percentage2->getFont()->setBold(true)->setSize(28)->setColor(new Color('FF00C000'));
+        $percentage2->getFont()->setBold(true)->setSize(24)->setColor(new Color('FF00C000'));
         $title2 = $shape2->createTextRun("\nIssues Closed");
         $title2->getFont()->setBold(true)->setSize(20)->setColor(new Color('FF00C000'));
-        $c_month2 = $shape2->createTextRun("\n\n\nCurrent Month : ");
+        $c_month2 = $shape2->createTextRun("\n\nCurrent Month : ");
         $c_month2->getFont()->setBold(true)->setSize(12);
         $vc_month2 = $shape2->createTextRun("\n" . $curr_closed);
         $vc_month2->getFont()->setBold(true)->setSize(18);
@@ -898,13 +930,12 @@ class MonthlyController extends Controller
             ->setCX(1280, DocumentLayout::UNIT_PIXEL)
             ->setCY(700, DocumentLayout::UNIT_PIXEL);
 
-        // Tambahkan teks judul slide
         $shape = $slideEnhancement->createRichTextShape()
             ->setHeight(50)
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('Product Enhancement');
+        $textRun = $shape->createTextRun('Problem Management');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -912,14 +943,30 @@ class MonthlyController extends Controller
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(25)
-            ->setOffsetY(60);
+            ->setOffsetY(65);
         $startdate = Carbon::parse($start_date)->format('d F Y');
         $enddate = Carbon::parse($end_date)->format('d F Y');
         $textRun = $shape->createTextRun('As of ' . $date);
         $textRun->getFont()->setSize(14);
 
-        //TABLE
-        $columns = 7; // Number of columns
+        $shape = $slideEnhancement->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(110);
+        $textRun = $shape->createTextRun('PRODUCT ENHANCEMENT');
+        $textRun->getFont()->setSize(10)->setBold(true);
+
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $slideEnhancement->addShape($pictureShape);
+
+        //TABLE OPEN PROBLEM ENHANCEMENT
+        $columns = 8; // Number of columns
         $tableShape = $slideEnhancement->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -927,14 +974,14 @@ class MonthlyController extends Controller
         $tableShape->setHeight(210);
         $tableShape->setWidth(1030);
         $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(110);
+        $tableShape->setOffsetY(135);
 
         // GET DATA FROM DATABASE
         $data_table = Data::
             // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'changed_at', 'rca_time', 'closed_time', 'team')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team')
             ->orderByRaw("
             CASE 
                 WHEN target_version NOT IN ('Backlog', 'Pending') THEN 1 
@@ -950,16 +997,10 @@ class MonthlyController extends Controller
             END
         ")
             ->get();
-        // ->orderByRaw("
-        //         CASE 
-        //             WHEN target_version NOT IN ('Backlog', 'Pending') THEN 1 
-        //             ELSE 2 
-        //         END, target_version ASC
-        // ")->get();
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Team', 'Status'],
+            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Level', 'Team', 'Status'],
         ];
 
         // ADD ARRAY DATA
@@ -1004,7 +1045,7 @@ class MonthlyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version,  $team, $status];
+            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version, $value->priority,  $team, $status];
             $i++;
         }
 
@@ -1026,20 +1067,22 @@ class MonthlyController extends Controller
                 } else if ($cellIndex == 2) {
                     $cell->setWidth(120);
                 } else if ($cellIndex == 3) {
-                    $cell->setWidth(480);
+                    $cell->setWidth(400);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(100);
                 } else if ($cellIndex == 5) {
                     $cell->setWidth(100);
                 } else if ($cellIndex == 6) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(80);
                 } else if ($cellIndex == 7) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 8) {
                     $cell->setWidth(100);
                 }
 
                 //set status
                 $problem = $row[0];
-                $status = explode("\n", $row[7]);
+                $status = explode("\n", $row[8]);
                 $firstStatus = $status[0];
                 // $cell = $tableRow->nextCell();
                 $textRun = $cell->createTextRun($cellText);
@@ -1053,7 +1096,7 @@ class MonthlyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex == 7) {
+                    if ($cellIndex == 8) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
                             $cell->getFill()->setStartColor(new Color('fff6f610'));
@@ -1070,6 +1113,132 @@ class MonthlyController extends Controller
                 }
             }
         }
+
+        //TABLE CLOSED ENHANCEMENT
+        $columns = 8; // Number of columns
+        $tableShape = $slideEnhancement->createTableShape($columns);
+        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        $tableShape->setHeight(210);
+        $tableShape->setWidth(1030);
+        $tableShape->setOffsetX(25);
+        $tableShape->setOffsetY(400);
+
+        //get lastdate
+        $last_date = Carbon::parse($end_date)->endOfDay();
+        // GET DATA FROM DATABASE
+        $data_table = Data::where('problem', '=', 'Enhancement')
+            ->whereBetween('closed_time', [$start_date, $last_date])
+            ->where('status', '=', 'Closed')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team')
+            ->get();
+
+        // DEFINE ARRAY
+        $tempdata = [
+            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Level', 'Team', 'Status'],
+        ];
+
+        // ADD ARRAY DATA
+        $i = 1;
+        foreach ($data_table as $key => $value) {
+            $status = $value->status;
+            if ($value->status == 'Root Cause Identified') {
+                $status = 'RC Identified';
+            }
+            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+            //convert date to carbon parse
+            $created = Carbon::parse($value->created);
+            $rcatime = Carbon::parse($value->rca_time);
+            $closed_time = Carbon::parse($value->closed_time);
+            $target_version = $value->target_version;
+            //declare rca time
+            if ($value->rca_time == null) {
+                $rca_time = '-';
+            } else {
+                $rca_days = intval($created->diffInDays($rcatime));
+                $rca_days_string = strval($rca_days) . ' days';
+                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+            }
+
+            //declare team
+            if ($value->team == null) {
+                $team = '-';
+            } else {
+                $team = $value->team;
+            }
+
+            //declare completion time
+            if ($value->closed_time == null) {
+                $completion_time = '-';
+            } else {
+                $completion_days = intval($created->diffInDays($closed_time));
+                $completion_days_string = strval($completion_days) . ' Days';
+                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
+            }
+
+            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version, $value->priority,  $team, $status];
+            $i++;
+        }
+
+        // INSERT ARRAY TO TABLE
+        foreach ($tempdata as $rowIndex => $row) {
+            $tableRow = $tableShape->createRow();
+            $tableRow->setHeight(25); // Set the height of the row
+            foreach ($row as $cellIndex => $cellText) {
+                if ($cellIndex == 0) {
+                    continue; // Lewati kolom yang disembunyikan
+                }
+                $cell = $tableRow->nextCell();
+                if ($cellIndex == 1) {
+                    $cell->setWidth(30);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(120);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(400);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 6) {
+                    $cell->setWidth(80);
+                } else if ($cellIndex == 7) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 8) {
+                    $cell->setWidth(100);
+                }
+
+                $problem = $row[0];
+                $status = explode("\n", $row[8]);
+                $firstStatus = $status[0];
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->getFill()->setStartColor(new Color('ffffffff'));
+                //
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } else {
+                    if ($cellIndex == 8) {
+                        //coloring by status
+                        if ($firstStatus == 'Pending') {
+                            $cell->getFill()->setStartColor(new Color('fff6f610'));
+                        } elseif ($firstStatus == 'Closed') {
+                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                        } elseif ($firstStatus == 'RC Identified') {
+                            $cell->getFill()->setStartColor(new Color('fff85208'));
+                        } else {
+                            $cell->getFill()->setFillType(Fill::FILL_NONE);
+                        }
+                    } else {
+                        $cell->getFill()->setStartColor(new Color('ffffffff'));
+                    }
+                }
+            }
+        }
+
 
         // Detail High, Medium, Low Enhancement
         $high_lastweek_enhancement = Data::where(DB::raw('DATE(created)'), '<', $start_date)
@@ -1153,7 +1322,7 @@ class MonthlyController extends Controller
         $tableShape->setHeight(100);
         $tableShape->setWidth(144);
         $tableShape->setOffsetX(1100);
-        $tableShape->setOffsetY(80);
+        $tableShape->setOffsetY(135);
 
         //row judul
         $rowShape = $tableShape->createRow();
@@ -1232,7 +1401,7 @@ class MonthlyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1070)
-            ->setOffsetY(155);
+            ->setOffsetY(210);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun('+');
         $textRun->getFont()->setBold(true)
@@ -1244,7 +1413,7 @@ class MonthlyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1070)
-            ->setOffsetY(175);
+            ->setOffsetY(230);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun('-');
         $textRun->getFont()->setBold(true)
@@ -1256,7 +1425,7 @@ class MonthlyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1235)
-            ->setOffsetY(135);
+            ->setOffsetY(190);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_existing_enhancement);
         $textRun->getFont()->setBold(true)
@@ -1268,7 +1437,7 @@ class MonthlyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1235)
-            ->setOffsetY(155);
+            ->setOffsetY(210);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_thisweek_enhancement);
         $textRun->getFont()->setBold(true)
@@ -1280,13 +1449,12 @@ class MonthlyController extends Controller
         $shape->setHeight(25)
             ->setWidth(40)
             ->setOffsetX(1235)
-            ->setOffsetY(175);
+            ->setOffsetY(230);
         $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $textRun = $shape->createTextRun($total_closed_enhancement);
         $textRun->getFont()->setBold(true)
             ->setSize(12)
             ->setColor(new Color(Color::COLOR_BLACK));
-
 
         // ----------------- ADDITIONAL SLIDE ----------------
         $additionalslide = $objPHPPresentation->createSlide();
@@ -1298,8 +1466,7 @@ class MonthlyController extends Controller
         $backgroundImage->setOffsetY(0);
         $additionalslide->addShape($backgroundImage);
 
-
-        $imagePath = storage_path('image/allobank.png');
+         $imagePath = storage_path('image/allobank.png');
         $pictureShape = new File();
         $pictureShape->setPath($imagePath);
         $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
@@ -1307,17 +1474,24 @@ class MonthlyController extends Controller
         $pictureShape->setOffsetY(20); // Posisi vertikal gambar
         $additionalslide->addShape($pictureShape);
 
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $additionalslide->addShape($pictureShape);
+
         $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
             ->setCX(1280, DocumentLayout::UNIT_PIXEL)
             ->setCY(700, DocumentLayout::UNIT_PIXEL);
 
-        // Tambahkan teks judul slide
         $shape = $additionalslide->createRichTextShape()
             ->setHeight(50)
             ->setWidth(1000)
             ->setOffsetX(25)
             ->setOffsetY(15);
-        $textRun = $shape->createTextRun('IT Problem - Chart');
+        $textRun = $shape->createTextRun('Problem Management');
         $textRun->getFont()->setBold(true)
             ->setSize(30);
 
@@ -1325,11 +1499,17 @@ class MonthlyController extends Controller
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(25)
-            ->setOffsetY(60);
-        $startdate = Carbon::parse($start_date)->format('d F Y');
-        $enddate = Carbon::parse($end_date)->format('d F Y');
+            ->setOffsetY(65);
         $textRun = $shape->createTextRun('As of ' . $date);
         $textRun->getFont()->setSize(14);
+
+        $shape = $additionalslide->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(110);
+        $textRun = $shape->createTextRun('IT PROBLEM CHART');
+        $textRun->getFont()->setSize(10)->setBold(true);
 
         // -------------- SET CHART RCA TIME --------------------------
 
@@ -1377,7 +1557,7 @@ class MonthlyController extends Controller
             ->setHeight(250)
             ->setWidth(600)
             ->setOffsetX(25)
-            ->setOffsetY(100);
+            ->setOffsetY(135);
         // Set judul chart
         $shape->getTitle()->setText('Ticket RCA Time');
         $shape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
@@ -1399,7 +1579,7 @@ class MonthlyController extends Controller
         $tableShape->setHeight(275);
         $tableShape->setWidth(600);
         $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(350);
+        $tableShape->setOffsetY(385);
 
         // QUERY
         $data_table = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
@@ -1565,7 +1745,7 @@ class MonthlyController extends Controller
         $chartShape->setHeight(250)
             ->setWidth(600)
             ->setOffsetX(625)
-            ->setOffsetY(100);
+            ->setOffsetY(135);
 
         // Tipe chart
         $chartType = new Bar();
@@ -1643,7 +1823,7 @@ class MonthlyController extends Controller
         $chartShape->setHeight(250)
             ->setWidth(600)
             ->setOffsetX(625)
-            ->setOffsetY(350);
+            ->setOffsetY(385);
 
         // Define tipe chart
         $chartType = new Bar();
