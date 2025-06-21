@@ -2282,7 +2282,9 @@ class WeeklyController extends Controller
         $resultdata_chart3 = [];
         foreach ($data_chart3 as $key => $value) {
             $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
+            $status_open = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Open')->get()->count();
             $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
+            $status_resolved = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Resolved')->get()->count();
             $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
             $status_review = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Review')->get()->count();
             $status_userconfirmation = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
@@ -2290,7 +2292,9 @@ class WeeklyController extends Controller
                 [
                     'sub_category' => $value->sub_category,
                     'total' => $total,
+                    'count_open' => $status_open,
                     'count_closed' => $status_closed,
+                    'count_resolved' => $status_resolved,
                     'count_declined' => $status_declined,
                     'count_review' => $status_review,
                     'count_userconfirmation' => $status_userconfirmation
@@ -2349,7 +2353,9 @@ class WeeklyController extends Controller
             // Filter hanya nilai yang lebih dari 0
             $filteredData = array_filter([
                 'Total' => $value['total'],
+                'Open' => $value['count_open'],
                 'Closed' => $value['count_closed'],
+                'Resolved' => $value['count_resolved'],
                 'Declined' => $value['count_declined'],
                 'Review' => $value['count_review'],
                 'User Confirmation' => $value['count_userconfirmation'],
@@ -2483,6 +2489,7 @@ class WeeklyController extends Controller
         foreach ($data_chart4 as $key => $value) {
             $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->count();
             $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->count();
+            $status_open = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Open')->count();
             $status_resolved = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Resolved')->count();
             $status_pending = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Pending')->count();
             $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->count();
@@ -2495,6 +2502,7 @@ class WeeklyController extends Controller
                     'sub_category' => $value->sub_category,
                     'total' => $total,
                     'count_closed' => $status_closed,
+                    'count_open' => $status_open,
                     'count_resolved' => $status_resolved,
                     'count_pending' => $status_pending,
                     'count_declined' => $status_declined,
@@ -2564,6 +2572,7 @@ class WeeklyController extends Controller
             $filteredData = array_filter([
                 'Total' => $value['total'],
                 'Closed' => $value['count_closed'],
+                'Open' => $value['count_open'],
                 'Resolved' => $value['count_resolved'],
                 'Pending' => $value['count_pending'],
                 'Declined' => $value['count_declined'],
