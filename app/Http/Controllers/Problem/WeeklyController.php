@@ -2486,12 +2486,13 @@ class WeeklyController extends Controller
 
 
         // ------------ CHART 3 / Ticket Service Customer Care ----------------
-        $data_chart4 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
+        $data_chart4 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')
+        ->where('status', '!=', 'Open')
+        ->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
         $resultdata_chart4 = [];
         foreach ($data_chart4 as $key => $value) {
-            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->count();
+            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '!=', 'Open')->count();
             $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->count();
-            $status_open = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Open')->count();
             $status_resolved = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Resolved')->count();
             $status_pending = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Pending')->count();
             $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->count();
@@ -2504,7 +2505,6 @@ class WeeklyController extends Controller
                     'sub_category' => $value->sub_category,
                     'total' => $total,
                     'count_closed' => $status_closed,
-                    'count_open' => $status_open,
                     'count_resolved' => $status_resolved,
                     'count_pending' => $status_pending,
                     'count_declined' => $status_declined,
@@ -2515,6 +2515,8 @@ class WeeklyController extends Controller
 
                 ];
         }
+
+        // dd($start_date, $end_date);
 
         // dd(json_encode($resultdata_chart4, JSON_PRETTY_PRINT));
 
@@ -2574,7 +2576,6 @@ class WeeklyController extends Controller
             $filteredData = array_filter([
                 'Total' => $value['total'],
                 'Closed' => $value['count_closed'],
-                'Open' => $value['count_open'],
                 'Resolved' => $value['count_resolved'],
                 'Pending' => $value['count_pending'],
                 'Declined' => $value['count_declined'],
