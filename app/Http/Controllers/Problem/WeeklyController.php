@@ -972,53 +972,58 @@ class WeeklyController extends Controller
             )
             ->get();
 
+
         // DEFINE ARRAY
         $tempdata = [
             ['', 'Category', 'Summary', 'Level', 'Created Date', 'Created-RCA Time', 'Status & Complete Time'],
         ];
 
-        // ADD ARRAY DATA
-        foreach ($data_table as $key => $value) {
-            $tempstatus = $value->status;
-            if ($value->status == 'Root Cause Identified') {
-                $tempstatus = 'RC Identified';
+        // ADD DATA
+        if ($data_table->isEmpty()) {
+            $tempdata[] = ['-', '-', '-', '-', '-', '-', '-'];
+        } else {
+            foreach ($data_table as $key => $value) {
+                $tempstatus = $value->status;
+                if ($value->status == 'Root Cause Identified') {
+                    $tempstatus = 'RC Identified';
+                }
+
+                if ($value->status == 'Closed') {
+                    $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+                } else {
+                    $status = $tempstatus . "\n" . '-';
+                }
+
+                $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+                //priority
+                $level = $value->priority;
+
+                //convert date to carbon parse
+                $created = Carbon::parse($value->created);
+                $rcatime = Carbon::parse($value->rca_time);
+                $closed_time = Carbon::parse($value->closed_time);
+
+                //declare rca time
+                if ($value->rca_time == null) {
+                    $rca_time = '-';
+                } else {
+                    $rca_days = intval($created->diffInDays($rcatime));
+                    $rca_days_string = strval($rca_days) . ' days';
+                    $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                }
+
+                //declare completion time
+                if ($value->closed_time == null) {
+                    $completion_time = '-';
+                } else {
+                    $completion_days = intval($created->diffInDays($closed_time));
+                    $completion_days_string = strval($completion_days) . ' Days';
+                    $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
+                }
+
+                $tempdata[] = [$value->problem, $value->category, $summary, $level, $created->format('d/m/y'), $rca_time,  $status];
             }
-
-            if ($value->status == 'Closed') {
-                $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
-            } else {
-                $status = $tempstatus . "\n" . '-';
-            }
-
-            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
-
-            //priority
-            $level = $value->priority;
-
-            //convert date to carbon parse
-            $created = Carbon::parse($value->created);
-            $rcatime = Carbon::parse($value->rca_time);
-            $closed_time = Carbon::parse($value->closed_time);
-
-            //declare rca time
-            if ($value->rca_time == null) {
-                $rca_time = '-';
-            } else {
-                $rca_days = intval($created->diffInDays($rcatime));
-                $rca_days_string = strval($rca_days) . ' days';
-                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
-            }
-
-            //declare completion time
-            if ($value->closed_time == null) {
-                $completion_time = '-';
-            } else {
-                $completion_days = intval($created->diffInDays($closed_time));
-                $completion_days_string = strval($completion_days) . ' Days';
-                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
-            }
-
-            $tempdata[] = [$value->problem, $value->category, $summary, $level, $created->format('d/m/y'), $rca_time,  $status];
         }
 
 
@@ -1062,40 +1067,46 @@ class WeeklyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex != 6) {
-                        //coloring by problem
-                        if ($problem == 'Core & Surrounding') {
-                            $cell->getFill()->setStartColor(new Color('ff89a64e'));
-                        } else if ($problem == 'Ekosistem MPC') {
-                            $cell->getFill()->setStartColor(new Color('ff00b0f0'));
-                        } else if ($problem == 'Loan') {
-                            $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
-                        } else if ($problem == 'Onboarding') {
-                            $cell->getFill()->setStartColor(new Color('ff81ff63'));
-                        } else if ($problem == 'Online Payment') {
-                            $cell->getFill()->setStartColor(new Color('ff09b1a7'));
-                        } else if ($problem == 'Switching & 3rdparty') {
-                            $cell->getFill()->setStartColor(new Color('ffee52e1'));
-                        } else if ($problem == 'Transaction') {
-                            $cell->getFill()->setStartColor(new Color('ff8380ee'));
-                        } else if ($problem == 'Wholesale Banking') {
-                            $cell->getFill()->setStartColor(new Color('ff8064a2'));
-                        } else {
-                            $cell->getFill()->setStartColor(new Color('ffffffff'));
-                        }
-                    } else if ($cellIndex == 6) {
-                        //coloring by status
-                        if ($firstStatus == 'Pending') {
-                            $cell->getFill()->setStartColor(new Color('fff6f610'));
-                        } elseif ($firstStatus == 'Closed') {
-                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
-                        } elseif ($firstStatus == 'RC Identified') {
-                            $cell->getFill()->setStartColor(new Color('fff85208'));
+                    // CEK jika ini baris dummy kosong (semua '-')
+                    $isEmptyRow = count(array_unique($row)) === 1 && $row[0] === '-';
+                    if ($isEmptyRow) {
+                        $cell->getFill()->setStartColor(new Color('ffffffff')); // putih
+                    } else {
+                        if ($cellIndex != 6) {
+                            //coloring by problem
+                            if ($problem == 'Core & Surrounding') {
+                                $cell->getFill()->setStartColor(new Color('ff89a64e'));
+                            } else if ($problem == 'Ekosistem MPC') {
+                                $cell->getFill()->setStartColor(new Color('ff00b0f0'));
+                            } else if ($problem == 'Loan') {
+                                $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
+                            } else if ($problem == 'Onboarding') {
+                                $cell->getFill()->setStartColor(new Color('ff81ff63'));
+                            } else if ($problem == 'Online Payment') {
+                                $cell->getFill()->setStartColor(new Color('ff09b1a7'));
+                            } else if ($problem == 'Switching & 3rdparty') {
+                                $cell->getFill()->setStartColor(new Color('ffee52e1'));
+                            } else if ($problem == 'Transaction') {
+                                $cell->getFill()->setStartColor(new Color('ff8380ee'));
+                            } else if ($problem == 'Wholesale Banking') {
+                                $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                            } else {
+                                $cell->getFill()->setStartColor(new Color('ffffffff'));
+                            }
+                        } else if ($cellIndex == 6) {
+                            //coloring by status
+                            if ($firstStatus == 'Pending') {
+                                $cell->getFill()->setStartColor(new Color('fff6f610'));
+                            } elseif ($firstStatus == 'Closed') {
+                                $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                            } elseif ($firstStatus == 'RC Identified') {
+                                $cell->getFill()->setStartColor(new Color('fff85208'));
+                            } else {
+                                $cell->getFill()->setFillType(Fill::FILL_NONE);
+                            }
                         } else {
                             $cell->getFill()->setFillType(Fill::FILL_NONE);
                         }
-                    } else {
-                        $cell->getFill()->setFillType(Fill::FILL_NONE);
                     }
                 }
             }
@@ -1156,51 +1167,52 @@ class WeeklyController extends Controller
         ];
 
         //SET TABLE DATA
-        foreach ($data_table_lastweek as $key => $value) {
-            $tempstatus = $value->status;
-            if ($value->status == 'Root Cause Identified') {
-                $tempstatus = 'RC Identified';
+        if ($data_table->isEmpty()) {
+            $tempdata[] = ['-', '-', '-', '-', '-', '-', '-'];
+        } else {
+            foreach ($data_table_lastweek as $key => $value) {
+                $tempstatus = $value->status;
+                if ($value->status == 'Root Cause Identified') {
+                    $tempstatus = 'RC Identified';
+                }
+
+                if ($value->status == 'Closed') {
+                    $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
+                } else {
+                    $status = $tempstatus . "\n" . '-';
+                }
+
+                $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+                //priority
+                $level = $value->priority;
+
+                //convert date to carbon parse
+                $created = Carbon::parse($value->created);
+                $rcatime = Carbon::parse($value->rca_time);
+                $closed_time = Carbon::parse($value->closed_time);
+
+                //declare rca time
+                if ($value->rca_time == null) {
+                    $rca_time = '-';
+                } else {
+                    $rca_days = intval($created->diffInDays($rcatime));
+                    $rca_days_string = strval($rca_days) . ' days';
+                    $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                }
+
+                //declare completion time
+                if ($value->closed_time == null) {
+                    $completion_time = '-';
+                } else {
+                    $completion_days = intval($created->diffInDays($closed_time));
+                    $completion_days_string = strval($completion_days) . ' Days';
+                    $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
+                }
+
+                $tempdata[] = [$value->problem, $value->category, $summary, $level,  $created->format('d/m/y'), $rca_time, $status];
             }
-
-            if ($value->status == 'Closed') {
-                $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
-            } else {
-                $status = $tempstatus . "\n" . '-';
-            }
-
-            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
-
-            //priority
-            $level = $value->priority;
-
-            //convert date to carbon parse
-            $created = Carbon::parse($value->created);
-            $rcatime = Carbon::parse($value->rca_time);
-            $closed_time = Carbon::parse($value->closed_time);
-
-            //declare rca time
-            if ($value->rca_time == null) {
-                $rca_time = '-';
-            } else {
-                $rca_days = intval($created->diffInDays($rcatime));
-                $rca_days_string = strval($rca_days) . ' days';
-                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
-            }
-
-            //declare completion time
-            if ($value->closed_time == null) {
-                $completion_time = '-';
-            } else {
-                $completion_days = intval($created->diffInDays($closed_time));
-                $completion_days_string = strval($completion_days) . ' Days';
-                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
-            }
-
-            $tempdata[] = [$value->problem, $value->category, $summary, $level,  $created->format('d/m/y'), $rca_time, $status];
         }
-
-        // dd($tempdata);
-
 
         // SET ARRAY TO TABLE
         foreach ($tempdata as $rowIndex => $row) {
@@ -1242,40 +1254,46 @@ class WeeklyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex != 6) {
-                        //coloring by problem
-                        if ($problem == 'Core & Surrounding') {
-                            $cell->getFill()->setStartColor(new Color('ff89a64e'));
-                        } else if ($problem == 'Ekosistem MPC') {
-                            $cell->getFill()->setStartColor(new Color('ff00b0f0'));
-                        } else if ($problem == 'Loan') {
-                            $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
-                        } else if ($problem == 'Onboarding') {
-                            $cell->getFill()->setStartColor(new Color('ff81ff63'));
-                        } else if ($problem == 'Online Payment') {
-                            $cell->getFill()->setStartColor(new Color('ff09b1a7'));
-                        } else if ($problem == 'Switching & 3rdparty') {
-                            $cell->getFill()->setStartColor(new Color('ffee52e1'));
-                        } else if ($problem == 'Transaction') {
-                            $cell->getFill()->setStartColor(new Color('ff8380ee'));
-                        } else if ($problem == 'Wholesale Banking') {
-                            $cell->getFill()->setStartColor(new Color('ff8064a2'));
-                        } else {
-                            $cell->getFill()->setStartColor(new Color('ffffffff'));
-                        }
-                    } else if ($cellIndex == 6) {
-                        //coloring by status
-                        if ($firstStatus == 'Pending') {
-                            $cell->getFill()->setStartColor(new Color('fff6f610'));
-                        } elseif ($firstStatus == 'Closed') {
-                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
-                        } elseif ($firstStatus == 'RC Identified') {
-                            $cell->getFill()->setStartColor(new Color('fff85208'));
+                    // CEK jika ini baris dummy kosong (semua '-')
+                    $isEmptyRow = count(array_unique($row)) === 1 && $row[0] === '-';
+                    if ($isEmptyRow) {
+                        $cell->getFill()->setStartColor(new Color('ffffffff')); // putih
+                    } else {
+                        if ($cellIndex != 6) {
+                            //coloring by problem
+                            if ($problem == 'Core & Surrounding') {
+                                $cell->getFill()->setStartColor(new Color('ff89a64e'));
+                            } else if ($problem == 'Ekosistem MPC') {
+                                $cell->getFill()->setStartColor(new Color('ff00b0f0'));
+                            } else if ($problem == 'Loan') {
+                                $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
+                            } else if ($problem == 'Onboarding') {
+                                $cell->getFill()->setStartColor(new Color('ff81ff63'));
+                            } else if ($problem == 'Online Payment') {
+                                $cell->getFill()->setStartColor(new Color('ff09b1a7'));
+                            } else if ($problem == 'Switching & 3rdparty') {
+                                $cell->getFill()->setStartColor(new Color('ffee52e1'));
+                            } else if ($problem == 'Transaction') {
+                                $cell->getFill()->setStartColor(new Color('ff8380ee'));
+                            } else if ($problem == 'Wholesale Banking') {
+                                $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                            } else {
+                                $cell->getFill()->setStartColor(new Color('ffffffff'));
+                            }
+                        } else if ($cellIndex == 6) {
+                            //coloring by status
+                            if ($firstStatus == 'Pending') {
+                                $cell->getFill()->setStartColor(new Color('fff6f610'));
+                            } elseif ($firstStatus == 'Closed') {
+                                $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                            } elseif ($firstStatus == 'RC Identified') {
+                                $cell->getFill()->setStartColor(new Color('fff85208'));
+                            } else {
+                                $cell->getFill()->setFillType(Fill::FILL_NONE);
+                            }
                         } else {
                             $cell->getFill()->setFillType(Fill::FILL_NONE);
                         }
-                    } else {
-                        $cell->getFill()->setFillType(Fill::FILL_NONE);
                     }
                 }
             }
@@ -1737,8 +1755,7 @@ class WeeklyController extends Controller
         //get lastdate
         $last_date = Carbon::parse($end_date)->endOfDay();
         // GET DATA FROM DATABASE
-        $data_table = Data::
-            where('problem', '=', 'Enhancement')
+        $data_table = Data::where('problem', '=', 'Enhancement')
             ->whereBetween('closed_time', [$start_date, $last_date])
             ->where('status', '=', 'Closed')
             ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team')
@@ -1814,7 +1831,7 @@ class WeeklyController extends Controller
                     $cell->setWidth(80);
                 } else if ($cellIndex == 7) {
                     $cell->setWidth(100);
-                }else if ($cellIndex == 8) {
+                } else if ($cellIndex == 8) {
                     $cell->setWidth(100);
                 }
 
@@ -2487,8 +2504,8 @@ class WeeklyController extends Controller
 
         // ------------ CHART 3 / Ticket Service Customer Care ----------------
         $data_chart4 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')
-        ->where('status', '!=', 'Open')
-        ->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
+            ->where('status', '!=', 'Open')
+            ->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
         $resultdata_chart4 = [];
         foreach ($data_chart4 as $key => $value) {
             $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '!=', 'Open')->count();
