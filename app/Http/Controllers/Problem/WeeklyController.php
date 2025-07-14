@@ -1396,56 +1396,60 @@ class WeeklyController extends Controller
         ];
 
         // ADD ARRAY DATA
-        foreach ($detaildata as $key => $value) {
-            $tempstatus = $value->status;
-            if ($value->status == 'Root Cause Identified') {
-                $tempstatus = 'RC Identified';
+        if ($detaildata->isEmpty()) {
+            $tempdata[] = ['-', '-', '-', '-', '-', '-', '-', '-', '-'];
+        } else {
+            foreach ($detaildata as $key => $value) {
+                $tempstatus = $value->status;
+                if ($value->status == 'Root Cause Identified') {
+                    $tempstatus = 'RC Identified';
+                }
+
+                $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
+
+                $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+                $level = $value->priority;
+
+                //convert date to carbon parse
+                $created = Carbon::parse($value->created);
+                $rcatime = Carbon::parse($value->rca_time);
+                $closed_time = Carbon::parse($value->closed_time);
+
+                //declare target version
+                if ($value->target_version == null) {
+                    $target_version = '-';
+                } else {
+                    $target_version = $value->target_version;
+                }
+
+                //declare team
+                if ($value->team == null) {
+                    $team = '-';
+                } else {
+                    $team = $value->team;
+                }
+
+                //declare rca time
+                if ($value->rca_time == null) {
+                    $rca_time = '-';
+                } else {
+                    $rca_days = intval($created->diffInDays($rcatime));
+                    $rca_days_string = strval($rca_days) . ' days';
+                    $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                }
+
+                //declare completion time
+                if ($value->closed_time == null) {
+                    $completion_time = '-';
+                } else {
+                    $completion_days = intval($created->diffInDays($closed_time));
+                    $completion_days_string = strval($completion_days) . ' Days';
+                    $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
+                }
+
+                $tempdata[] = [$value->problem, $value->category, $summary, $level, $target_version, $team, $value->aspect,  $status, $rca_time];
             }
-
-            $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
-
-            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
-
-            $level = $value->priority;
-
-            //convert date to carbon parse
-            $created = Carbon::parse($value->created);
-            $rcatime = Carbon::parse($value->rca_time);
-            $closed_time = Carbon::parse($value->closed_time);
-
-            //declare target version
-            if ($value->target_version == null) {
-                $target_version = '-';
-            } else {
-                $target_version = $value->target_version;
-            }
-
-            //declare team
-            if ($value->team == null) {
-                $team = '-';
-            } else {
-                $team = $value->team;
-            }
-
-            //declare rca time
-            if ($value->rca_time == null) {
-                $rca_time = '-';
-            } else {
-                $rca_days = intval($created->diffInDays($rcatime));
-                $rca_days_string = strval($rca_days) . ' days';
-                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
-            }
-
-            //declare completion time
-            if ($value->closed_time == null) {
-                $completion_time = '-';
-            } else {
-                $completion_days = intval($created->diffInDays($closed_time));
-                $completion_days_string = strval($completion_days) . ' Days';
-                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
-            }
-
-            $tempdata[] = [$value->problem, $value->category, $summary, $level, $target_version, $team, $value->aspect,  $status, $rca_time];
         }
 
 
@@ -1493,40 +1497,46 @@ class WeeklyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex != 7) {
-                        //coloring by problem
-                        if ($problem == 'Core & Surrounding') {
-                            $cell->getFill()->setStartColor(new Color('ff89a64e'));
-                        } else if ($problem == 'Ekosistem MPC') {
-                            $cell->getFill()->setStartColor(new Color('ff00b0f0'));
-                        } else if ($problem == 'Loan') {
-                            $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
-                        } else if ($problem == 'Onboarding') {
-                            $cell->getFill()->setStartColor(new Color('ff81ff63'));
-                        } else if ($problem == 'Online Payment') {
-                            $cell->getFill()->setStartColor(new Color('ff09b1a7'));
-                        } else if ($problem == 'Switching & 3rdparty') {
-                            $cell->getFill()->setStartColor(new Color('ffee52e1'));
-                        } else if ($problem == 'Transaction') {
-                            $cell->getFill()->setStartColor(new Color('ff8380ee'));
-                        } else if ($problem == 'Wholesale Banking') {
-                            $cell->getFill()->setStartColor(new Color('ff8064a2'));
-                        } else {
-                            $cell->getFill()->setStartColor(new Color('ffffffff'));
-                        }
-                    } else if ($cellIndex == 7) {
-                        //coloring by status
-                        if ($firstStatus == 'Pending') {
-                            $cell->getFill()->setStartColor(new Color('fff6f610'));
-                        } elseif ($firstStatus == 'Closed') {
-                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
-                        } elseif ($firstStatus == 'RC Identified') {
-                            $cell->getFill()->setStartColor(new Color('fff85208'));
+                    // CEK jika ini baris dummy kosong (semua '-')
+                    $isEmptyRow = count(array_unique($row)) === 1 && $row[0] === '-';
+                    if ($isEmptyRow) {
+                        $cell->getFill()->setStartColor(new Color('ffffffff')); // putih
+                    } else {
+                        if ($cellIndex != 7) {
+                            //coloring by problem
+                            if ($problem == 'Core & Surrounding') {
+                                $cell->getFill()->setStartColor(new Color('ff89a64e'));
+                            } else if ($problem == 'Ekosistem MPC') {
+                                $cell->getFill()->setStartColor(new Color('ff00b0f0'));
+                            } else if ($problem == 'Loan') {
+                                $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
+                            } else if ($problem == 'Onboarding') {
+                                $cell->getFill()->setStartColor(new Color('ff81ff63'));
+                            } else if ($problem == 'Online Payment') {
+                                $cell->getFill()->setStartColor(new Color('ff09b1a7'));
+                            } else if ($problem == 'Switching & 3rdparty') {
+                                $cell->getFill()->setStartColor(new Color('ffee52e1'));
+                            } else if ($problem == 'Transaction') {
+                                $cell->getFill()->setStartColor(new Color('ff8380ee'));
+                            } else if ($problem == 'Wholesale Banking') {
+                                $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                            } else {
+                                $cell->getFill()->setStartColor(new Color('ffffffff'));
+                            }
+                        } else if ($cellIndex == 7) {
+                            //coloring by status
+                            if ($firstStatus == 'Pending') {
+                                $cell->getFill()->setStartColor(new Color('fff6f610'));
+                            } elseif ($firstStatus == 'Closed') {
+                                $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                            } elseif ($firstStatus == 'RC Identified') {
+                                $cell->getFill()->setStartColor(new Color('fff85208'));
+                            } else {
+                                $cell->getFill()->setFillType(Fill::FILL_NONE);
+                            }
                         } else {
                             $cell->getFill()->setFillType(Fill::FILL_NONE);
                         }
-                    } else {
-                        $cell->getFill()->setFillType(Fill::FILL_NONE);
                     }
                 }
             }
@@ -1743,17 +1753,8 @@ class WeeklyController extends Controller
         }
 
         //TABLE CLOSED ENHANCEMENT
-        $columns = 8; // Number of columns
-        $tableShape = $slideEnhancement->createTableShape($columns);
-        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-
-        $tableShape->setHeight(210);
-        $tableShape->setWidth(1030);
-        $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(400);
-
-        //get lastdate
         $last_date = Carbon::parse($end_date)->endOfDay();
+
         // GET DATA FROM DATABASE
         $data_table = Data::where('problem', '=', 'Enhancement')
             ->whereBetween('closed_time', [$start_date, $last_date])
@@ -1761,111 +1762,124 @@ class WeeklyController extends Controller
             ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team')
             ->get();
 
-        // DEFINE ARRAY
-        $tempdata = [
-            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Level', 'Team', 'Status'],
-        ];
+        if ($data_table->isNotEmpty()) {
+            
+            // Define Size Table
+            $columns = 8; // Number of columns
+            $tableShape = $slideEnhancement->createTableShape($columns);
+            $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+            $tableShape->setHeight(210);
+            $tableShape->setWidth(1030);
+            $tableShape->setOffsetX(25);
+            $tableShape->setOffsetY(400);
 
-        // ADD ARRAY DATA
-        $i = 1;
-        foreach ($data_table as $key => $value) {
-            $status = $value->status;
-            if ($value->status == 'Root Cause Identified') {
-                $status = 'RC Identified';
-            }
-            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
-            //convert date to carbon parse
-            $created = Carbon::parse($value->created);
-            $rcatime = Carbon::parse($value->rca_time);
-            $closed_time = Carbon::parse($value->closed_time);
-            $target_version = $value->target_version;
-            //declare rca time
-            if ($value->rca_time == null) {
-                $rca_time = '-';
-            } else {
-                $rca_days = intval($created->diffInDays($rcatime));
-                $rca_days_string = strval($rca_days) . ' days';
-                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
-            }
+            // DEFINE ARRAY
+            $tempdata = [
+                ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Level', 'Team', 'Status'],
+            ];
 
-            //declare team
-            if ($value->team == null) {
-                $team = '-';
-            } else {
-                $team = $value->team;
-            }
-
-            //declare completion time
-            if ($value->closed_time == null) {
-                $completion_time = '-';
-            } else {
-                $completion_days = intval($created->diffInDays($closed_time));
-                $completion_days_string = strval($completion_days) . ' Days';
-                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
-            }
-
-            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version, $value->priority,  $team, $status];
-            $i++;
-        }
-
-        // INSERT ARRAY TO TABLE
-        foreach ($tempdata as $rowIndex => $row) {
-            $tableRow = $tableShape->createRow();
-            $tableRow->setHeight(25); // Set the height of the row
-            foreach ($row as $cellIndex => $cellText) {
-                if ($cellIndex == 0) {
-                    continue; // Lewati kolom yang disembunyikan
+            // ADD ARRAY DATA
+            $i = 1;
+            foreach ($data_table as $key => $value) {
+                $status = $value->status;
+                if ($value->status == 'Root Cause Identified') {
+                    $status = 'RC Identified';
                 }
-                $cell = $tableRow->nextCell();
-                if ($cellIndex == 1) {
-                    $cell->setWidth(30);
-                } else if ($cellIndex == 2) {
-                    $cell->setWidth(120);
-                } else if ($cellIndex == 3) {
-                    $cell->setWidth(400);
-                } else if ($cellIndex == 4) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 5) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 6) {
-                    $cell->setWidth(80);
-                } else if ($cellIndex == 7) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 8) {
-                    $cell->setWidth(100);
-                }
-
-                $problem = $row[0];
-                $status = explode("\n", $row[8]);
-                $firstStatus = $status[0];
-                $textRun = $cell->createTextRun($cellText);
-                $textRun->getFont()->setBold($rowIndex == 0);
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $cell->getFill()->setStartColor(new Color('ffffffff'));
-                //
-                if ($rowIndex == 0) {
-                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
-                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+                //convert date to carbon parse
+                $created = Carbon::parse($value->created);
+                $rcatime = Carbon::parse($value->rca_time);
+                $closed_time = Carbon::parse($value->closed_time);
+                $target_version = $value->target_version;
+                //declare rca time
+                if ($value->rca_time == null) {
+                    $rca_time = '-';
                 } else {
-                    if ($cellIndex == 8) {
-                        //coloring by status
-                        if ($firstStatus == 'Pending') {
-                            $cell->getFill()->setStartColor(new Color('fff6f610'));
-                        } elseif ($firstStatus == 'Closed') {
-                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
-                        } elseif ($firstStatus == 'RC Identified') {
-                            $cell->getFill()->setStartColor(new Color('fff85208'));
-                        } else {
-                            $cell->getFill()->setFillType(Fill::FILL_NONE);
-                        }
+                    $rca_days = intval($created->diffInDays($rcatime));
+                    $rca_days_string = strval($rca_days) . ' days';
+                    $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                }
+
+                //declare team
+                if ($value->team == null) {
+                    $team = '-';
+                } else {
+                    $team = $value->team;
+                }
+
+                //declare completion time
+                if ($value->closed_time == null) {
+                    $completion_time = '-';
+                } else {
+                    $completion_days = intval($created->diffInDays($closed_time));
+                    $completion_days_string = strval($completion_days) . ' Days';
+                    $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
+                }
+
+                $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version, $value->priority,  $team, $status];
+                $i++;
+            }
+
+            // INSERT ARRAY TO TABLE
+            foreach ($tempdata as $rowIndex => $row) {
+                $tableRow = $tableShape->createRow();
+                $tableRow->setHeight(25); // Set the height of the row
+                foreach ($row as $cellIndex => $cellText) {
+                    if ($cellIndex == 0) {
+                        continue; // Lewati kolom yang disembunyikan
+                    }
+                    $cell = $tableRow->nextCell();
+                    if ($cellIndex == 1) {
+                        $cell->setWidth(30);
+                    } else if ($cellIndex == 2) {
+                        $cell->setWidth(120);
+                    } else if ($cellIndex == 3) {
+                        $cell->setWidth(400);
+                    } else if ($cellIndex == 4) {
+                        $cell->setWidth(100);
+                    } else if ($cellIndex == 5) {
+                        $cell->setWidth(100);
+                    } else if ($cellIndex == 6) {
+                        $cell->setWidth(80);
+                    } else if ($cellIndex == 7) {
+                        $cell->setWidth(100);
+                    } else if ($cellIndex == 8) {
+                        $cell->setWidth(100);
+                    }
+
+                    $problem = $row[0];
+                    $status = explode("\n", $row[8]);
+                    $firstStatus = $status[0];
+                    $textRun = $cell->createTextRun($cellText);
+                    $textRun->getFont()->setBold($rowIndex == 0);
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                    $cell->getFill()->setStartColor(new Color('ffffffff'));
+                    //
+                    if ($rowIndex == 0) {
+                        $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                        $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                     } else {
-                        $cell->getFill()->setStartColor(new Color('ffffffff'));
+                        if ($cellIndex == 8) {
+                            //coloring by status
+                            if ($firstStatus == 'Pending') {
+                                $cell->getFill()->setStartColor(new Color('fff6f610'));
+                            } elseif ($firstStatus == 'Closed') {
+                                $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                            } elseif ($firstStatus == 'RC Identified') {
+                                $cell->getFill()->setStartColor(new Color('fff85208'));
+                            } else {
+                                $cell->getFill()->setFillType(Fill::FILL_NONE);
+                            }
+                        } else {
+                            $cell->getFill()->setStartColor(new Color('ffffffff'));
+                        }
                     }
                 }
             }
         }
+
 
 
         // Detail High, Medium, Low Enhancement
