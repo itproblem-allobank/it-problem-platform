@@ -1763,7 +1763,7 @@ class WeeklyController extends Controller
             ->get();
 
         if ($data_table->isNotEmpty()) {
-            
+
             // Define Size Table
             $columns = 8; // Number of columns
             $tableShape = $slideEnhancement->createTableShape($columns);
@@ -2547,9 +2547,13 @@ class WeeklyController extends Controller
                 ];
         }
 
-        // dd($start_date, $end_date);
 
-        // dd(json_encode($resultdata_chart4, JSON_PRETTY_PRINT));
+        // echo "<pre>";
+        // echo json_encode($data_chart4, JSON_PRETTY_PRINT);
+        // echo "\n\n";
+        // echo json_encode($resultdata_chart4, JSON_PRETTY_PRINT);
+        // echo "</pre>";
+        // exit;
 
         // set title table
         $titleTable = $slide5->createRichTextShape();

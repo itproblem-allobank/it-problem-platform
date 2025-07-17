@@ -9,5 +9,5 @@ class Service extends Model
 {
     protected $table = 'service_data';
 
-    protected $fillable = ['issue_type', 'code_jira', 'summary', 'assignee', 'reporter', 'status', 'created', 'updated', 'priority', 'sub_category', 'ticket_number'];
+    protected $fillable = ['issue_type', 'code_jira', 'summary', 'assignee', 'reporter', 'status', 'created', 'updated', 'priority', 'sub_category', 'ticket_number', 'customer_care_category'];
 }

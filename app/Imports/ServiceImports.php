@@ -52,6 +52,7 @@ class ServiceImports implements ToModel, WithStartRow, WithMultipleSheets
             'priority'      => $row[8],
             'sub_category'   => $row[9],
             'ticket_number' => $row[10],
+            'customer_care_category' => $row[11],
         ];
 
         return new Service($data);
