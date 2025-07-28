@@ -2165,7 +2165,7 @@ class WeeklyController extends Controller
         $titleTable->setHeight(50);
         $titleTable->setWidth(410);
         $titleTable->setOffsetX(435);
-        $titleTable->setOffsetY(135);
+        $titleTable->setOffsetY(430);
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -2226,7 +2226,7 @@ class WeeklyController extends Controller
         $chartShape->setHeight(180)
             ->setWidth(410)
             ->setOffsetX(435)
-            ->setOffsetY(185);
+            ->setOffsetY(480);
 
         // Define tipe chart
         $chartType = new Bar();
@@ -2340,7 +2340,7 @@ class WeeklyController extends Controller
         $titleTable->setHeight(50);
         $titleTable->setWidth(410);
         $titleTable->setOffsetX(435);
-        $titleTable->setOffsetY(425);
+        $titleTable->setOffsetY(135);
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -2356,7 +2356,7 @@ class WeeklyController extends Controller
         $chartShape->setHeight(180)
             ->setWidth(410)
             ->setOffsetX(435)
-            ->setOffsetY(475);
+            ->setOffsetY(185);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -2561,7 +2561,7 @@ class WeeklyController extends Controller
         $titleTable->setHeight(50);
         $titleTable->setWidth(410);
         $titleTable->setOffsetX(845);
-        $titleTable->setOffsetY(425);
+        $titleTable->setOffsetY(135);
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -2577,7 +2577,7 @@ class WeeklyController extends Controller
         $chartShape->setHeight(180)
             ->setWidth(410)
             ->setOffsetX(845)
-            ->setOffsetY(475);
+            ->setOffsetY(185);
         // Define tipe chart
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
@@ -2718,7 +2718,7 @@ class WeeklyController extends Controller
         $titleTable->setHeight(50);
         $titleTable->setWidth(410);
         $titleTable->setOffsetX(845);
-        $titleTable->setOffsetY(135);
+        $titleTable->setOffsetY(430);
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -2764,7 +2764,7 @@ class WeeklyController extends Controller
             ->setHeight(180)
             ->setWidth(410)
             ->setOffsetX(845)
-            ->setOffsetY(185);
+            ->setOffsetY(480);
         $shape->getTitle()->setText('Resolved Time');
         $shape->getTitle()->setVisible(false);
         $shape->getPlotArea()->setType($pie3DChart);
