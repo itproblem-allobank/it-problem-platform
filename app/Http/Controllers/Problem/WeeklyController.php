@@ -1167,7 +1167,7 @@ class WeeklyController extends Controller
         ];
 
         //SET TABLE DATA
-        if ($data_table->isEmpty()) {
+        if ($data_table_lastweek->isEmpty()) {
             $tempdata[] = ['-', '-', '-', '-', '-', '-', '-'];
         } else {
             foreach ($data_table_lastweek as $key => $value) {
