@@ -70,6 +70,14 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
             $closed_time = gmdate("Y-m-d H:i:s", $row21);
         }
 
+        // set Target Date
+        if ($row[25] == null) {
+            $target_date = null;
+        } else {
+            $row25 = ($row[25] - 25569) * 86400;
+            $target_date = gmdate("Y-m-d H:i:s", $row25);
+        }
+
         // pisahkan problem & category 
         $problem_category = $row[2];
         $array_problem_cat = explode(" - ", $problem_category);
@@ -110,8 +118,9 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
             'resolved_days'     => $resolved_days,
             'rca_days'          => $rca_fix,
             'team'              => $row[22],
-            'aspect'          => $row[23],
-            'zoho_ticket'          => $row[24],
+            'aspect'            => $row[23],
+            'zoho_ticket'       => $row[24],
+            'target_date'       => $target_date
         ];
 
         $assignee_too = $row[13];
