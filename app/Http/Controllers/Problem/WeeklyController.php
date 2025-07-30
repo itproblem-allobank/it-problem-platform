@@ -1591,7 +1591,7 @@ class WeeklyController extends Controller
             ->setWidth(400)
             ->setOffsetX(25)
             ->setOffsetY(110);
-        $textRun = $shape->createTextRun('PRODUCT ENHANCEMENT');
+        $textRun = $shape->createTextRun('PRODUCT ENHANCEMENT (STRENGTHEN)');
         $textRun->getFont()->setSize(10)->setBold(true);
 
         $imagePath = storage_path('image/Line.png');
@@ -1603,7 +1603,7 @@ class WeeklyController extends Controller
         $slideEnhancement->addShape($pictureShape);
 
         //TABLE OPEN PROBLEM ENHANCEMENT
-        $columns = 9; // Number of columns
+        $columns = 10; // Number of columns
         $tableShape = $slideEnhancement->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -1618,7 +1618,7 @@ class WeeklyController extends Controller
             // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'target_date', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
             ->orderBy('created', 'ASC')
             ->get();
         //     ->orderByRaw("
@@ -1638,7 +1638,7 @@ class WeeklyController extends Controller
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Level', 'Team', 'Aspect', 'Status'],
+            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Target Date', 'Level', 'Team', 'Aspect', 'Status'],
         ];
 
         // ADD ARRAY DATA
@@ -1655,7 +1655,6 @@ class WeeklyController extends Controller
             $created = Carbon::parse($value->created);
             $rcatime = Carbon::parse($value->rca_time);
             $closed_time = Carbon::parse($value->closed_time);
-
             $target_version = $value->target_version;
 
             //declare rca time
@@ -1683,13 +1682,20 @@ class WeeklyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
+            //declare target date
+            if ($value->target_date == null) {
+                $target_date = '-';
+            } else {
+                $target_date = Carbon::parse($value->target_date)->format('d/m/y');
+            }
+
             if ($value->aspect == null) {
                 $aspect = 'Others';
             } else {
                 $aspect = $value->aspect;
             }
 
-            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version, $value->priority,  $team, $aspect, $status];
+            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version, $target_date, $value->priority,  $team, $aspect, $status];
             $i++;
         }
 
@@ -1711,11 +1717,11 @@ class WeeklyController extends Controller
                 } else if ($cellIndex == 2) {
                     $cell->setWidth(120);
                 } else if ($cellIndex == 3) {
-                    $cell->setWidth(380);
+                    $cell->setWidth(320);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(80);
                 } else if ($cellIndex == 5) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(80);
                 } else if ($cellIndex == 6) {
                     $cell->setWidth(80);
                 } else if ($cellIndex == 7) {
@@ -1724,11 +1730,13 @@ class WeeklyController extends Controller
                     $cell->setWidth(80);
                 } else if ($cellIndex == 9) {
                     $cell->setWidth(80);
+                } else if ($cellIndex == 10) {
+                    $cell->setWidth(80);
                 }
 
                 //set status
                 $problem = $row[0];
-                $status = explode("\n", $row[9]);
+                $status = explode("\n", $row[10]);
                 $firstStatus = $status[0];
                 // $cell = $tableRow->nextCell();
                 $textRun = $cell->createTextRun($cellText);
@@ -1742,7 +1750,7 @@ class WeeklyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex == 9) {
+                    if ($cellIndex == 10) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
                             $cell->getFill()->setStartColor(new Color('fff6f610'));
@@ -1767,7 +1775,7 @@ class WeeklyController extends Controller
         $data_table = Data::where('problem', '=', 'Enhancement')
             ->whereBetween('closed_time', [$start_date, $last_date])
             ->where('status', '=', 'Closed')
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team' , 'aspect')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
             ->get();
 
         if ($data_table->isNotEmpty()) {
