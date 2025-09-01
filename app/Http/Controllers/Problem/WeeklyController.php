@@ -2347,28 +2347,23 @@ class WeeklyController extends Controller
 
 
         // ------------ CHART 2 / Ticket Service Request Nasabah ----------------
-        $data_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Allo Care Service Request')->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
-        $resultdata_chart3 = [];
-        foreach ($data_chart3 as $key => $value) {
-            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->get()->count();
-            $status_open = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Open')->get()->count();
-            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->get()->count();
-            $status_resolved = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Resolved')->get()->count();
-            $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->get()->count();
-            $status_review = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Review')->get()->count();
-            $status_userconfirmation = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->get()->count();
-            $resultdata_chart3[] =
-                [
-                    'sub_category' => $value->sub_category,
-                    'total' => $total,
-                    'count_open' => $status_open,
-                    'count_closed' => $status_closed,
-                    'count_resolved' => $status_resolved,
-                    'count_declined' => $status_declined,
-                    'count_review' => $status_review,
-                    'count_userconfirmation' => $status_userconfirmation
-                ];
-        }
+        $resultdata_chart3 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->where('issue_type', '=', '[JSM] Allo Care Service Request')
+            ->select(
+                'sub_category',
+                DB::raw('CAST(COUNT(*) as UNSIGNED) as total'),
+                DB::raw("CAST(SUM(CASE WHEN status = 'Open' THEN 1 ELSE 0 END) as UNSIGNED) as count_open"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END) as UNSIGNED) as count_closed"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END) as UNSIGNED) as count_resolved"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'Declined' THEN 1 ELSE 0 END) as UNSIGNED) as count_declined"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'Review' THEN 1 ELSE 0 END) as UNSIGNED) as count_review"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'User Confirmation' THEN 1 ELSE 0 END) as UNSIGNED) as count_userconfirmation")
+            )
+            ->groupBy('sub_category')
+            ->get();
+
+        // dd(json_encode($resultdata_chart3, JSON_PRETTY_PRINT));
+
 
         // set title table
         $titleTable = $slide5->createRichTextShape();
@@ -2553,43 +2548,26 @@ class WeeklyController extends Controller
 
 
         // ------------ CHART 3 / Ticket Service Customer Care ----------------
-        $data_chart4 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('issue_type', '=', '[JSM] Contact Center Request')
+        $resultdata_chart4 = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            ->where('issue_type', '=', '[JSM] Contact Center Request')
             ->where('status', '!=', 'Open')
-            ->select('sub_category', DB::raw('count(*) as count'))->groupBy('sub_category')->get();
-        $resultdata_chart4 = [];
-        foreach ($data_chart4 as $key => $value) {
-            $total = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '!=', 'Open')->count();
-            $status_closed = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Closed')->count();
-            $status_resolved = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Resolved')->count();
-            $status_pending = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Pending')->count();
-            $status_declined = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Declined')->count();
-            $status_approval = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', 'like', '%' . 'Approval' . '%')->count();
-            $status_inprogress = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'In Progress')->count();
-            $status_userconfirmation = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'User Confirmation')->count();
-            $status_assignedtoDBA = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])->where('sub_category', '=', $value->sub_category)->where('status', '=', 'Assigned to DBA')->count();
-            $resultdata_chart4[] =
-                [
-                    'sub_category' => $value->sub_category,
-                    'total' => $total,
-                    'count_closed' => $status_closed,
-                    'count_resolved' => $status_resolved,
-                    'count_pending' => $status_pending,
-                    'count_declined' => $status_declined,
-                    'count_approval' => $status_approval,
-                    'count_inprogress' => $status_inprogress,
-                    'count_userconfirmation' => $status_userconfirmation,
-                    'count_assignedtoDBA' => $status_assignedtoDBA
-
-                ];
-        }
+            ->select(
+                'customer_care_category',
+                DB::raw('CAST(COUNT(*) as UNSIGNED) as total'),
+                DB::raw("CAST(SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END) as UNSIGNED) as count_closed"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END) as UNSIGNED) as count_resolved"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as UNSIGNED) as count_pending"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'Declined' THEN 1 ELSE 0 END) as UNSIGNED) as count_declined"),
+                DB::raw("CAST(SUM(CASE WHEN status LIKE '%Approval%' THEN 1 ELSE 0 END) as UNSIGNED) as count_approval"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as UNSIGNED) as count_inprogress"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'User Confirmation' THEN 1 ELSE 0 END) as UNSIGNED) as count_userconfirmation"),
+                DB::raw("CAST(SUM(CASE WHEN status = 'Assigned to DBA' THEN 1 ELSE 0 END) as UNSIGNED) as count_assignedtoDBA")
+            )
+            ->groupBy('customer_care_category')
+            ->get();
 
 
-        // echo "<pre>";
-        // echo json_encode($data_chart4, JSON_PRETTY_PRINT);
-        // echo "\n\n";
-        // echo json_encode($resultdata_chart4, JSON_PRETTY_PRINT);
-        // echo "</pre>";
-        // exit;
+        // dd(json_encode($resultdata_chart4, JSON_PRETTY_PRINT));
 
         // set title table
         $titleTable = $slide5->createRichTextShape();
@@ -2636,12 +2614,6 @@ class WeeklyController extends Controller
         $chartShape->getPlotArea()->getAxisY()->setIsVisible(false);
         $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
 
-        // Tambahkan seri data ke chart
-        // foreach ($resultdata_chart4 as $key => $value) {
-        //     $series = new Series($value['sub_category'], ['Total' => $value['total'], 'Closed' => $value['count_closed'], 'Resolved' => $value['count_resolved'], 'Pending' => $value['count_pending'], 'Declined' => $value['count_declined'], 'Approval' => $value['count_approval'], 'Process on DBA' => $value['count_assignedtoDBA'], 'Process on Problem' => $value['count_inprogress'], 'User Confirmation' => $value['count_userconfirmation']]);
-        //     $chartType->addSeries($series);
-        // }
-
         foreach ($resultdata_chart4 as $key => $value) {
             // Filter hanya nilai yang tidak kosong (tidak nol)
             $filteredData = array_filter([
@@ -2660,7 +2632,7 @@ class WeeklyController extends Controller
 
             // Hanya tambahkan jika ada data yang tersisa setelah filter
             if (!empty($filteredData)) {
-                $series = new Series($value['sub_category'], $filteredData);
+                $series = new Series($value['customer_care_category'], $filteredData);
                 $chartType->addSeries($series);
             }
         }
