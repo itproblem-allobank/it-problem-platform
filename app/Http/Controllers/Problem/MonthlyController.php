@@ -460,7 +460,7 @@ class MonthlyController extends Controller
             // Tambahkan tabel dengan 4 baris dan 3 kolom
             $tableShape = $slide3->createTableShape(3);
             $tableShape->setHeight(100);
-            $tableShape->setWidth(144);
+            $tableShape->setWidth(128);
             $tableShape->setOffsetX($offsetx);
             $tableShape->setOffsetY($offsety);
 
@@ -537,7 +537,7 @@ class MonthlyController extends Controller
             }
 
             //set tempat box selanjutnya
-            $offsetx = $offsetx + 155;
+            $offsetx = $offsetx + 137.5;
         }
 
         $total_last_month = 0;
