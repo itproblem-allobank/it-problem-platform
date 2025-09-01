@@ -78,6 +78,14 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
         $problem = $array_problem_cat[0];
         $category = $array_problem_cat[1] ?? "-";
 
+        if ($problem == 'Wholesale Banking') {
+            $problem = 'Wholesale';
+        } else if($problem == 'Core & Surrounding') {
+            $problem = 'Core Surrounding';
+        } else if($problem == 'Switching & 3rdparty') {
+            $problem = 'Switching 3rdparty';
+        }
+
         // set resolved days
         if ($row[6] == 'Closed') {
             $resolved_days = Carbon::parse($created)->diffInDays(Carbon::parse($changed));

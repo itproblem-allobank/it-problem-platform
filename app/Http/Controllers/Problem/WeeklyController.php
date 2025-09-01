@@ -403,7 +403,7 @@ class WeeklyController extends Controller
 
             // SET COLOR
             $color = '';
-            if ($value->problem == 'Core & Surrounding') {
+            if ($value->problem == 'Core Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
                 $color = 'ff00b0f0';
@@ -413,16 +413,17 @@ class WeeklyController extends Controller
                 $color = 'ff81ff63';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff09b1a7';
-            } else if ($value->problem == 'Switching & 3rdparty') {
+            } else if ($value->problem == 'Switching 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
                 $color = 'ff8380ee';
-            } else if ($value->problem == 'Wholesale Banking') {
+            } else if ($value->problem == 'Wholesale') {
                 $color = 'ff8064a2';
+            } else if ($value->problem == 'Cybersecurity') {
+                $color = 'ffb9cd96';
             } else {
                 $color = 'ffffffff';
             }
-
 
             $total[] = [
                 'problem' => $value->problem,
@@ -457,7 +458,7 @@ class WeeklyController extends Controller
             // Tambahkan tabel dengan 4 baris dan 3 kolom
             $tableShape = $slide3->createTableShape(3);
             $tableShape->setHeight(100);
-            $tableShape->setWidth(144);
+            $tableShape->setWidth(128);
             $tableShape->setOffsetX($offsetx);
             $tableShape->setOffsetY($offsety);
 
@@ -534,7 +535,7 @@ class WeeklyController extends Controller
             }
 
             //set tempat box selanjutnya
-            $offsetx = $offsetx + 155;
+            $offsetx = $offsetx + 137.5;
         }
 
         $total_last_week = 0;
@@ -675,7 +676,7 @@ class WeeklyController extends Controller
 
             //set color to chart
             $color = '';
-            if ($value->problem == 'Core & Surrounding') {
+            if ($value->problem == 'Core Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
                 $color = 'ff00b0f0';
@@ -685,12 +686,14 @@ class WeeklyController extends Controller
                 $color = 'ff81ff63';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff09b1a7';
-            } else if ($value->problem == 'Switching & 3rdparty') {
+            } else if ($value->problem == 'Switching 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
                 $color = 'ff8380ee';
-            } else if ($value->problem == 'Wholesale Banking') {
+            } else if ($value->problem == 'Wholesale') {
                 $color = 'ff8064a2';
+            } else if ($value->problem == 'Cybersecurity') {
+                $color = 'ffb9cd96';
             } else {
                 $color = 'ffffffff';
             }
@@ -1074,7 +1077,7 @@ class WeeklyController extends Controller
                     } else {
                         if ($cellIndex != 6) {
                             //coloring by problem
-                            if ($problem == 'Core & Surrounding') {
+                            if ($problem == 'Core Surrounding') {
                                 $cell->getFill()->setStartColor(new Color('ff89a64e'));
                             } else if ($problem == 'Ekosistem MPC') {
                                 $cell->getFill()->setStartColor(new Color('ff00b0f0'));
@@ -1084,12 +1087,14 @@ class WeeklyController extends Controller
                                 $cell->getFill()->setStartColor(new Color('ff81ff63'));
                             } else if ($problem == 'Online Payment') {
                                 $cell->getFill()->setStartColor(new Color('ff09b1a7'));
-                            } else if ($problem == 'Switching & 3rdparty') {
+                            } else if ($problem == 'Switching 3rdparty') {
                                 $cell->getFill()->setStartColor(new Color('ffee52e1'));
                             } else if ($problem == 'Transaction') {
                                 $cell->getFill()->setStartColor(new Color('ff8380ee'));
-                            } else if ($problem == 'Wholesale Banking') {
+                            } else if ($problem == 'Wholesale') {
                                 $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                            } else if ($problem == 'Cybersecurity') {
+                                $cell->getFill()->setStartColor(new Color('ffb9cd96'));
                             } else {
                                 $cell->getFill()->setStartColor(new Color('ffffffff'));
                             }
@@ -1261,7 +1266,7 @@ class WeeklyController extends Controller
                     } else {
                         if ($cellIndex != 6) {
                             //coloring by problem
-                            if ($problem == 'Core & Surrounding') {
+                            if ($problem == 'Core Surrounding') {
                                 $cell->getFill()->setStartColor(new Color('ff89a64e'));
                             } else if ($problem == 'Ekosistem MPC') {
                                 $cell->getFill()->setStartColor(new Color('ff00b0f0'));
@@ -1271,12 +1276,14 @@ class WeeklyController extends Controller
                                 $cell->getFill()->setStartColor(new Color('ff81ff63'));
                             } else if ($problem == 'Online Payment') {
                                 $cell->getFill()->setStartColor(new Color('ff09b1a7'));
-                            } else if ($problem == 'Switching & 3rdparty') {
+                            } else if ($problem == 'Switching 3rdparty') {
                                 $cell->getFill()->setStartColor(new Color('ffee52e1'));
                             } else if ($problem == 'Transaction') {
                                 $cell->getFill()->setStartColor(new Color('ff8380ee'));
-                            } else if ($problem == 'Wholesale Banking') {
+                            } else if ($problem == 'Wholesale') {
                                 $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                            } else if ($problem == 'Cybersecurity') {
+                                $cell->getFill()->setStartColor(new Color('ffb9cd96'));
                             } else {
                                 $cell->getFill()->setStartColor(new Color('ffffffff'));
                             }
@@ -1371,7 +1378,7 @@ class WeeklyController extends Controller
             CASE problem
             WHEN 'Loan' THEN 1
             WHEN 'Onboarding' THEN 2
-            WHEN 'Core & Surrounding' THEN 3
+            WHEN 'Core Surrounding' THEN 3
             ELSE 4 
         END
     ")
@@ -1504,7 +1511,7 @@ class WeeklyController extends Controller
                     } else {
                         if ($cellIndex != 7) {
                             //coloring by problem
-                            if ($problem == 'Core & Surrounding') {
+                            if ($problem == 'Core Surrounding') {
                                 $cell->getFill()->setStartColor(new Color('ff89a64e'));
                             } else if ($problem == 'Ekosistem MPC') {
                                 $cell->getFill()->setStartColor(new Color('ff00b0f0'));
@@ -1514,12 +1521,14 @@ class WeeklyController extends Controller
                                 $cell->getFill()->setStartColor(new Color('ff81ff63'));
                             } else if ($problem == 'Online Payment') {
                                 $cell->getFill()->setStartColor(new Color('ff09b1a7'));
-                            } else if ($problem == 'Switching & 3rdparty') {
+                            } else if ($problem == 'Switching 3rdparty') {
                                 $cell->getFill()->setStartColor(new Color('ffee52e1'));
                             } else if ($problem == 'Transaction') {
                                 $cell->getFill()->setStartColor(new Color('ff8380ee'));
-                            } else if ($problem == 'Wholesale Banking') {
+                            } else if ($problem == 'Wholesale') {
                                 $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                            } else if ($problem == 'Cybersecurity') {
+                                $cell->getFill()->setStartColor(new Color('ffb9cd96'));
                             } else {
                                 $cell->getFill()->setStartColor(new Color('ffffffff'));
                             }
@@ -1631,7 +1640,7 @@ class WeeklyController extends Controller
         //     CASE category
         //         WHEN 'Loan' THEN 1
         //         WHEN 'Onboarding' THEN 2
-        //         WHEN 'Core & Surrounding' THEN 3
+        //         WHEN 'Core Surrounding' THEN 3
         //         ELSE 4 
         //     END
         // ")
@@ -2216,7 +2225,7 @@ class WeeklyController extends Controller
 
             //set color to chart
             $color = '';
-            if ($value->problem == 'Core & Surrounding') {
+            if ($value->problem == 'Core Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
                 $color = 'ff00b0f0';
@@ -2226,12 +2235,14 @@ class WeeklyController extends Controller
                 $color = 'ff81ff63';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff09b1a7';
-            } else if ($value->problem == 'Switching & 3rdparty') {
+            } else if ($value->problem == 'Switching 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
                 $color = 'ff8380ee';
-            } else if ($value->problem == 'Wholesale Banking') {
+            } else if ($value->problem == 'Wholesale') {
                 $color = 'ff8064a2';
+            } else if ($value->problem == 'Cybersecurity') {
+                $color = 'ffb9cd96';
             } else {
                 $color = 'ffffffff';
             }

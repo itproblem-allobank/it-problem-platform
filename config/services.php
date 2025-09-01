@@ -4,10 +4,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Switching & 3rdparty Services
+    | Switching 3rdparty Services
     |--------------------------------------------------------------------------
     |
-    | This file is for storing the credentials for Switching & 3rdparty services such
+    | This file is for storing the credentials for Switching 3rdparty services such
     | as Mailgun, Postmark, AWS and more. This file provides the de facto
     | location for this type of information, allowing packages to have
     | a conventional file to locate the various service credentials.

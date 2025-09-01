@@ -402,7 +402,7 @@ class MonthlyController extends Controller
 
             // SET COLOR
             $color = '';
-            if ($value->problem == 'Core & Surrounding') {
+            if ($value->problem == 'Core Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
                 $color = 'ff00b0f0';
@@ -412,12 +412,14 @@ class MonthlyController extends Controller
                 $color = 'ff81ff63';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff09b1a7';
-            } else if ($value->problem == 'Switching & 3rdparty') {
+            } else if ($value->problem == 'Switching 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
                 $color = 'ff8380ee';
-            } else if ($value->problem == 'Wholesale Banking') {
+            } else if ($value->problem == 'Wholesale') {
                 $color = 'ff8064a2';
+            } else if ($value->problem == 'Cybersecurity') {
+                $color = 'ffb9cd96';
             } else {
                 $color = 'ffffffff';
             }
@@ -670,7 +672,7 @@ class MonthlyController extends Controller
 
             // SET COLOR
             $color = '';
-            if ($value->problem == 'Core & Surrounding') {
+            if ($value->problem == 'Core Surrounding') {
                 $color = 'ff89a64e';
             } else if ($value->problem == 'Ekosistem MPC') {
                 $color = 'ff00b0f0';
@@ -680,12 +682,14 @@ class MonthlyController extends Controller
                 $color = 'ff81ff63';
             } else if ($value->problem == 'Online Payment') {
                 $color = 'ff09b1a7';
-            } else if ($value->problem == 'Switching & 3rdparty') {
+            } else if ($value->problem == 'Switching 3rdparty') {
                 $color = 'ffee52e1';
             } else if ($value->problem == 'Transaction') {
                 $color = 'ff8380ee';
-            } else if ($value->problem == 'Wholesale Banking') {
+            } else if ($value->problem == 'Wholesale') {
                 $color = 'ff8064a2';
+            } else if ($value->problem == 'Cybersecurity') {
+                $color = 'ffb9cd96';
             } else {
                 $color = 'ffffffff';
             }
@@ -992,7 +996,7 @@ class MonthlyController extends Controller
             CASE category
                 WHEN 'Loan' THEN 1
                 WHEN 'Onboarding' THEN 2
-                WHEN 'Core & Surrounding' THEN 3
+                WHEN 'Core Surrounding' THEN 3
                 ELSE 4 
             END
         ")
