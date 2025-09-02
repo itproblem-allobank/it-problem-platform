@@ -319,7 +319,7 @@ class WeeklyController extends Controller
             ->setWidth(400)
             ->setOffsetX(25)
             ->setOffsetY(110);
-        $textRun = $shape->createTextRun('PROBLEM OVERVIEW');
+        $textRun = $shape->createTextRun('SUMMARY ALL PROBLEM');
         $textRun->getFont()->setSize(10)->setBold(true);
 
         // NEW
@@ -2207,18 +2207,18 @@ class WeeklyController extends Controller
         $textRun1 = $titleTable->createTextRun('IT Problem Ticket Closed');
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nTotal IT Problem Tickets Closed This Week by Category from 2024");
+        $textRun2 = $titleTable->createTextRun("\nTotal IT Problem Tickets Closed This Week by Category from 2025");
         $textRun2->getFont()->setSize(9);
 
         // create chart
-        $w2024 = '2024-01-01';
-        $data_chart1 = Data::whereBetween(DB::raw('DATE(created)'), [$w2024, $end_date])
+        $w2025 = '2025-01-01';
+        $data_chart1 = Data::whereBetween(DB::raw('DATE(created)'), [$w2025, $end_date])
             ->where('problem', '!=', 'Enhancement')
             ->select('problem', DB::raw('count(*) as count'))->groupBy('problem')
             ->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
-            $status_closed = Data::whereBetween(DB::raw('DATE(created)'), [$w2024, $end_date])
+            $status_closed = Data::whereBetween(DB::raw('DATE(created)'), [$w2025, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('status', '=', 'Closed')
                 ->count();
