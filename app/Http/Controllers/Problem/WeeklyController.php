@@ -935,7 +935,7 @@ class WeeklyController extends Controller
         $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $titleTable->setHeight(50);
         $titleTable->setWidth(610);
-        $titleTable->setOffsetX(25);
+        $titleTable->setOffsetX(645);
         $titleTable->setOffsetY(425);
         //coloring
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
@@ -959,7 +959,7 @@ class WeeklyController extends Controller
         // Set the table's position and size
         $tableShape->setHeight(210);
         $tableShape->setWidth(610);
-        $tableShape->setOffsetX(25);
+        $tableShape->setOffsetX(645);
         $tableShape->setOffsetY(475);
 
         // GET DATA FROM DATABASE
@@ -1128,7 +1128,7 @@ class WeeklyController extends Controller
         $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $titleTable->setHeight(50);
         $titleTable->setWidth(610);
-        $titleTable->setOffsetX(645);
+        $titleTable->setOffsetX(25);
         $titleTable->setOffsetY(425);
         //coloring
         $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
@@ -1152,7 +1152,7 @@ class WeeklyController extends Controller
         // Set the table's position and size
         $tableShape->setHeight(210);
         $tableShape->setWidth(610);
-        $tableShape->setOffsetX(645);
+        $tableShape->setOffsetX(25);
         $tableShape->setOffsetY(475);
 
         // Define the data for the table
@@ -1397,7 +1397,7 @@ class WeeklyController extends Controller
         // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
 
         // ----------------- Create Table ------------------------------ 
-        $columns = 9;
+        $columns = 10;
         $table = $slide_additional->createTableShape($columns);
         $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -1409,12 +1409,12 @@ class WeeklyController extends Controller
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version',  'Team', 'Aspect',  'Status' . "\n" . 'Created Date', 'Created-RCA Time'],
+            ['', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version',  'Team', 'Aspect',  'Status' . "\n" . 'Created Date', 'Created - RCA Time', 'Ticket Age'],
         ];
 
         // ADD ARRAY DATA
         if ($detaildata->isEmpty()) {
-            $tempdata[] = ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-'];
+            $tempdata[] = ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'];
         } else {
             foreach ($detaildata as $key => $value) {
                 $tempstatus = $value->status;
@@ -1467,7 +1467,9 @@ class WeeklyController extends Controller
                     $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
                 }
 
-                $tempdata[] = [$value->problem, $value->category, $no_ticket, $summary, $level, $target_version, $team, $value->aspect,  $status, $rca_time];
+                $ticket_age = Carbon::parse($value->created)->diffForHumans(null, true);
+
+                $tempdata[] = [$value->problem, $value->category, $no_ticket, $summary, $level, $target_version, $team, $value->aspect,  $status, $rca_time, $ticket_age];
             }
         }
 
@@ -1490,17 +1492,19 @@ class WeeklyController extends Controller
                 } else if ($cellIndex == 3) {
                     $cell->setWidth(520);
                 } else if ($cellIndex == 4) {
-                    $cell->setWidth(75);
+                    $cell->setWidth(71.42);
                 } else if ($cellIndex == 5) {
-                    $cell->setWidth(75);
+                    $cell->setWidth(71.42);
                 } else if ($cellIndex == 6) {
-                    $cell->setWidth(75);
+                    $cell->setWidth(71.42);
                 } else if ($cellIndex == 7) {
-                    $cell->setWidth(75);
+                    $cell->setWidth(71.42);
                 } else if ($cellIndex == 8) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(71.42);
                 } else if ($cellIndex == 9) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(71.42);
+                } else if ($cellIndex == 10) {
+                    $cell->setWidth(71.42);
                 }
 
                 //set status
