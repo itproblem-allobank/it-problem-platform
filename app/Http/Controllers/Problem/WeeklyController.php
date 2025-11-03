@@ -1397,7 +1397,7 @@ class WeeklyController extends Controller
         // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
 
         // ----------------- Create Table ------------------------------ 
-        $columns = 10;
+        $columns = 11;
         $table = $slide_additional->createTableShape($columns);
         $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -1409,12 +1409,12 @@ class WeeklyController extends Controller
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version',  'Team', 'Aspect',  'Status' . "\n" . 'Created Date', 'Created - RCA Time', 'Ticket Age'],
+            ['', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type',  'Team', 'Aspect',  'Status' . "\n" . 'Created Date', 'Created - RCA Time', 'Ticket Age'],
         ];
 
         // ADD ARRAY DATA
         if ($detaildata->isEmpty()) {
-            $tempdata[] = ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'];
+            $tempdata[] = ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'];
         } else {
             foreach ($detaildata as $key => $value) {
                 $tempstatus = $value->status;
@@ -1469,7 +1469,7 @@ class WeeklyController extends Controller
 
                 $ticket_age = Carbon::parse($value->created)->diffForHumans(null, true);
 
-                $tempdata[] = [$value->problem, $value->category, $no_ticket, $summary, $level, $target_version, $team, $value->aspect,  $status, $rca_time, $ticket_age];
+                $tempdata[] = [$value->problem, $value->category, $no_ticket, $summary, $level, $target_version, $target_version, $team, $value->aspect,  $status, $rca_time, $ticket_age];
             }
         }
 
@@ -1490,7 +1490,7 @@ class WeeklyController extends Controller
                 } else if ($cellIndex == 2) {
                     $cell->setWidth(80);
                 } else if ($cellIndex == 3) {
-                    $cell->setWidth(520);
+                    $cell->setWidth(448.58);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(71.42);
                 } else if ($cellIndex == 5) {
@@ -1500,16 +1500,18 @@ class WeeklyController extends Controller
                 } else if ($cellIndex == 7) {
                     $cell->setWidth(71.42);
                 } else if ($cellIndex == 8) {
-                    $cell->setWidth(71.42);
+                    $cell->setWidth(68);
                 } else if ($cellIndex == 9) {
-                    $cell->setWidth(71.42);
+                    $cell->setWidth(74.84);
                 } else if ($cellIndex == 10) {
+                    $cell->setWidth(71.42);
+                } else if ($cellIndex == 11) {
                     $cell->setWidth(71.42);
                 }
 
                 //set status
                 $problem = $row[0];
-                $status = explode("\n", $row[8]);
+                $status = explode("\n", $row[9]);
                 $firstStatus = $status[0];
                 // $cell = $tableRow->nextCell();
                 $textRun = $cell->createTextRun($cellText);
@@ -1527,7 +1529,7 @@ class WeeklyController extends Controller
                     if ($isEmptyRow) {
                         $cell->getFill()->setStartColor(new Color('ffffffff')); // putih
                     } else {
-                        if ($cellIndex != 8) {
+                        if ($cellIndex != 9) {
                             //coloring by problem
                             if ($problem == 'Core Surrounding') {
                                 $cell->getFill()->setStartColor(new Color('ff89a64e'));
@@ -1550,7 +1552,7 @@ class WeeklyController extends Controller
                             } else {
                                 $cell->getFill()->setStartColor(new Color('ffffffff'));
                             }
-                        } else if ($cellIndex == 8) {
+                        } else if ($cellIndex == 9) {
                             //coloring by status
                             if ($firstStatus == 'Pending') {
                                 $cell->getFill()->setStartColor(new Color('fff6f610'));
