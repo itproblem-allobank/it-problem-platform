@@ -653,7 +653,7 @@ class MonthlyController extends Controller
 
 
 
-         // -------------------- CHART 1 ---------------------
+        // -------------------- CHART 1 ---------------------
         $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->where('problem', '!=', 'Enhancement')->groupBy('problem')->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
@@ -958,7 +958,7 @@ class MonthlyController extends Controller
             ->setWidth(400)
             ->setOffsetX(25)
             ->setOffsetY(110);
-        $textRun = $shape->createTextRun('PRODUCT ENHANCEMENT');
+        $textRun = $shape->createTextRun('PRODUCT ENHANCEMENT (STRENGTHEN)');
         $textRun->getFont()->setSize(10)->setBold(true);
 
         $imagePath = storage_path('image/Line.png');
@@ -970,7 +970,7 @@ class MonthlyController extends Controller
         $slideEnhancement->addShape($pictureShape);
 
         //TABLE OPEN PROBLEM ENHANCEMENT
-        $columns = 8; // Number of columns
+        $columns = 12; // Number of columns
         $tableShape = $slideEnhancement->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -985,26 +985,13 @@ class MonthlyController extends Controller
             // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team')
-            ->orderByRaw("
-            CASE 
-                WHEN target_version NOT IN ('Backlog', 'Pending') THEN 1 
-                ELSE 2 
-            END, target_version ASC
-        ")
-            ->orderByRaw("
-            CASE category
-                WHEN 'Loan' THEN 1
-                WHEN 'Onboarding' THEN 2
-                WHEN 'Core Surrounding' THEN 3
-                ELSE 4 
-            END
-        ")
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'target_date', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
+            ->orderBy('created', 'ASC')
             ->get();
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Level', 'Team', 'Status'],
+            ['', 'No', 'Category', 'No Ticket', 'Summary', 'Created Date', 'Target Version', 'Version Type', 'Target Date', 'Level', 'Team', 'Aspect', 'Status'],
         ];
 
         // ADD ARRAY DATA
@@ -1015,7 +1002,8 @@ class MonthlyController extends Controller
                 $status = 'RC Identified';
             }
 
-            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+            $summary = $value->summary;
+            $no_ticket = $value->code_jira;
 
             //convert date to carbon parse
             $created = Carbon::parse($value->created);
@@ -1049,7 +1037,20 @@ class MonthlyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version, $value->priority,  $team, $status];
+            //declare target date
+            if ($value->target_date == null) {
+                $target_date = '-';
+            } else {
+                $target_date = Carbon::parse($value->target_date)->format('d/m/y');
+            }
+
+            if ($value->aspect == null) {
+                $aspect = 'Others';
+            } else {
+                $aspect = $value->aspect;
+            }
+
+            $tempdata[] = [$value->problem, strval($i), $value->category, $no_ticket, $summary,  $created->format('d/m/y'), $target_version, $target_version, $target_date, $value->priority,  $team, $aspect, $status];
             $i++;
         }
 
@@ -1069,24 +1070,32 @@ class MonthlyController extends Controller
                 if ($cellIndex == 1) {
                     $cell->setWidth(30);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(120);
-                } else if ($cellIndex == 3) {
-                    $cell->setWidth(400);
-                } else if ($cellIndex == 4) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 5) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 6) {
                     $cell->setWidth(80);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(80);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(290);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 6) {
+                    $cell->setWidth(70);
                 } else if ($cellIndex == 7) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(70);
                 } else if ($cellIndex == 8) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 9) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 10) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 11) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 12) {
+                    $cell->setWidth(60);
                 }
 
                 //set status
                 $problem = $row[0];
-                $status = explode("\n", $row[8]);
+                $status = explode("\n", $row[12]);
                 $firstStatus = $status[0];
                 // $cell = $tableRow->nextCell();
                 $textRun = $cell->createTextRun($cellText);
@@ -1100,7 +1109,7 @@ class MonthlyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex == 8) {
+                    if ($cellIndex == 12) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
                             $cell->getFill()->setStartColor(new Color('fff6f610'));
@@ -1119,7 +1128,7 @@ class MonthlyController extends Controller
         }
 
         //TABLE CLOSED ENHANCEMENT
-        $columns = 8; // Number of columns
+        $columns = 12; // Number of columns
         $tableShape = $slideEnhancement->createTableShape($columns);
         $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -1134,12 +1143,12 @@ class MonthlyController extends Controller
         $data_table = Data::where('problem', '=', 'Enhancement')
             ->whereBetween('closed_time', [$start_date, $last_date])
             ->where('status', '=', 'Closed')
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'target_date', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
             ->get();
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'No', 'Category', 'Summary', 'Created Date', 'Target Version', 'Level', 'Team', 'Status'],
+            ['', 'No', 'Category', 'No Ticket', 'Summary', 'Created Date', 'Target Version', 'Version Type', 'Target Date', 'Level', 'Team', 'Aspect', 'Status'],
         ];
 
         // ADD ARRAY DATA
@@ -1149,12 +1158,16 @@ class MonthlyController extends Controller
             if ($value->status == 'Root Cause Identified') {
                 $status = 'RC Identified';
             }
-            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+            $summary = $value->summary;
+            $no_ticket = $value->code_jira;
+
             //convert date to carbon parse
             $created = Carbon::parse($value->created);
             $rcatime = Carbon::parse($value->rca_time);
             $closed_time = Carbon::parse($value->closed_time);
             $target_version = $value->target_version;
+
             //declare rca time
             if ($value->rca_time == null) {
                 $rca_time = '-';
@@ -1180,7 +1193,21 @@ class MonthlyController extends Controller
                 $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
             }
 
-            $tempdata[] = [$value->problem, strval($i), $value->category, $summary,  $created->format('d/m/y'), $target_version, $value->priority,  $team, $status];
+            //declare target date
+            if ($value->target_date == null) {
+                $target_date = '-';
+            } else {
+                $target_date = Carbon::parse($value->target_date)->format('d/m/y');
+            }
+
+            //aspect
+            if ($value->aspect == null) {
+                $aspect = 'Others';
+            } else {
+                $aspect = $value->aspect;
+            }
+
+            $tempdata[] = [$value->problem, strval($i), $value->category, $no_ticket, $summary,  $created->format('d/m/y'), $target_version, $target_version, $target_date, $value->priority,  $team, $aspect, $status];
             $i++;
         }
 
@@ -1196,23 +1223,31 @@ class MonthlyController extends Controller
                 if ($cellIndex == 1) {
                     $cell->setWidth(30);
                 } else if ($cellIndex == 2) {
-                    $cell->setWidth(120);
-                } else if ($cellIndex == 3) {
-                    $cell->setWidth(400);
-                } else if ($cellIndex == 4) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 5) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 6) {
                     $cell->setWidth(80);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(80);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(290);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 6) {
+                    $cell->setWidth(70);
                 } else if ($cellIndex == 7) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(70);
                 } else if ($cellIndex == 8) {
-                    $cell->setWidth(100);
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 9) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 10) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 11) {
+                    $cell->setWidth(70);
+                } else if ($cellIndex == 12) {
+                    $cell->setWidth(60);
                 }
 
                 $problem = $row[0];
-                $status = explode("\n", $row[8]);
+                $status = explode("\n", $row[12]);
                 $firstStatus = $status[0];
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
@@ -1225,7 +1260,7 @@ class MonthlyController extends Controller
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
                 } else {
-                    if ($cellIndex == 8) {
+                    if ($cellIndex == 12) {
                         //coloring by status
                         if ($firstStatus == 'Pending') {
                             $cell->getFill()->setStartColor(new Color('fff6f610'));
@@ -1470,7 +1505,7 @@ class MonthlyController extends Controller
         $backgroundImage->setOffsetY(0);
         $additionalslide->addShape($backgroundImage);
 
-         $imagePath = storage_path('image/allobank.png');
+        $imagePath = storage_path('image/allobank.png');
         $pictureShape = new File();
         $pictureShape->setPath($imagePath);
         $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
