@@ -1066,7 +1066,13 @@ class WeeklyController extends Controller
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                // kolom 3 harus left
+                if (in_array($cellIndex, [3])) {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 //
                 if ($rowIndex == 0) {
@@ -1259,7 +1265,13 @@ class WeeklyController extends Controller
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                // kolom 3 harus left
+                if (in_array($cellIndex, [3])) {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 //
                 if ($rowIndex == 0) {
@@ -1517,7 +1529,13 @@ class WeeklyController extends Controller
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                // kolom 3 harus left
+                if (in_array($cellIndex, [3])) {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 //
                 if ($rowIndex == 0) {
@@ -1646,14 +1664,20 @@ class WeeklyController extends Controller
 
                 //set status
                 $problem = $row[0];
-                // $cell = $tableRow->nextCell();
-                $cellText = $cellText ?? '';   // kalau null jadi string kosong
+                $cellText = $cellText ?? '';
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                //
+                // kolom 3 & 4 harus left
+                if (in_array($cellIndex, [3, 4])) {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
+
+
                 if ($rowIndex == 0) {
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
@@ -1852,6 +1876,8 @@ class WeeklyController extends Controller
                     $cell->setWidth(80);
                 } else if ($cellIndex == 4) {
                     $cell->setWidth(290);
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
                 } else if ($cellIndex == 5) {
                     $cell->setWidth(70);
                 } else if ($cellIndex == 6) {
@@ -1878,7 +1904,9 @@ class WeeklyController extends Controller
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                if ($cellIndex != 4) { // jangan override untuk kolom ke-4
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $cell->getFill()->setStartColor(new Color('ffffffff'));
                 //
@@ -2004,6 +2032,8 @@ class WeeklyController extends Controller
                         $cell->setWidth(80);
                     } else if ($cellIndex == 4) {
                         $cell->setWidth(290);
+                        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                        $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
                     } else if ($cellIndex == 5) {
                         $cell->setWidth(70);
                     } else if ($cellIndex == 6) {
@@ -2028,7 +2058,9 @@ class WeeklyController extends Controller
                     $textRun = $cell->createTextRun($cellText);
                     $textRun->getFont()->setBold($rowIndex == 0);
                     $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    if ($cellIndex != 4) { // jangan override untuk kolom ke-4
+                        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    }
                     $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                     $cell->getFill()->setStartColor(new Color('ffffffff'));
                     //
