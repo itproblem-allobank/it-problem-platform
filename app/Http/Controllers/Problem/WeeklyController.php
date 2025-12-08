@@ -2707,8 +2707,14 @@ class WeeklyController extends Controller
                 $textRun->getFont()->setSize(8);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                // kolom 3 & 4 harus left
+                if (in_array($cellIndex, [2])) {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
                 //
                 if ($rowIndex == 0) {
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
