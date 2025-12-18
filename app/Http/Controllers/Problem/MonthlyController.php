@@ -911,6 +911,393 @@ class MonthlyController extends Controller
         $chartType->addSeries($closed);
 
 
+        // ---------- SLIDE 3 PROBLEM DETAILS -------------- //
+
+        $slide_additional = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slide_additional->addShape($backgroundImage);
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20);
+        $slide_additional->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        $shape = $slide_additional->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('Problem Management');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slide_additional->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(65);
+        $date = Carbon::parse($end_date)->format('F Y');
+        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun->getFont()->setSize(14);
+
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $slide_additional->addShape($pictureShape);
+
+
+        // SUMMARY ALL PROBLEM
+        $shape = $slide_additional->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(110);
+        $textRun = $shape->createTextRun('SUMMARY ALL PROBLEM ON THIS MONTH');
+        $textRun->getFont()->setSize(10)->setBold(true);
+
+        // Define data
+        $detaildata = Data::where('problem', '!=', 'Enhancement')->where('status', '=', 'Pending')
+            ->union(Data::where('problem', '!=', 'Enhancement')->where('status',  '=', 'Root Cause Identified'))
+            ->orderByRaw("
+        CASE 
+            WHEN target_version = '' THEN 3  -- Kosong di paling bawah
+            WHEN target_version = 'Backlog' THEN 2  -- Backlog di atas kosong
+            ELSE 1  -- Lainnya di atas semua
+            END, target_version ASC
+            ")
+            ->orderByRaw("
+            CASE problem
+            WHEN 'Loan' THEN 1
+            WHEN 'Onboarding' THEN 2
+            WHEN 'Core Surrounding' THEN 3
+            ELSE 4 
+        END
+    ")
+            ->get();
+
+        // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
+
+        // ----------------- Create Table ------------------------------ 
+        $columns = 11;
+        $table = $slide_additional->createTableShape($columns);
+        $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        // Set table position & Size
+        $table->setheight(210);
+        $table->setwidth(1200);
+        $table->setOffsetX(25);
+        $table->setOffsetY(135);
+
+        // DEFINE ARRAY
+        $tempdata = [
+            ['', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type',  'Team', 'Aspect',  'Status' . "\n" . 'Created Date', 'Created - RCA Time', 'Ticket Age'],
+        ];
+
+        // ADD ARRAY DATA
+        if ($detaildata->isEmpty()) {
+            $tempdata[] = ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'];
+        } else {
+            foreach ($detaildata as $key => $value) {
+                $tempstatus = $value->status;
+                if ($value->status == 'Root Cause Identified') {
+                    $tempstatus = 'RC Identified';
+                }
+
+                $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
+
+                $no_ticket = $value->code_jira;
+                $summary = $value->summary;
+                // $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+                $level = $value->priority;
+
+                //convert date to carbon parse
+                $created = Carbon::parse($value->created);
+                $rcatime = Carbon::parse($value->rca_time);
+                $closed_time = Carbon::parse($value->closed_time);
+
+                //declare target version
+                if ($value->target_version == null) {
+                    $target_version = '-';
+                } else {
+                    $target_version = $value->target_version;
+                }
+
+                //declare team
+                if ($value->team == null) {
+                    $team = '-';
+                } else {
+                    $team = $value->team;
+                }
+
+                //declare rca time
+                if ($value->rca_time == null) {
+                    $rca_time = '-';
+                } else {
+                    $rca_days = intval($created->diffInDays($rcatime));
+                    $rca_days_string = strval($rca_days) . ' days';
+                    $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+                }
+
+                //declare completion time
+                if ($value->closed_time == null) {
+                    $completion_time = '-';
+                } else {
+                    $completion_days = intval($created->diffInDays($closed_time));
+                    $completion_days_string = strval($completion_days) . ' Days';
+                    $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
+                }
+
+                $ticket_age = Carbon::parse($value->created)->diffForHumans(null, true);
+
+                $tempdata[] = [$value->problem, $value->category, $no_ticket, $summary, $level, $target_version, $target_version, $team, $value->aspect,  $status, $rca_time, $ticket_age];
+            }
+        }
+
+
+        // INSERT ARRAY TO TABLE
+        foreach ($tempdata as $rowIndex => $row) {
+            $tableRow = $table->createRow();
+            $tableRow->setHeight(25); // Set the height of the row
+            foreach ($row as $cellIndex => $cellText) {
+                if ($cellIndex == 0) {
+                    continue; // Lewati kolom yang disembunyikan
+                }
+
+                //set width
+                $cell = $tableRow->nextCell();
+                if ($cellIndex == 1) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(80);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(448.58);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(71.42);
+                } else if ($cellIndex == 5) {
+                    $cell->setWidth(71.42);
+                } else if ($cellIndex == 6) {
+                    $cell->setWidth(71.42);
+                } else if ($cellIndex == 7) {
+                    $cell->setWidth(71.42);
+                } else if ($cellIndex == 8) {
+                    $cell->setWidth(68);
+                } else if ($cellIndex == 9) {
+                    $cell->setWidth(74.84);
+                } else if ($cellIndex == 10) {
+                    $cell->setWidth(71.42);
+                } else if ($cellIndex == 11) {
+                    $cell->setWidth(71.42);
+                }
+
+                //set status
+                $problem = $row[0];
+                $status = explode("\n", $row[9]);
+                $firstStatus = $status[0];
+                // $cell = $tableRow->nextCell();
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                // kolom 3 harus left
+                if (in_array($cellIndex, [3])) {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                //
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } else {
+                    // CEK jika ini baris dummy kosong (semua '-')
+                    $isEmptyRow = count(array_unique($row)) === 1 && $row[0] === '-';
+                    if ($isEmptyRow) {
+                        $cell->getFill()->setStartColor(new Color('ffffffff')); // putih
+                    } else {
+                        if ($cellIndex != 9) {
+                            //coloring by problem
+                            if ($problem == 'Core Surrounding') {
+                                $cell->getFill()->setStartColor(new Color('ff89a64e'));
+                            } else if ($problem == 'Ekosistem MPC') {
+                                $cell->getFill()->setStartColor(new Color('ff00b0f0'));
+                            } else if ($problem == 'Loan') {
+                                $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
+                            } else if ($problem == 'Onboarding') {
+                                $cell->getFill()->setStartColor(new Color('ff81ff63'));
+                            } else if ($problem == 'Online Payment') {
+                                $cell->getFill()->setStartColor(new Color('ff09b1a7'));
+                            } else if ($problem == 'Switching 3rdparty') {
+                                $cell->getFill()->setStartColor(new Color('ffee52e1'));
+                            } else if ($problem == 'Transaction') {
+                                $cell->getFill()->setStartColor(new Color('ff8380ee'));
+                            } else if ($problem == 'Wholesale') {
+                                $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                            } else if ($problem == 'Cybersecurity') {
+                                $cell->getFill()->setStartColor(new Color('ffb9cd96'));
+                            } else {
+                                $cell->getFill()->setStartColor(new Color('ffffffff'));
+                            }
+                        } else if ($cellIndex == 9) {
+                            //coloring by status
+                            if ($firstStatus == 'Pending') {
+                                $cell->getFill()->setStartColor(new Color('fff6f610'));
+                            } elseif ($firstStatus == 'Closed') {
+                                $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                            } elseif ($firstStatus == 'RC Identified') {
+                                $cell->getFill()->setStartColor(new Color('fff85208'));
+                            } else {
+                                $cell->getFill()->setFillType(Fill::FILL_NONE);
+                            }
+                        } else {
+                            $cell->getFill()->setFillType(Fill::FILL_NONE);
+                        }
+                    }
+                }
+            }
+        }
+
+
+        // SUMMARY ALL PROBLEM CLOSED
+        $shape = $slide_additional->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(410);
+        $textRun = $shape->createTextRun('DETAIL PROBLEM CLOSED ON THIS MONTH');
+        $textRun->getFont()->setSize(10)->setBold(true);
+
+        // Define data
+        $detaildata = Data::where('problem', '!=', 'Enhancement')->where('status', '=', 'Closed')->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])->get();
+
+        // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
+
+        // ----------------- Create Table ------------------------------ 
+        $columns = 4;
+        $table = $slide_additional->createTableShape($columns);
+        $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        // Set table position & Size
+        $table->setheight(210);
+        $table->setwidth(1200);
+        $table->setOffsetX(25);
+        $table->setOffsetY(435);
+
+        // DEFINE ARRAY
+        $tempdata = [
+            ['', 'Category', 'No Ticket', 'Summary', 'Solution'],
+        ];
+
+        // ADD ARRAY DATA
+        if ($detaildata->isEmpty()) {
+            $tempdata[] = ['-', '-', '-', '-', '-'];
+        } else {
+            foreach ($detaildata as $key => $value) {
+                $tempstatus = $value->status;
+                if ($value->status == 'Root Cause Identified') {
+                    $tempstatus = 'RC Identified';
+                }
+
+                $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
+
+                $no_ticket = $value->code_jira;
+                $summary = $value->summary;
+                // $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+
+                $tempdata[] = [$value->problem, $value->category, $no_ticket, $summary, $value->work_around];
+            }
+        }
+
+
+        // INSERT ARRAY TO TABLE
+        foreach ($tempdata as $rowIndex => $row) {
+            $tableRow = $table->createRow();
+            $tableRow->setHeight(25); // Set the height of the row
+            foreach ($row as $cellIndex => $cellText) {
+                if ($cellIndex == 0) {
+                    continue; // Lewati kolom yang disembunyikan
+                }
+
+                //set width
+                $cell = $tableRow->nextCell();
+                if ($cellIndex == 1) {
+                    $cell->setWidth(100);
+                } else if ($cellIndex == 2) {
+                    $cell->setWidth(80);
+                } else if ($cellIndex == 3) {
+                    $cell->setWidth(520);
+                } else if ($cellIndex == 4) {
+                    $cell->setWidth(500);
+                }
+
+                //set status
+                $problem = $row[0];
+                $cellText = $cellText ?? '';
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($rowIndex == 0);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                // kolom 3 & 4 harus left
+                if (in_array($cellIndex, [3, 4])) {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
+
+
+                if ($rowIndex == 0) {
+                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
+                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
+                } else {
+                    // CEK jika ini baris dummy kosong (semua '-')
+                    $isEmptyRow = count(array_unique($row)) === 1 && $row[0] === '-';
+                    if ($isEmptyRow) {
+                        $cell->getFill()->setStartColor(new Color('ffffffff')); // putih
+                    } else {
+                        if ($problem == 'Core Surrounding') {
+                            $cell->getFill()->setStartColor(new Color('ff89a64e'));
+                        } else if ($problem == 'Ekosistem MPC') {
+                            $cell->getFill()->setStartColor(new Color('ff00b0f0'));
+                        } else if ($problem == 'Loan') {
+                            $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
+                        } else if ($problem == 'Onboarding') {
+                            $cell->getFill()->setStartColor(new Color('ff81ff63'));
+                        } else if ($problem == 'Online Payment') {
+                            $cell->getFill()->setStartColor(new Color('ff09b1a7'));
+                        } else if ($problem == 'Switching 3rdparty') {
+                            $cell->getFill()->setStartColor(new Color('ffee52e1'));
+                        } else if ($problem == 'Transaction') {
+                            $cell->getFill()->setStartColor(new Color('ff8380ee'));
+                        } else if ($problem == 'Wholesale') {
+                            $cell->getFill()->setStartColor(new Color('ff8064a2'));
+                        } else if ($problem == 'Cybersecurity') {
+                            $cell->getFill()->setStartColor(new Color('ffb9cd96'));
+                        } else {
+                            $cell->getFill()->setStartColor(new Color('ffffffff'));
+                        }
+                    }
+                }
+            }
+        }
+
+
         // ----------- SLIDE ENHANCEMENT ------------------------
         $slideEnhancement = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
