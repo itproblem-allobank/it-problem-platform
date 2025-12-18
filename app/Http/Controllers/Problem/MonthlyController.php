@@ -2105,9 +2105,14 @@ class MonthlyController extends Controller
                 $textRun->getFont()->setSize(8);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                //
+                if ($cellIndex == 2) { // jangan override untuk kolom ke-4
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                }
                 if ($rowIndex == 0) {
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
@@ -2220,42 +2225,58 @@ class MonthlyController extends Controller
             $chartType->addSeries($series3);
         }
 
-        // --------- CHART JIRA SERVICE REQUEST --------------
-        // Ambil semua status unik sebagai sumbu X
-        $all_statuses = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-            ->select('status')
-            ->distinct()
-            ->pluck('status')
+        // ================== CHART JIRA SERVICE REQUEST (CLEAN) ==================
+
+        // 1️⃣ Ambil data sekali (aggregate)
+        $services = Service::whereBetween(
+            DB::raw('DATE(created)'),
+            [$start_date, $end_date]
+        )
+            ->select(
+                'issue_type',
+                'status',
+                DB::raw('COUNT(*) as total')
+            )
+            ->groupBy('issue_type', 'status')
+            ->get();
+
+        // 2️⃣ Ambil status dan urutkan berdasarkan total terbanyak
+        $statuses = $services
+            ->groupBy('status')
+            ->map(fn($items) => $items->sum('total'))
+            ->sortDesc()
+            ->keys()
+            ->values()
             ->toArray();
 
-        // Ambil semua issue_type (kategori series)
-        $issue_types = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-            ->select('issue_type')
-            ->distinct()
-            ->pluck('issue_type')
-            ->toArray();
+        // 3️⃣ Ambil issue_type dan urutkan berdasarkan total terbanyak
+        $issueTypes = $services
+            ->groupBy('issue_type')
+            ->map(fn($items) => $items->sum('total'))
+            ->sortDesc()
+            ->keys()
+            ->values();
 
-        // Buat data series untuk chart
-        $series_data = [];
-        foreach ($issue_types as $issue_type) {
+        // 4️⃣ Build series data (issue_type sebagai series)
+        $seriesData = [];
+
+        foreach ($issueTypes as $issueType) {
             $data = [];
 
-            foreach ($all_statuses as $status) {
-                $count = Service::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-                    ->where('issue_type', $issue_type)
+            foreach ($statuses as $status) {
+                $data[$status] = $services
+                    ->where('issue_type', $issueType)
                     ->where('status', $status)
-                    ->count();
-
-                $data[$status] = $count; // set 0 jika tidak ada
+                    ->sum('total');
             }
 
-            // Tambahkan ke chart hanya jika ada data
+            // hanya tambahkan kalau ada datanya
             if (array_sum($data) > 0) {
-                $series_data[$issue_type] = $data;
+                $seriesData[$issueType] = $data;
             }
         }
 
-        // ==== Generate Chart ====
+        // ================== GENERATE CHART ==================
 
         $chartShape = $additionalslide->createChartShape();
         $chartShape->setHeight(250)
@@ -2263,25 +2284,28 @@ class MonthlyController extends Controller
             ->setOffsetX(625)
             ->setOffsetY(385);
 
-        // Define tipe chart
+        // Chart type
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
 
-        // Set judul chart
+        // Title
         $chartShape->getTitle()->setText('Ticket Jira Service Request');
 
-        // Styling dan Axis
-        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Hilangkan border legend
+        // Axis & styling
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE);
         $chartShape->getPlotArea()->getAxisX()->setTitle('');
         $chartShape->getPlotArea()->getAxisY()->setTitle('');
         $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $chartShape->getBorder()->setColor(new Color('FF000000'));
         $chartShape->getBorder()->setLineWidth(1);
 
-        // Tambahkan series ke chart
-        foreach ($series_data as $issue_type => $status_counts) {
-            $chartType->addSeries(new Series($issue_type, $status_counts));
+        // Add series ke chart
+        foreach ($seriesData as $issueType => $statusCounts) {
+            $chartType->addSeries(
+                new Series($issueType, $statusCounts)
+            );
         }
+
 
         // ------------------------------------------------------------------------------------
 
