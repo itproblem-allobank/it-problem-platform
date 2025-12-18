@@ -2122,68 +2122,56 @@ class MonthlyController extends Controller
             }
         }
 
-        // --------- CHART PROBLEM BY ASSIGNEE & STATUS --------------
-        $data_chart5 = Data::select('nickname', DB::raw('count(*) as count'))
+        // ================== CHART PROBLEM BY ASSIGNEE & STATUS ==================
+
+        // --------------------------------------------------
+        // 1. Ambil daftar assignee
+        // --------------------------------------------------
+        $assignees = Data::select('nickname')
             ->where('problem', '!=', 'Enhancement')
             ->groupBy('nickname')
-            ->get();
+            ->pluck('nickname');
 
-        $resultdata_chart5 = [];
-        foreach ($data_chart5 as $key => $value) {
-            $closed = Data::whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
-                ->where('nickname', '=', $value->nickname)
-                ->where('status', '=', 'Closed')
-                ->where('problem', '!=', 'Enhancement')
-                ->count();
+        // --------------------------------------------------
+        // 2. Mapping status & warna
+        // --------------------------------------------------
+        $statusMap = [
+            'Closed' => [
+                'field' => 'closed_time',
+                'color' => 'FF00B050' // Hijau
+            ],
+            'Root Cause Identified' => [
+                'field' => 'created',
+                'color' => 'FFFFC000' // Oranye
+            ],
+            'Pending' => [
+                'field' => 'created',
+                'color' => 'FFFFFF00' // Kuning
+            ],
+        ];
 
-            $rcidentified = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-                ->where('nickname', '=', $value->nickname)
-                ->where('status', '=', 'Root Cause Identified')
-                ->where('problem', '!=', 'Enhancement')
-                ->count();
+        // --------------------------------------------------
+        // 3. Hitung data per assignee & status
+        // --------------------------------------------------
+        $chartData = [];
 
-            $pending = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
-                ->where('nickname', '=', $value->nickname)
-                ->where('status', '=', 'Pending')
-                ->where('problem', '!=', 'Enhancement')
-                ->count();
+        foreach ($assignees as $nickname) {
+            foreach ($statusMap as $status => $config) {
+                $count = Data::whereBetween(DB::raw('DATE(' . $config['field'] . ')'), [$start_date, $end_date])
+                    ->where('nickname', $nickname)
+                    ->where('status', $status)
+                    ->where('problem', '!=', 'Enhancement')
+                    ->count();
 
-            // Filter: hanya masukkan kalau ada minimal 1 nilai yang lebih dari 0
-            if ($closed === 0 && $rcidentified === 0 && $pending === 0) {
-                continue;
-            }
-
-            $resultdata_chart5[] = [
-                'nickname' => $value->nickname,
-                'closed' => $closed,
-                'rcidentified' => $rcidentified,
-                'pending' => $pending
-            ];
-        }
-
-        // Siapkan array series dengan nickname sebagai key
-        $data_closed = [];
-        $data_rcidentified = [];
-        $data_pending = [];
-
-        foreach ($resultdata_chart5 as $value) {
-            $nickname = $value['nickname'];
-
-            // Hanya tambahkan jika nilai > 0
-            if ($value['closed'] > 0) {
-                $data_closed[$nickname] = $value['closed'];
-            }
-
-            if ($value['rcidentified'] > 0) {
-                $data_rcidentified[$nickname] = $value['rcidentified'];
-            }
-
-            if ($value['pending'] > 0) {
-                $data_pending[$nickname] = $value['pending'];
+                if ($count > 0) {
+                    $chartData[$status][$nickname] = $count;
+                }
             }
         }
 
-        // Buat chart
+        // --------------------------------------------------
+        // 4. Buat chart
+        // --------------------------------------------------
         $chartShape = $additionalslide->createChartShape();
         $chartShape->setHeight(250)
             ->setWidth(600)
@@ -2194,35 +2182,36 @@ class MonthlyController extends Controller
         $chartType = new Bar();
         $chartShape->getPlotArea()->setType($chartType);
 
-        // Judul chart
+        // Judul
         $chartShape->getTitle()->setText('Problem By Assignee & Status');
+
+        // Legend
         $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE);
 
-        // Sumbu
-        $xAxis = $chartShape->getPlotArea()->getAxisX();
-        $yAxis = $chartShape->getPlotArea()->getAxisY();
-        $xAxis->setTitle('');
-        $yAxis->setTitle('');
+        // Axis
+        $chartShape->getPlotArea()->getAxisX()->setTitle('');
+        $chartShape->getPlotArea()->getAxisY()->setTitle('');
 
         // Border chart
-        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $chartShape->getBorder()->setColor(new Color('FF000000'));
-        $chartShape->getBorder()->setLineWidth(1);
+        $chartShape->getBorder()
+            ->setLineStyle(Border::LINE_SINGLE)
+            ->setLineWidth(1)
+            ->setColor(new Color('FF000000'));
 
-        // Tambahkan series (status sebagai series, nickname sebagai kategori/data)
-        if (!empty($data_closed)) {
-            $series1 = new Series('Closed', $data_closed);
-            $chartType->addSeries($series1);
-        }
+        // --------------------------------------------------
+        // 5. Tambahkan series (status → warna)
+        // --------------------------------------------------
+        foreach ($statusMap as $status => $config) {
+            if (empty($chartData[$status])) {
+                continue;
+            }
 
-        if (!empty($data_rcidentified)) {
-            $series2 = new Series('Root Cause Identified', $data_rcidentified);
-            $chartType->addSeries($series2);
-        }
+            $series = new Series($status, $chartData[$status]);
+            $series->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->setStartColor(new Color($config['color']));
 
-        if (!empty($data_pending)) {
-            $series3 = new Series('Pending', $data_pending);
-            $chartType->addSeries($series3);
+            $chartType->addSeries($series);
         }
 
         // ================== CHART JIRA SERVICE REQUEST (CLEAN) ==================
