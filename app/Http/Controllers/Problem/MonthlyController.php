@@ -1101,7 +1101,13 @@ class MonthlyController extends Controller
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                if ($cellIndex == 4) { // jangan override untuk kolom ke-4
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
+                // vertical center
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $cell->getFill()->setStartColor(new Color('ffffffff'));
                 //
@@ -1252,7 +1258,13 @@ class MonthlyController extends Controller
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                if ($cellIndex == 4) { // jangan override untuk kolom ke-4
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
+                // vertical center
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $cell->getFill()->setStartColor(new Color('ffffffff'));
                 //
