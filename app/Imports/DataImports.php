@@ -121,7 +121,8 @@ class DataImports implements ToModel, WithStartRow, WithMultipleSheets
             'team'              => $row[21],
             'aspect'            => $row[22],
             'zoho_ticket'       => $row[23],
-            'target_date'       => $target_date
+            'target_date'       => $target_date,
+            'version_type'      => $row[25]
         ];
 
         $assignee_too = $row[13];
