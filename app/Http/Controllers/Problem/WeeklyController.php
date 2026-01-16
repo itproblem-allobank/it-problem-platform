@@ -2384,18 +2384,18 @@ class WeeklyController extends Controller
         $textRun1 = $titleTable->createTextRun('IT Problem Ticket Closed');
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nTotal IT Problem Tickets Closed This Week by Category from 2025");
+        $textRun2 = $titleTable->createTextRun("\nTotal IT Problem Tickets Closed This Week by Category from 2026");
         $textRun2->getFont()->setSize(9);
 
         // create chart
-        $w2025 = '2025-01-01';
-        $data_chart1 = Data::whereBetween(DB::raw('DATE(created)'), [$w2025, $end_date])
+        $w2026 = '2026-01-01';
+        $data_chart1 = Data::whereBetween(DB::raw('DATE(closed_time)'), [$w2026, $end_date])
             ->where('problem', '!=', 'Enhancement')
             ->select('problem', DB::raw('count(*) as count'))->groupBy('problem')
             ->get();
         $resultdata_chart1 = [];
         foreach ($data_chart1 as $key => $value) {
-            $status_closed = Data::whereBetween(DB::raw('DATE(created)'), [$w2025, $end_date])
+            $status_closed = Data::whereBetween(DB::raw('DATE(closed_time)'), [$w2026, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('status', '=', 'Closed')
                 ->count();
@@ -2917,16 +2917,16 @@ class WeeklyController extends Controller
         $textRun1 = $titleTable->createTextRun('IT Problem Ticket Resolved Time');
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nCounting All IT Problem Tickets by Resolved Time Identified from 2025");
+        $textRun2 = $titleTable->createTextRun("\nCounting All IT Problem Tickets by Resolved Time Identified from 2026");
         $textRun2->getFont()->setSize(9);
 
         // define data
-        $high_sla = Data::where('status', '=', 'cLosed')->where('created', '>=', '2025-01-01')->where('priority', '=', 'High')->where('resolved_days', '<=', 30)->count();
-        $high_oversla = Data::where('status', '=', 'cLosed')->where('created', '>=', '2025-01-01')->where('priority', '=', 'High')->where('resolved_days', '>', 30)->count();
-        $medium_sla = Data::where('status', '=', 'cLosed')->where('created', '>=', '2025-01-01')->where('priority', '=', 'Medium')->where('resolved_days', '<=', 60)->count();
-        $medium_oversla = Data::where('status', '=', 'cLosed')->where('created', '>=', '2025-01-01')->where('priority', '=', 'Medium')->where('resolved_days', '>', 60)->count();
-        $low_sla = Data::where('status', '=', 'cLosed')->where('created', '>=', '2025-01-01')->where('priority', '=', 'Low')->where('resolved_days', '<=', 365)->count();
-        $low_oversla = Data::where('status', '=', 'cLosed')->where('created', '>=', '2025-01-01')->where('priority', '=', 'Low')->where('resolved_days', '>', 365)->count();
+        $high_sla = Data::where('status', '=', 'closed')->where('rca_time', '>=', '2026-01-01')->where('priority', '=', 'High')->where('resolved_days', '<=', 30)->count();
+        $high_oversla = Data::where('status', '=', 'closed')->where('rca_time', '>=', '2026-01-01')->where('priority', '=', 'High')->where('resolved_days', '>', 30)->count();
+        $medium_sla = Data::where('status', '=', 'closed')->where('rca_time', '>=', '2026-01-01')->where('priority', '=', 'Medium')->where('resolved_days', '<=', 60)->count();
+        $medium_oversla = Data::where('status', '=', 'closed')->where('rca_time', '>=', '2026-01-01')->where('priority', '=', 'Medium')->where('resolved_days', '>', 60)->count();
+        $low_sla = Data::where('status', '=', 'closed')->where('rca_time', '>=', '2026-01-01')->where('priority', '=', 'Low')->where('resolved_days', '<=', 365)->count();
+        $low_oversla = Data::where('status', '=', 'closed')->where('rca_time', '>=', '2026-01-01')->where('priority', '=', 'Low')->where('resolved_days', '>', 365)->count();
 
         // $closed = Data::where('status' ,'=', 'closed')->count();
 
