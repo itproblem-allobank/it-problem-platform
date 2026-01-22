@@ -1005,7 +1005,7 @@ class MonthlyController extends Controller
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type',  'Team', 'Aspect',  'Status' . "\n" . 'Created Date', 'Created - RCA Time', 'Ticket Age'],
+            ['', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type',  'Team', 'SLA',  'Status' . "\n" . 'Created Date', 'Created - RCA Time', 'Ticket Age'],
         ];
 
         // ADD ARRAY DATA
@@ -1065,7 +1065,34 @@ class MonthlyController extends Controller
 
                 $ticket_age = Carbon::parse($value->created)->diffForHumans(null, true);
 
-                $tempdata[] = [$value->problem, $value->category, $no_ticket, $summary, $level, $target_version, $target_version, $team, $value->aspect,  $status, $rca_time, $ticket_age];
+                //SLA
+                $slaStatus = '-';
+                $priority = strtolower($value->priority);
+
+                // tentukan batas bulan SLA
+                $limitMonth = match ($priority) {
+                    'high'   => 2,
+                    'medium' => 4,
+                    'low'    => 6,
+                    default  => null,
+                };
+
+                if ($limitMonth !== null) {
+                    $createdDate = Carbon::parse($value->created);
+                    // kalau rca_time null, pakai hari ini
+                    $endDate = $value->rca_time
+                        ? Carbon::parse($value->rca_time)
+                        : Carbon::now();
+
+                    // cek SLA
+                    if ($createdDate->copy()->addMonths($limitMonth)->lt($endDate)) {
+                        $slaStatus = '🔴 Over';
+                    } else {
+                        $slaStatus = '🟢 Met';
+                    }
+                }
+
+                $tempdata[] = [$value->problem, $value->category, $no_ticket, $summary, $level, $target_version, $target_version, $team, $slaStatus,  $status, $rca_time, $ticket_age];
             }
         }
 
@@ -1173,13 +1200,61 @@ class MonthlyController extends Controller
             }
         }
 
+        // ----------- SLIDE CLOSED TICKET ------------------------
+        $slideclosedticket = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slideclosedticket->addShape($backgroundImage);
 
-        // SUMMARY ALL PROBLEM CLOSED
-        $shape = $slide_additional->createRichTextShape()
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20);
+        $slideclosedticket->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        $shape = $slideclosedticket->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('Problem Management');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slideclosedticket->createRichTextShape()
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(25)
-            ->setOffsetY(410);
+            ->setOffsetY(65);
+
+        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun->getFont()->setSize(14);
+
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $slideclosedticket->addShape($pictureShape);
+
+        // SUMMARY ALL PROBLEM CLOSED
+        $shape = $slideclosedticket->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(110);
         $textRun = $shape->createTextRun('DETAIL PROBLEM CLOSED ON THIS MONTH');
         $textRun->getFont()->setSize(10)->setBold(true);
 
@@ -1190,14 +1265,14 @@ class MonthlyController extends Controller
 
         // ----------------- Create Table ------------------------------ 
         $columns = 4;
-        $table = $slide_additional->createTableShape($columns);
+        $table = $slideclosedticket->createTableShape($columns);
         $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
         // Set table position & Size
         $table->setheight(210);
         $table->setwidth(1200);
         $table->setOffsetX(25);
-        $table->setOffsetY(435);
+        $table->setOffsetY(135);
 
         // DEFINE ARRAY
         $tempdata = [
