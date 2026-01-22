@@ -815,13 +815,36 @@ class MonthlyController extends Controller
         $shape->getBorder()->setLineStyle(Border::LINE_SINGLE)->setColor(new Color('FF000000'));
 
         // Set Data
-        $curr_created = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '!=', 'Enhancement')->get()->count();
-        $prev_created = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '!=', 'Enhancement')->get()->count();
-        $curr_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->where('problem', '!=', 'Enhancement')->where('status', '=', 'Closed')->get()->count();
-        $prev_closed = Data::where(DB::raw('DATE(created)'), '<', $start_date)->where('problem', '!=', 'Enhancement')->where('status', '=', 'Closed')->get()->count();
+        $curr_created = Data::whereYear('created', 2026)
+            ->where(DB::raw('DATE(created)'), '<=', $end_date)
+            ->where('problem', '!=', 'Enhancement')
+            ->count();
+
+        $prev_created = Data::whereYear('created', 2026)
+            ->where(DB::raw('DATE(created)'), '<', $start_date)
+            ->where('problem', '!=', 'Enhancement')
+            ->count();
+
+        $curr_closed = Data::whereYear('closed_time', 2026)
+            ->where(DB::raw('DATE(closed_time)'), '<=', $end_date)
+            ->where('problem', '!=', 'Enhancement')
+            ->where('status', 'Closed')
+            ->count();
+
+        $prev_closed = Data::whereYear('closed_time', 2026)
+            ->where(DB::raw('DATE(closed_time)'), '<', $start_date)
+            ->where('problem', '!=', 'Enhancement')
+            ->where('status', 'Closed')
+            ->count();
         // dd($curr_created, $prev_created, $curr_closed, $prev_closed);
-        $percen_created = ($curr_created - $prev_created) / $prev_created * 100;
-        $percen_closed = ($curr_closed - $prev_closed) / $prev_closed * 100;
+        $percen_created = $prev_created > 0
+            ? (($curr_created - $prev_created) / $prev_created) * 100
+            : 0;
+
+        $percen_closed = $prev_closed > 0
+            ? (($curr_closed - $prev_closed) / $prev_closed) * 100
+            : 0;
+
 
         // Menambahkan teks ke kotak pertama
         $percentage = $shape->createTextRun("▲ " . number_format($percen_created, 2) . "%");
