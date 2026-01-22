@@ -1143,7 +1143,8 @@ class MonthlyController extends Controller
                 if ($cellIndex == 1) $cell->setWidth(40);
                 elseif ($cellIndex == 2) $cell->setWidth(120);
                 elseif ($cellIndex == 3) $cell->setWidth(90);
-                elseif ($cellIndex == 4) $cell->setWidth(420);
+                elseif ($cellIndex == 4) $cell->setWidth(410);
+                elseif ($cellIndex == 10) $cell->setWidth(80);
                 else $cell->setWidth(70);
 
                 // ===== TEXT =====
@@ -1182,6 +1183,26 @@ class MonthlyController extends Controller
 
                     $cell->getFill()->setFillType(Fill::FILL_SOLID);
                     $cell->getFill()->setStartColor(new Color($rowColor));
+                    continue;
+                }
+
+                // ===== STATUS COLUMN COLOR =====
+                if ($cellIndex == 10) {
+
+                    $firstStatus = trim(explode("\n", $cellText)[0]);
+
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
+
+                    if ($firstStatus == 'Pending') {
+                        $cell->getFill()->setStartColor(new Color('fff6f610')); // kuning
+                    } elseif ($firstStatus == 'Closed') {
+                        $cell->getFill()->setStartColor(new Color('ff14ca66')); // hijau
+                    } elseif ($firstStatus == 'RC Identified') {
+                        $cell->getFill()->setStartColor(new Color('fff85208')); // orange
+                    } else {
+                        $cell->getFill()->setFillType(Fill::FILL_NONE);
+                    }
+
                     continue;
                 }
 
