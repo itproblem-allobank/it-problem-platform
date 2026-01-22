@@ -1016,16 +1016,6 @@ class MonthlyController extends Controller
         // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
 
         // ----------------- Create Table ------------------------------ 
-        $columns = 12;
-        $table = $slide_additional->createTableShape($columns);
-        $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
-
-        // Set table position & Size
-        $table->setheight(210);
-        $table->setwidth(1200);
-        $table->setOffsetX(25);
-        $table->setOffsetY(135);
-
         $tempdata = [
             ['', 'No', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type', 'Team', 'SLA', "Status\nCreated Date", 'Created - RCA Time', 'Ticket Age'],
         ];
@@ -1124,6 +1114,17 @@ class MonthlyController extends Controller
         }
 
 
+        $totalColumns = 12;
+        $rcaColspan = 11;
+        $table = $slide_additional->createTableShape($totalColumns);
+        $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        // Set table position & Size
+        $table->setheight(210);
+        $table->setwidth(1200);
+        $table->setOffsetX(25);
+        $table->setOffsetY(135);
+
         foreach ($tempdata as $rowIndex => $row) {
 
             $isHeader = ($rowIndex === 0);
@@ -1133,13 +1134,52 @@ class MonthlyController extends Controller
             $tableRow = $table->createRow();
             $tableRow->setHeight($isRcaRow ? 45 : 25);
 
+            /**
+             * ======================
+             * RCA ROW (MANUAL)
+             * ======================
+             */
+            if ($isRcaRow) {
+
+                // 🔹 SKIP kolom "No" (karena rowspan dari atas)
+                $tableRow->nextCell(); // ⬅️ INI KUNCI UTAMANYA
+
+                // 🔹 CELL 1: Category = RCA
+                $cell = $tableRow->nextCell();
+                $cell->setWidth(120);
+                $cell->createTextRun('RCA')->getFont()->setBold(true);
+                $cell->getActiveParagraph()->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getFill()->setStartColor(new Color($rowColor));
+
+                // 🔹 CELL 2: Summary (MERGED)
+                $cell = $tableRow->nextCell();
+                $cell->setColSpan($rcaColspan);
+                $cell->createTextRun($row[4])
+                    ->getFont()->setItalic(true)->setSize(10);
+                $cell->getActiveParagraph()->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                    ->setVertical(Alignment::VERTICAL_CENTER)
+                    ->setMarginLeft(3);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getFill()->setStartColor(new Color($rowColor));
+
+                continue;
+            }
+            /**
+             * ======================
+             * HEADER & MAIN ROW
+             * ======================
+             */
             foreach ($row as $cellIndex => $cellText) {
 
                 if ($cellIndex === 0 || $cellIndex === '__ROWCOLOR__') continue;
 
                 $cell = $tableRow->nextCell();
 
-                // ===== WIDTH =====
+                // WIDTH
                 if ($cellIndex == 1) $cell->setWidth(40);
                 elseif ($cellIndex == 2) $cell->setWidth(120);
                 elseif ($cellIndex == 3) $cell->setWidth(90);
@@ -1147,11 +1187,11 @@ class MonthlyController extends Controller
                 elseif ($cellIndex == 10) $cell->setWidth(80);
                 else $cell->setWidth(70);
 
-                // ===== TEXT =====
+                // TEXT
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($isHeader);
 
-                // ===== ALIGN =====
+                // ALIGN
                 if ($cellIndex == 4) {
                     $cell->getActiveParagraph()->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_LEFT)
@@ -1164,7 +1204,7 @@ class MonthlyController extends Controller
                 $cell->getActiveParagraph()->getAlignment()
                     ->setVertical(Alignment::VERTICAL_CENTER);
 
-                // ===== HEADER =====
+                // HEADER STYLE
                 if ($isHeader) {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID);
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
@@ -1172,18 +1212,9 @@ class MonthlyController extends Controller
                     continue;
                 }
 
-                // ===== RCA ROW =====
-                if ($isRcaRow) {
-
-                    if ($cellIndex != 4) {
-                        $cell->createTextRun('');
-                    } else {
-                        $textRun->getFont()->setItalic(true)->setSize(10);
-                    }
-
-                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                    $cell->getFill()->setStartColor(new Color($rowColor));
-                    continue;
+                // ROWSPAN "No"
+                if ($cellIndex == 1) {
+                    $cell->setRowSpan(2);
                 }
 
                 // ===== STATUS COLUMN COLOR =====
@@ -1206,12 +1237,11 @@ class MonthlyController extends Controller
                     continue;
                 }
 
-                // ===== NORMAL ROW COLOR =====
+                // ROW COLOR
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
                 $cell->getFill()->setStartColor(new Color($rowColor));
             }
         }
-
 
         // ----------- SLIDE CLOSED TICKET ------------------------
         $slideclosedticket = $objPHPPresentation->createSlide();
