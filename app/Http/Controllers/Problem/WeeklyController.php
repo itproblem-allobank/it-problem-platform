@@ -1409,8 +1409,107 @@ class WeeklyController extends Controller
         // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
 
         // ----------------- Create Table ------------------------------ 
-        $columns = 11;
-        $table = $slide_additional->createTableShape($columns);
+        $tempdata = [
+            ['', 'No', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type', 'Team', 'SLA', "Status\nCreated Date", 'Created - RCA Time', 'Ticket Age'],
+        ];
+
+        $no = 1;
+
+        foreach ($detaildata as $value) {
+
+            // ===== STATUS =====
+            $tempstatus = $value->status === 'Root Cause Identified'
+                ? 'RC Identified'
+                : $value->status;
+
+            $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
+
+            // ===== RCA TIME =====
+            if ($value->rca_time) {
+                $createdDate = Carbon::parse($value->created);
+                $rcaDate = Carbon::parse($value->rca_time);
+                $rca_days = (int) $createdDate->diffInDays($rcaDate, false);
+                $rca_time = $rca_days . " days\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+            } else {
+                $rca_time = '-';
+            }
+
+            // ===== SLA =====
+            $priority = strtolower($value->priority);
+            $limitMonth = match ($priority) {
+                'high' => 2,
+                'medium' => 4,
+                'low' => 6,
+                default => null,
+            };
+
+            if ($limitMonth) {
+                $slaStatus = Carbon::parse($value->created)
+                    ->addMonths($limitMonth)
+                    ->lt($value->rca_time ? Carbon::parse($value->rca_time) : Carbon::now())
+                    ? '🔴 Over'
+                    : '🟢 Met';
+            } else {
+                $slaStatus = '-';
+            }
+
+            // ===== ROW COLOR =====
+            $rowColor = match ($value->problem) {
+                'Core Surrounding' => 'ff89a64e',
+                'Ekosistem MPC' => 'ff00b0f0',
+                'Loan' => 'ffa6a6a6',
+                'Onboarding' => 'ff81ff63',
+                'Online Payment' => 'ff09b1a7',
+                'Switching 3rdparty' => 'ffee52e1',
+                'Transaction' => 'ff8380ee',
+                'Wholesale' => 'ff8064a2',
+                'Cybersecurity' => 'ffb9cd96',
+                default => 'ffffffff',
+            };
+
+            // ===== MAIN ROW =====
+            $tempdata[] = [
+                $value->problem,
+                $no,
+                $value->category,
+                $value->code_jira,
+                $value->summary,
+                $value->priority,
+                $value->target_version ?? '-',
+                $value->version_type ?? '-',
+                $value->team ?? '-',
+                $slaStatus,
+                $status,
+                $rca_time,
+                Carbon::parse($value->created)->diffForHumans(null, true),
+                '__ROWCOLOR__' => $rowColor
+            ];
+
+            // ===== RCA ROW =====
+            $tempdata[] = [
+                'RCA',
+                '',
+                'RCA',
+                '',
+                $value->root_cause,
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '__ROWCOLOR__' => $rowColor
+            ];
+
+            $no++;
+        }
+
+
+        $totalColumns = 12;
+        $rcaColspan = 11;
+        $table = $slide_additional->createTableShape($totalColumns);
         $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
         // Set table position & Size
@@ -1419,185 +1518,183 @@ class WeeklyController extends Controller
         $table->setOffsetX(25);
         $table->setOffsetY(135);
 
-        // DEFINE ARRAY
-        $tempdata = [
-            ['', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type',  'Team', 'Aspect',  'Status' . "\n" . 'Created Date', 'Created - RCA Time', 'Ticket Age'],
-        ];
-
-        // ADD ARRAY DATA
-        if ($detaildata->isEmpty()) {
-            $tempdata[] = ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'];
-        } else {
-            foreach ($detaildata as $key => $value) {
-                $tempstatus = $value->status;
-                if ($value->status == 'Root Cause Identified') {
-                    $tempstatus = 'RC Identified';
-                }
-
-                $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
-
-                $no_ticket = $value->code_jira;
-                $summary = $value->summary;
-                $version_type = $value->version_type;
-                // $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
-
-                $level = $value->priority;
-
-                //convert date to carbon parse
-                $created = Carbon::parse($value->created);
-                $rcatime = Carbon::parse($value->rca_time);
-                $closed_time = Carbon::parse($value->closed_time);
-
-                //declare target version
-                if ($value->target_version == null) {
-                    $target_version = '-';
-                } else {
-                    $target_version = $value->target_version;
-                }
-
-                //declare team
-                if ($value->team == null) {
-                    $team = '-';
-                } else {
-                    $team = $value->team;
-                }
-
-                //declare rca time
-                if ($value->rca_time == null) {
-                    $rca_time = '-';
-                } else {
-                    $rca_days = intval($created->diffInDays($rcatime));
-                    $rca_days_string = strval($rca_days) . ' days';
-                    $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
-                }
-
-                //declare completion time
-                if ($value->closed_time == null) {
-                    $completion_time = '-';
-                } else {
-                    $completion_days = intval($created->diffInDays($closed_time));
-                    $completion_days_string = strval($completion_days) . ' Days';
-                    $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
-                }
-
-                $ticket_age = Carbon::parse($value->created)->diffForHumans(null, true);
-
-                $tempdata[] = [$value->problem, $value->category, $no_ticket, $summary, $level, $target_version, $version_type, $team, $value->aspect,  $status, $rca_time, $ticket_age];
-            }
-        }
-
-
-        // INSERT ARRAY TO TABLE
         foreach ($tempdata as $rowIndex => $row) {
+
+            $isHeader = ($rowIndex === 0);
+            $isRcaRow = ($row[0] === 'RCA');
+            $rowColor = $row['__ROWCOLOR__'] ?? 'ffffffff';
+
             $tableRow = $table->createRow();
-            $tableRow->setHeight(25); // Set the height of the row
-            foreach ($row as $cellIndex => $cellText) {
-                if ($cellIndex == 0) {
-                    continue; // Lewati kolom yang disembunyikan
-                }
+            $tableRow->setHeight($isRcaRow ? 45 : 25);
 
-                //set width
+            /**
+             * ======================
+             * RCA ROW (MANUAL)
+             * ======================
+             */
+            if ($isRcaRow) {
+
+                // 🔹 SKIP kolom "No" (karena rowspan dari atas)
+                $tableRow->nextCell(); // ⬅️ INI KUNCI UTAMANYA
+
+                // 🔹 CELL 1: Category = RCA
                 $cell = $tableRow->nextCell();
-                if ($cellIndex == 1) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 2) {
-                    $cell->setWidth(80);
-                } else if ($cellIndex == 3) {
-                    $cell->setWidth(448.58);
-                } else if ($cellIndex == 4) {
-                    $cell->setWidth(71.42);
-                } else if ($cellIndex == 5) {
-                    $cell->setWidth(71.42);
-                } else if ($cellIndex == 6) {
-                    $cell->setWidth(71.42);
-                } else if ($cellIndex == 7) {
-                    $cell->setWidth(71.42);
-                } else if ($cellIndex == 8) {
-                    $cell->setWidth(68);
-                } else if ($cellIndex == 9) {
-                    $cell->setWidth(74.84);
-                } else if ($cellIndex == 10) {
-                    $cell->setWidth(71.42);
-                } else if ($cellIndex == 11) {
-                    $cell->setWidth(71.42);
+                $cell->setWidth(120);
+                $cell->createTextRun('RCA')->getFont()->setBold(true);
+                $cell->getActiveParagraph()->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(Alignment::VERTICAL_CENTER);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getFill()->setStartColor(new Color($rowColor));
+
+                // 🔹 CELL 2: Summary (MERGED)
+                $cell = $tableRow->nextCell();
+                $cell->setColSpan($rcaColspan);
+                $cell->createTextRun($row[4])
+                    ->getFont()->setItalic(true)->setSize(10);
+                $cell->getActiveParagraph()->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                    ->setVertical(Alignment::VERTICAL_CENTER)
+                    ->setMarginLeft(3);
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getFill()->setStartColor(new Color($rowColor));
+
+                continue;
+            }
+            /**
+             * ======================
+             * HEADER & MAIN ROW
+             * ======================
+             */
+            foreach ($row as $cellIndex => $cellText) {
+
+                if ($cellIndex === 0 || $cellIndex === '__ROWCOLOR__') continue;
+
+                $cell = $tableRow->nextCell();
+
+                // WIDTH
+                if ($cellIndex == 1) $cell->setWidth(40);
+                elseif ($cellIndex == 2) $cell->setWidth(120);
+                elseif ($cellIndex == 3) $cell->setWidth(90);
+                elseif ($cellIndex == 4) $cell->setWidth(410);
+                elseif ($cellIndex == 10) $cell->setWidth(80);
+                else $cell->setWidth(70);
+
+                // TEXT
+                $textRun = $cell->createTextRun($cellText);
+                $textRun->getFont()->setBold($isHeader);
+
+                // ALIGN
+                if ($cellIndex == 4) {
+                    $cell->getActiveParagraph()->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                        ->setMarginLeft(3);
+                } else {
+                    $cell->getActiveParagraph()->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 }
 
-                //set status
-                $problem = $row[0];
-                $status = explode("\n", $row[9]);
-                $firstStatus = $status[0];
-                // $cell = $tableRow->nextCell();
-                $textRun = $cell->createTextRun($cellText);
-                $textRun->getFont()->setBold($rowIndex == 0);
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                // kolom 3 harus left
-                if (in_array($cellIndex, [3])) {
-                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
-                } else {
-                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                }
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                //
-                if ($rowIndex == 0) {
+                $cell->getActiveParagraph()->getAlignment()
+                    ->setVertical(Alignment::VERTICAL_CENTER);
+
+                // HEADER STYLE
+                if ($isHeader) {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-                } else {
-                    // CEK jika ini baris dummy kosong (semua '-')
-                    $isEmptyRow = count(array_unique($row)) === 1 && $row[0] === '-';
-                    if ($isEmptyRow) {
-                        $cell->getFill()->setStartColor(new Color('ffffffff')); // putih
-                    } else {
-                        if ($cellIndex != 9) {
-                            //coloring by problem
-                            if ($problem == 'Core Surrounding') {
-                                $cell->getFill()->setStartColor(new Color('ff89a64e'));
-                            } else if ($problem == 'Ekosistem MPC') {
-                                $cell->getFill()->setStartColor(new Color('ff00b0f0'));
-                            } else if ($problem == 'Loan') {
-                                $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
-                            } else if ($problem == 'Onboarding') {
-                                $cell->getFill()->setStartColor(new Color('ff81ff63'));
-                            } else if ($problem == 'Online Payment') {
-                                $cell->getFill()->setStartColor(new Color('ff09b1a7'));
-                            } else if ($problem == 'Switching 3rdparty') {
-                                $cell->getFill()->setStartColor(new Color('ffee52e1'));
-                            } else if ($problem == 'Transaction') {
-                                $cell->getFill()->setStartColor(new Color('ff8380ee'));
-                            } else if ($problem == 'Wholesale') {
-                                $cell->getFill()->setStartColor(new Color('ff8064a2'));
-                            } else if ($problem == 'Cybersecurity') {
-                                $cell->getFill()->setStartColor(new Color('ffb9cd96'));
-                            } else {
-                                $cell->getFill()->setStartColor(new Color('ffffffff'));
-                            }
-                        } else if ($cellIndex == 9) {
-                            //coloring by status
-                            if ($firstStatus == 'Pending') {
-                                $cell->getFill()->setStartColor(new Color('fff6f610'));
-                            } elseif ($firstStatus == 'Closed') {
-                                $cell->getFill()->setStartColor(new Color('ff14ca66'));
-                            } elseif ($firstStatus == 'RC Identified') {
-                                $cell->getFill()->setStartColor(new Color('fff85208'));
-                            } else {
-                                $cell->getFill()->setFillType(Fill::FILL_NONE);
-                            }
-                        } else {
-                            $cell->getFill()->setFillType(Fill::FILL_NONE);
-                        }
-                    }
+                    continue;
                 }
+
+                // ROWSPAN "No"
+                if ($cellIndex == 1) {
+                    $cell->setRowSpan(2);
+                }
+
+                // ===== STATUS COLUMN COLOR =====
+                if ($cellIndex == 10) {
+
+                    $firstStatus = trim(explode("\n", $cellText)[0]);
+
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
+
+                    if ($firstStatus == 'Pending') {
+                        $cell->getFill()->setStartColor(new Color('fff6f610')); // kuning
+                    } elseif ($firstStatus == 'Closed') {
+                        $cell->getFill()->setStartColor(new Color('ff14ca66')); // hijau
+                    } elseif ($firstStatus == 'RC Identified') {
+                        $cell->getFill()->setStartColor(new Color('fff85208')); // orange
+                    } else {
+                        $cell->getFill()->setFillType(Fill::FILL_NONE);
+                    }
+
+                    continue;
+                }
+
+                // ROW COLOR
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getFill()->setStartColor(new Color($rowColor));
             }
         }
 
 
-        // SUMMARY ALL PROBLEM CLOSED
-        $shape = $slide_additional->createRichTextShape()
+        // ----------- SLIDE CLOSED TICKET ------------------------
+        $slideclosedticket = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $slideclosedticket->addShape($backgroundImage);
+
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20);
+        $slideclosedticket->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        $shape = $slideclosedticket->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('Problem Management');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $slideclosedticket->createRichTextShape()
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(25)
-            ->setOffsetY(410);
-        $textRun = $shape->createTextRun('DETAIL PROBLEM CLOSED ON THIS WEEK');
+            ->setOffsetY(65);
+
+        $startdate = Carbon::parse($start_date)->format('d F Y');
+        $enddate = Carbon::parse($end_date)->format('d F Y');
+        $textRun = $shape->createTextRun('As of ' . $startdate . ' - ' . $enddate);
+        $textRun->getFont()->setSize(14);
+
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $slideclosedticket->addShape($pictureShape);
+
+        // SUMMARY ALL PROBLEM CLOSED
+        $shape = $slideclosedticket->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(110);
+        $textRun = $shape->createTextRun('DETAIL PROBLEM CLOSED ON THIS MONTH');
         $textRun->getFont()->setSize(10)->setBold(true);
 
         // Define data
@@ -1607,14 +1704,14 @@ class WeeklyController extends Controller
 
         // ----------------- Create Table ------------------------------ 
         $columns = 4;
-        $table = $slide_additional->createTableShape($columns);
+        $table = $slideclosedticket->createTableShape($columns);
         $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
         // Set table position & Size
         $table->setheight(210);
         $table->setwidth(1200);
         $table->setOffsetX(25);
-        $table->setOffsetY(435);
+        $table->setOffsetY(135);
 
         // DEFINE ARRAY
         $tempdata = [
@@ -1714,7 +1811,6 @@ class WeeklyController extends Controller
             }
         }
 
-
         // ----------- SLIDE ENHANCEMENT ------------------------
         $slideEnhancement = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
@@ -1789,7 +1885,7 @@ class WeeklyController extends Controller
             // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'version_type' , 'target_date', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'version_type', 'target_date', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
             ->orderBy('created', 'ASC')
             ->get();
 
