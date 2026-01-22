@@ -1307,7 +1307,7 @@ class MonthlyController extends Controller
         // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
 
         // ----------------- Create Table ------------------------------ 
-        $columns = 4;
+        $columns = 9;
         $table = $slideclosedticket->createTableShape($columns);
         $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -1317,103 +1317,152 @@ class MonthlyController extends Controller
         $table->setOffsetX(25);
         $table->setOffsetY(135);
 
-        // DEFINE ARRAY
         $tempdata = [
-            ['', 'Category', 'No Ticket', 'Summary', 'Solution'],
+            [
+                '',
+                'No',
+                'Category',
+                'No Ticket',
+                'Summary',
+                "Severity\nLevel",
+                'Solution',
+                'Status',
+                'SLA',
+                "Created Time\nUpdate Time"
+            ],
         ];
 
-        // ADD ARRAY DATA
-        if ($detaildata->isEmpty()) {
-            $tempdata[] = ['-', '-', '-', '-', '-'];
-        } else {
-            foreach ($detaildata as $key => $value) {
-                $tempstatus = $value->status;
-                if ($value->status == 'Root Cause Identified') {
-                    $tempstatus = 'RC Identified';
-                }
+        $no = 1;
 
-                $status = $tempstatus . "\n" . Carbon::parse($value->created)->format('d/m/y');
+        foreach ($detaildata as $value) {
 
-                $no_ticket = $value->code_jira;
-                $summary = $value->summary;
-                // $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
+            $status = $value->status === 'Root Cause Identified'
+                ? 'RC Identified'
+                : $value->status;
 
-                $tempdata[] = [$value->problem, $value->category, $no_ticket, $summary, $value->work_around];
+            $createdUpdate =
+                Carbon::parse($value->created)->format('d/m/y') . "\n" .
+                Carbon::parse($value->updated)->format('d/m/y');
+
+            $priority = strtolower($value->priority);
+            $limitMonth = match ($priority) {
+                'high' => 2,
+                'medium' => 4,
+                'low' => 6,
+                default => null,
+            };
+
+            if ($limitMonth) {
+                $slaStatus = Carbon::parse($value->created)
+                    ->addMonths($limitMonth)
+                    ->lt($value->rca_time ? Carbon::parse($value->rca_time) : Carbon::now())
+                    ? '🔴 Over'
+                    : '🟢 Met';
+            } else {
+                $slaStatus = '-';
             }
+
+            $tempdata[] = [
+                $value->problem,   // hidden (color key)
+                $no++,             // 👈 No
+                $value->category,
+                $value->code_jira,
+                $value->summary,
+                ucfirst($value->priority),
+                $value->work_around,
+                $status,
+                $slaStatus,
+                $createdUpdate,
+            ];
         }
 
 
-        // INSERT ARRAY TO TABLE
         foreach ($tempdata as $rowIndex => $row) {
+
             $tableRow = $table->createRow();
-            $tableRow->setHeight(25); // Set the height of the row
+            $tableRow->setHeight($rowIndex === 0 ? 28 : 32);
+
             foreach ($row as $cellIndex => $cellText) {
-                if ($cellIndex == 0) {
-                    continue; // Lewati kolom yang disembunyikan
-                }
 
-                //set width
+                // hidden problem
+                if ($cellIndex === 0) continue;
+
                 $cell = $tableRow->nextCell();
-                if ($cellIndex == 1) {
-                    $cell->setWidth(100);
-                } else if ($cellIndex == 2) {
-                    $cell->setWidth(80);
-                } else if ($cellIndex == 3) {
-                    $cell->setWidth(520);
-                } else if ($cellIndex == 4) {
-                    $cell->setWidth(500);
-                }
 
-                //set status
-                $problem = $row[0];
-                $cellText = $cellText ?? '';
-                $textRun = $cell->createTextRun($cellText);
-                $textRun->getFont()->setBold($rowIndex == 0);
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                // kolom 3 & 4 harus left
-                if (in_array($cellIndex, [3, 4])) {
-                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                // ===== WIDTH =====
+                match ($cellIndex) {
+                    1 => $cell->setWidth(40),   // No
+                    2 => $cell->setWidth(90),   // Category
+                    3 => $cell->setWidth(90),   // No Ticket
+                    4 => $cell->setWidth(300),  // Summary
+                    5 => $cell->setWidth(90),   // Severity
+                    6 => $cell->setWidth(300),  // Solution
+                    7 => $cell->setWidth(90),   // Status
+                    8 => $cell->setWidth(80),   // SLA
+                    9 => $cell->setWidth(120),  // Created / Update
+                };
+
+                // ===== TEXT =====
+                $textRun = $cell->createTextRun($cellText ?? '');
+                $textRun->getFont()->setBold($rowIndex === 0);
+
+                // ===== ALIGN =====
+                if (in_array($cellIndex, [4, 6])) {
+                    $cell->getActiveParagraph()->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                        ->setMarginLeft(3);
                 } else {
-                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $cell->getActiveParagraph()->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 }
 
+                $cell->getActiveParagraph()->getAlignment()
+                    ->setVertical(Alignment::VERTICAL_CENTER);
 
-                if ($rowIndex == 0) {
+                // ===== HEADER =====
+                if ($rowIndex === 0) {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-                } else {
-                    // CEK jika ini baris dummy kosong (semua '-')
-                    $isEmptyRow = count(array_unique($row)) === 1 && $row[0] === '-';
-                    if ($isEmptyRow) {
-                        $cell->getFill()->setStartColor(new Color('ffffffff')); // putih
-                    } else {
-                        if ($problem == 'Core Surrounding') {
-                            $cell->getFill()->setStartColor(new Color('ff89a64e'));
-                        } else if ($problem == 'Ekosistem MPC') {
-                            $cell->getFill()->setStartColor(new Color('ff00b0f0'));
-                        } else if ($problem == 'Loan') {
-                            $cell->getFill()->setStartColor(new Color('ffa6a6a6'));
-                        } else if ($problem == 'Onboarding') {
-                            $cell->getFill()->setStartColor(new Color('ff81ff63'));
-                        } else if ($problem == 'Online Payment') {
-                            $cell->getFill()->setStartColor(new Color('ff09b1a7'));
-                        } else if ($problem == 'Switching 3rdparty') {
-                            $cell->getFill()->setStartColor(new Color('ffee52e1'));
-                        } else if ($problem == 'Transaction') {
-                            $cell->getFill()->setStartColor(new Color('ff8380ee'));
-                        } else if ($problem == 'Wholesale') {
-                            $cell->getFill()->setStartColor(new Color('ff8064a2'));
-                        } else if ($problem == 'Cybersecurity') {
-                            $cell->getFill()->setStartColor(new Color('ffb9cd96'));
-                        } else {
-                            $cell->getFill()->setStartColor(new Color('ffffffff'));
-                        }
-                    }
+                    continue;
                 }
+
+                // ===== STATUS COLOR =====
+                if ($cellIndex === 7) {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
+
+                    if ($cellText === 'Closed') {
+                        $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                    } elseif ($cellText === 'RC Identified') {
+                        $cell->getFill()->setStartColor(new Color('fff85208'));
+                    } else {
+                        $cell->getFill()->setFillType(Fill::FILL_NONE);
+                    }
+
+                    continue;
+                }
+
+                // ===== ROW COLOR BY PROBLEM =====
+                $problem = $row[0];
+
+                $color = match ($problem) {
+                    'Core Surrounding'   => 'ff89a64e',
+                    'Ekosistem MPC'     => 'ff00b0f0',
+                    'Loan'              => 'ffa6a6a6',
+                    'Onboarding'        => 'ff81ff63',
+                    'Online Payment'    => 'ff09b1a7',
+                    'Switching 3rdparty' => 'ffee52e1',
+                    'Transaction'       => 'ff8380ee',
+                    'Wholesale'         => 'ff8064a2',
+                    'Cybersecurity'     => 'ffb9cd96',
+                    default             => 'ffffffff',
+                };
+
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getFill()->setStartColor(new Color($color));
             }
         }
+
 
 
         // ----------- SLIDE ENHANCEMENT ------------------------
@@ -2242,89 +2291,76 @@ class MonthlyController extends Controller
 
         // ================== CHART PROBLEM BY ASSIGNEE & STATUS ==================
 
-        // --------------------------------------------------
-        // 1. Ambil daftar assignee
-        // --------------------------------------------------
+        // 1. Ambil assignee (URUTAN = CATEGORY)
         $assignees = Data::select('nickname')
+            ->whereNotNull('nickname')
+            ->where('nickname', '!=', 'Intan')
             ->where('problem', '!=', 'Enhancement')
             ->groupBy('nickname')
-            ->pluck('nickname');
+            ->orderBy('nickname')
+            ->pluck('nickname')
+            ->toArray();
 
-        // --------------------------------------------------
         // 2. Mapping status & warna
-        // --------------------------------------------------
         $statusMap = [
-            'Closed' => [
-                'field' => 'closed_time',
-                'color' => 'FF00B050' // Hijau
-            ],
-            'Root Cause Identified' => [
-                'field' => 'created',
-                'color' => 'FFFFC000' // Oranye
-            ],
-            'Pending' => [
-                'field' => 'created',
-                'color' => 'FFFFFF00' // Kuning
-            ],
+            'Closed' => ['field' => 'closed_time', 'color' => 'FF00B050'],
+            'Root Cause Identified' => ['field' => 'created', 'color' => 'fff85208'],
+            'Pending' => ['field' => 'created', 'color' => 'FFFFC000'],
         ];
 
-        // --------------------------------------------------
-        // 3. Hitung data per assignee & status
-        // --------------------------------------------------
-        $chartData = [];
+        // 3. Hitung & NORMALISASI (ASSOCIATIVE!)
+        $chartSeriesData = [];
 
-        foreach ($assignees as $nickname) {
-            foreach ($statusMap as $status => $config) {
-                $count = Data::whereBetween(DB::raw('DATE(' . $config['field'] . ')'), [$start_date, $end_date])
+        foreach ($statusMap as $status => $config) {
+            foreach ($assignees as $nickname) {
+
+                $count = Data::whereBetween(
+                    DB::raw('DATE(' . $config['field'] . ')'),
+                    [$start_date, $end_date]
+                )
                     ->where('nickname', $nickname)
                     ->where('status', $status)
                     ->where('problem', '!=', 'Enhancement')
                     ->count();
 
-                if ($count > 0) {
-                    $chartData[$status][$nickname] = $count;
-                }
+                $chartSeriesData[$status][$nickname] = $count;
             }
         }
 
-        // --------------------------------------------------
         // 4. Buat chart
-        // --------------------------------------------------
         $chartShape = $additionalslide->createChartShape();
         $chartShape->setHeight(250)
             ->setWidth(600)
             ->setOffsetX(625)
             ->setOffsetY(135);
 
-        // Tipe chart
-        $chartType = new Bar();
-        $chartShape->getPlotArea()->setType($chartType);
-
-        // Judul
-        $chartShape->getTitle()->setText('Problem By Assignee & Status');
-
-        // Legend
-        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE);
-
-        // Axis
-        $chartShape->getPlotArea()->getAxisX()->setTitle('');
-        $chartShape->getPlotArea()->getAxisY()->setTitle('');
-
-        // Border chart
         $chartShape->getBorder()
             ->setLineStyle(Border::LINE_SINGLE)
             ->setLineWidth(1)
-            ->setColor(new Color('FF000000'));
+            ->setColor(new Color('FF000000')); // hitam
 
-        // --------------------------------------------------
-        // 5. Tambahkan series (status → warna)
-        // --------------------------------------------------
+
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        $chartShape->getPlotArea()->getAxisX()->setTitle('');
+        $yAxis = $chartShape->getPlotArea()->getAxisY()->setTitle('');
+        $yAxis->setMajorUnit(1);
+
+
+
+        $chartShape->getTitle()->setText('Problem By Assignee & Status');
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE);
+
+        // 5. Tambahkan series (ASSOCIATIVE ARRAY!)
         foreach ($statusMap as $status => $config) {
-            if (empty($chartData[$status])) {
+
+            // skip kalau semuanya 0
+            if (array_sum($chartSeriesData[$status]) === 0) {
                 continue;
             }
 
-            $series = new Series($status, $chartData[$status]);
+            $series = new Series($status, $chartSeriesData[$status]);
+
             $series->getFill()
                 ->setFillType(Fill::FILL_SOLID)
                 ->setStartColor(new Color($config['color']));
