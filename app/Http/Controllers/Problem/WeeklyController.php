@@ -1694,7 +1694,7 @@ class WeeklyController extends Controller
             ->setWidth(400)
             ->setOffsetX(25)
             ->setOffsetY(110);
-        $textRun = $shape->createTextRun('DETAIL PROBLEM CLOSED ON THIS MONTH');
+        $textRun = $shape->createTextRun('DETAIL PROBLEM CLOSED ON THIS WEEK');
         $textRun->getFont()->setSize(10)->setBold(true);
 
         // Define data
