@@ -2576,13 +2576,18 @@ class WeeklyController extends Controller
         $tableShape1->setOffsetY(365);
 
         // set data last week
-        $startlw = Carbon::parse($start_date)->subDays(7)->format('d/m/y');
-        $endlw = Carbon::parse($start_date)->subDays(1)->format('d/m/y');
-        $datalw = Data::where(DB::raw('DATE(changed_at)'), '<=', Carbon::parse($start_date)->subDays(1))->where('status', '=', 'Closed')->count();
+        $startlw = Carbon::parse($start_date)->format('d/m/y');
+        $endlw = Carbon::parse($end_date)->format('d/m/y');
+        // $datalw = Data::where(DB::raw('DATE(closed_time)'), '<=', Carbon::parse($start_date)->subDays(1))->where('status', '=', 'Closed')->count();
+        $datalw = Data::whereBetween('closed_time', [$start_date, $end_date])
+            ->where('problem', '!=', 'enhancement')
+            ->where('status', 'Closed')
+            ->count();
+
 
         $row = $tableShape1->createRow();
         $cell = $row->nextCell();
-        $cell->createTextRun('Closed Last Week');
+        $cell->createTextRun('Total Closed This Week');
         $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FF5A9BD5')); // Warna biru
         $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
@@ -2599,21 +2604,22 @@ class WeeklyController extends Controller
         $tableShape2->setOffsetY(365);
 
         // set data last month
-        $month = Carbon::parse($start_date)->subMonth(1)->format('F Y');
-        $endDate = Carbon::parse($start_date)->subMonth(1)->endOfMonth();
-        $datalm = Data::whereDate(DB::raw('DATE(changed_at)'), '<=', $endDate)
-            ->where('status', '=', 'Closed')
+        $year = Carbon::parse($start_date)->format('Y');
+        $datalm = Data::whereYear('closed_time', 2026)
+            ->where('problem', '!=', 'enhancement')
+            ->where('status', 'Closed')
             ->count();
+
 
         // Menambah baris kedua
         $row = $tableShape2->createRow();
         $cell = $row->nextCell();
-        $cell->createTextRun('Closed Last Month');
+        $cell->createTextRun('Total Closed This Year');
         $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFDBE5F1')); // Warna abu muda
         $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $cell->createBreak();
-        $cell->createTextRun("(" . $month . ")");
+        $cell->createTextRun("(" . $year . ")");
         $cell->createBreak();
         $cell->createTextRun(strval($datalm))->getFont()->setBold(true)->setSize(20);
 
