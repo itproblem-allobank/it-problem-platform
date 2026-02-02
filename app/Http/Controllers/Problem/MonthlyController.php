@@ -654,54 +654,46 @@ class MonthlyController extends Controller
 
 
         // -------------------- CHART 1 ---------------------
-        $data_chart1 = Data::where(DB::raw('DATE(created)'), '<=', $end_date)->select('problem', DB::raw('count(*) as count'))->where('problem', '!=', 'Enhancement')->groupBy('problem')->get();
-        $resultdata_chart1 = [];
-        foreach ($data_chart1 as $key => $value) {
-            $status_closed = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
-                ->where('problem', '=', $value->problem)
-                ->where('status', '=', 'Closed')
-                ->count();
-            $status_RCI = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
-                ->where('problem', '=', $value->problem)
-                ->where('status', '=', 'Root Cause Identified')
-                ->count();
-            $status_pending = Data::where(DB::raw('DATE(created)'), '<=', $end_date)
-                ->where('problem', '=', $value->problem)
-                ->where('status', '=', 'Pending')
-                ->count();
+        $data_chart1 = Data::select(
+            'problem',
+            DB::raw('COUNT(*) as total'),
+            DB::raw("SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END) as count_closed"),
+            DB::raw("SUM(CASE WHEN status = 'Root Cause Identified' THEN 1 ELSE 0 END) as count_RCI"),
+            DB::raw("SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as count_pending")
+        )
+            ->where(function ($q) {
+                $q->whereDate('created', '>=', '2026-01-01')
+                    ->orWhereDate('closed_time', '>=', '2026-01-01');
+            })
+            ->where('problem', '!=', 'Enhancement')
+            ->groupBy('problem')
+            ->orderBy('problem')
+            ->get();
 
-            // SET COLOR
-            $color = '';
-            if ($value->problem == 'Core Surrounding') {
-                $color = 'ff89a64e';
-            } else if ($value->problem == 'Ekosistem MPC') {
-                $color = 'ff00b0f0';
-            } else if ($value->problem == 'Loan') {
-                $color = 'ffa6a6a6';
-            } else if ($value->problem == 'Onboarding') {
-                $color = 'ff81ff63';
-            } else if ($value->problem == 'Online Payment') {
-                $color = 'ff09b1a7';
-            } else if ($value->problem == 'Switching 3rdparty') {
-                $color = 'ffee52e1';
-            } else if ($value->problem == 'Transaction') {
-                $color = 'ff8380ee';
-            } else if ($value->problem == 'Wholesale') {
-                $color = 'ff8064a2';
-            } else if ($value->problem == 'Cybersecurity') {
-                $color = 'ffb9cd96';
-            } else {
-                $color = 'ffffffff';
-            }
-            $resultdata_chart1[] =
-                [
-                    'problem' => $value->problem,
-                    'total' => $value->count,
-                    'count_closed' => $status_closed,
-                    'count_RCI' => $status_RCI,
-                    'count_pending' => $status_pending,
-                    'color' => $color
-                ];
+
+        $colorMap = [
+            'Core Surrounding'   => 'ff89a64e',
+            'Ekosistem MPC'      => 'ff00b0f0',
+            'Loan'               => 'ffa6a6a6',
+            'Onboarding'         => 'ff81ff63',
+            'Online Payment'     => 'ff09b1a7',
+            'Switching 3rdparty' => 'ffee52e1',
+            'Transaction'        => 'ff8380ee',
+            'Wholesale'          => 'ff8064a2',
+            'Cybersecurity'      => 'ffb9cd96',
+        ];
+
+        $resultdata_chart1 = [];
+
+        foreach ($data_chart1 as $value) {
+            $resultdata_chart1[] = [
+                'problem'        => $value->problem,
+                'total'          => (int) $value->total,
+                'count_closed'   => (int) $value->count_closed,
+                'count_RCI'      => (int) $value->count_RCI,
+                'count_pending'  => (int) $value->count_pending,
+                'color'          => $colorMap[$value->problem] ?? 'ffffffff',
+            ];
         }
 
         // Chart 1 Ticket by Category
