@@ -1299,7 +1299,7 @@ class MonthlyController extends Controller
         // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
 
         // ----------------- Create Table ------------------------------ 
-        $columns = 9;
+        $columns = 10;
         $table = $slideclosedticket->createTableShape($columns);
         $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
@@ -1320,7 +1320,8 @@ class MonthlyController extends Controller
                 'Solution',
                 'Status',
                 'SLA',
-                "Created Time\nUpdate Time"
+                "Created Time",
+                "Updated Time",
             ],
         ];
 
@@ -1332,9 +1333,8 @@ class MonthlyController extends Controller
                 ? 'RC Identified'
                 : $value->status;
 
-            $createdUpdate =
-                Carbon::parse($value->created)->format('d/m/y') . "\n" .
-                Carbon::parse($value->updated)->format('d/m/y');
+            $createdTime = Carbon::parse($value->created)->format('d/m/y');
+            $updateTime = Carbon::parse($value->updated)->format('d/m/y');
 
             $priority = strtolower($value->priority);
             $limitMonth = match ($priority) {
@@ -1364,7 +1364,8 @@ class MonthlyController extends Controller
                 $value->work_around,
                 $status,
                 $slaStatus,
-                $createdUpdate,
+                $createdTime,
+                $updateTime
             ];
         }
 
@@ -1384,14 +1385,15 @@ class MonthlyController extends Controller
                 // ===== WIDTH =====
                 match ($cellIndex) {
                     1 => $cell->setWidth(40),   // No
-                    2 => $cell->setWidth(90),   // Category
-                    3 => $cell->setWidth(90),   // No Ticket
-                    4 => $cell->setWidth(300),  // Summary
-                    5 => $cell->setWidth(90),   // Severity
-                    6 => $cell->setWidth(300),  // Solution
-                    7 => $cell->setWidth(90),   // Status
-                    8 => $cell->setWidth(80),   // SLA
-                    9 => $cell->setWidth(120),  // Created / Update
+                    2 => $cell->setWidth(100),   // Category
+                    3 => $cell->setWidth(80),   // No Ticket
+                    4 => $cell->setWidth(280),  // Summary
+                    5 => $cell->setWidth(70),   // Severity
+                    6 => $cell->setWidth(350),  // Solution
+                    7 => $cell->setWidth(70),   // Status
+                    8 => $cell->setWidth(70),   // SLA
+                    9 => $cell->setWidth(70),  // Created
+                    10 => $cell->setWidth(70), // Update
                 };
 
                 // ===== TEXT =====
