@@ -1533,7 +1533,7 @@ class MonthlyController extends Controller
             // whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
             where('problem', '=', 'Enhancement')
             ->whereIn('status', ['Pending', 'Root Cause Identified'])
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'target_date', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'version_type', 'target_date', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
             ->orderBy('created', 'ASC')
             ->get();
 
@@ -1598,7 +1598,7 @@ class MonthlyController extends Controller
                 $aspect = $value->aspect;
             }
 
-            $tempdata[] = [$value->problem, strval($i), $value->category, $no_ticket, $summary,  $created->format('d/m/y'), $target_version, $target_version, $target_date, $value->priority,  $team, $aspect, $status];
+            $tempdata[] = [$value->problem, strval($i), $value->category, $no_ticket, $summary,  $created->format('d/m/y'), $target_version, $value->version_type, $target_date, $value->priority,  $team, $aspect, $status];
             $i++;
         }
 
@@ -1697,7 +1697,7 @@ class MonthlyController extends Controller
         $data_table = Data::where('problem', '=', 'Enhancement')
             ->whereBetween('closed_time', [$start_date, $last_date])
             ->where('status', '=', 'Closed')
-            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'target_date', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
+            ->select('code_jira', 'problem', 'category', 'summary', 'status', 'created', 'target_version', 'version_type', 'target_date', 'priority', 'changed_at', 'rca_time', 'closed_time', 'team', 'aspect')
             ->get();
 
         // DEFINE ARRAY
@@ -1761,7 +1761,7 @@ class MonthlyController extends Controller
                 $aspect = $value->aspect;
             }
 
-            $tempdata[] = [$value->problem, strval($i), $value->category, $no_ticket, $summary,  $created->format('d/m/y'), $target_version, $target_version, $target_date, $value->priority,  $team, $aspect, $status];
+            $tempdata[] = [$value->problem, strval($i), $value->category, $no_ticket, $summary,  $created->format('d/m/y'), $target_version, $value->version_type, $target_date, $value->priority,  $team, $aspect, $status];
             $i++;
         }
 
