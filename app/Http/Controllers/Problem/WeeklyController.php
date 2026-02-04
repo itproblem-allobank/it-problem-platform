@@ -477,7 +477,7 @@ class WeeklyController extends Controller
             //row title
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(20);
-            $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'fffeb909'], ['status' => 'Low', 'color' => 'fffffe00']];
+            $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'fffeb909'], ['status' => 'Low', 'color' => 'ff00c000']];
             foreach ($val as $key => $v) {
                 $cell = $rowShape->nextCell();
                 $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
@@ -564,7 +564,7 @@ class WeeklyController extends Controller
         //row title
         $rowShape = $tableShape->createRow();
         $rowShape->setHeight(20);
-        $val = [['status' => 'Total High', 'color' => 'FFFF0000', 'value' => $total_high], ['status' => 'Total Medium', 'color' => 'fffeb909', 'value' => $total_medium], ['status' => 'Total Low', 'color' => 'fffffe00', 'value' => $total_low]];
+        $val = [['status' => 'Total High', 'color' => 'FFFF0000', 'value' => $total_high], ['status' => 'Total Medium', 'color' => 'fffeb909', 'value' => $total_medium], ['status' => 'Total Low', 'color' => 'ff00c000', 'value' => $total_low]];
         foreach ($val as $key => $v) {
             $cell = $rowShape->nextCell();
             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
@@ -2288,7 +2288,7 @@ class WeeklyController extends Controller
         //row title
         $rowShape = $tableShape->createRow();
         $rowShape->setHeight(20);
-        $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'fffeb909'], ['status' => 'Low', 'color' => 'fffffe00']];
+        $val = [['status' => 'High', 'color' => 'FFFF0000'], ['status' => 'Med', 'color' => 'fffeb909'], ['status' => 'Low', 'color' => 'ff00c000']];
         foreach ($val as $key => $v) {
             $cell = $rowShape->nextCell();
             $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($v['color']));
@@ -2978,8 +2978,8 @@ class WeeklyController extends Controller
         $series->getDataPointFill(1)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFF4C4C'));
         $series->getDataPointFill(2)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffeb909'));
         $series->getDataPointFill(3)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFC634'));
-        $series->getDataPointFill(4)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffffe00'));
-        $series->getDataPointFill(5)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFCFB84'));
+        $series->getDataPointFill(4)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00c000'));
+        $series->getDataPointFill(5)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff36dc36'));
         $pie3DChart->addSeries($series);
 
         /* Create a shape (chart) */
@@ -3046,8 +3046,8 @@ class WeeklyController extends Controller
         $series->getDataPointFill(1)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFF4C4C'));
         $series->getDataPointFill(2)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffeb909'));
         $series->getDataPointFill(3)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFC634'));
-        $series->getDataPointFill(4)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffffe00'));
-        $series->getDataPointFill(5)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFCFB84'));
+        $series->getDataPointFill(4)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00c000'));
+        $series->getDataPointFill(5)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff36dc36'));
         $pie3DChart->addSeries($series);
 
 
