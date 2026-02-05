@@ -1326,9 +1326,15 @@ class MonthlyController extends Controller
 
                 // ALIGN
                 if ($cellIndex == 4) {
-                    $cell->getActiveParagraph()->getAlignment()
-                        ->setHorizontal(Alignment::HORIZONTAL_LEFT)
-                        ->setMarginLeft(3);
+                    if ($isHeader) {
+                        $cell->getActiveParagraph()->getAlignment()
+                            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                            ->setMarginLeft(3);
+                    } else {
+                        $cell->getActiveParagraph()->getAlignment()
+                            ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                            ->setMarginLeft(3);
+                    }
                 } else {
                     $cell->getActiveParagraph()->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
