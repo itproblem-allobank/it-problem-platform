@@ -757,11 +757,9 @@ class MonthlyController extends Controller
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        $textRun1 = $titleTable->createTextRun('IT Problem Ticket RCA Time');
+        $textRun1 = $titleTable->createTextRun('RCA Time');
         $textRun1->getFont()->setBold(true);
-        $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nCounting IT Problem Tickets by RCA Time Identified in this Month");
-        $textRun2->getFont()->setSize(9);
+        $textRun1->getFont()->setSize(16);
 
         // Define data
         $days1 = Data::whereBetween('created', [$start_date, $end_date])
@@ -843,9 +841,7 @@ class MonthlyController extends Controller
         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $textRun1 = $titleTable->createTextRun('RCA Performance');
         $textRun1->getFont()->setBold(true);
-        $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nblablablabla");
-        $textRun2->getFont()->setSize(9);
+        $textRun1->getFont()->setSize(16);
 
         $overSLA = Data::whereBetween('created', [$start_date, $end_date])
             ->whereNotNull('rca_time')
@@ -934,9 +930,7 @@ class MonthlyController extends Controller
         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $textRun1 = $titleTable->createTextRun('Aging Time');
         $textRun1->getFont()->setBold(true);
-        $textRun1->getFont()->setSize(10);
-        $textRun2 = $titleTable->createTextRun("\nblablablabla");
-        $textRun2->getFont()->setSize(9);
+        $textRun1->getFont()->setSize(16);
 
         //high header
         $highHeader = $slide3->createRichTextShape();
