@@ -1803,8 +1803,12 @@ class MonthlyController extends Controller
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
                 if ($cellIndex == 4) { // jangan override untuk kolom ke-4
-                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                    if ($rowIndex == 0) {
+                        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    } else {
+                        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                        $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                    }
                 } else {
                     $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 }
@@ -1960,8 +1964,12 @@ class MonthlyController extends Controller
                 $textRun->getFont()->setBold($rowIndex == 0);
                 $cell->getFill()->setFillType(Fill::FILL_SOLID);
                 if ($cellIndex == 4) { // jangan override untuk kolom ke-4
-                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                    if ($rowIndex == 0) {
+                        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    } else {
+                        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                        $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
+                    }
                 } else {
                     $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 }
