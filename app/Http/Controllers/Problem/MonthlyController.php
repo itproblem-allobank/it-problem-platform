@@ -847,17 +847,12 @@ class MonthlyController extends Controller
         $textRun2 = $titleTable->createTextRun("\nblablablabla");
         $textRun2->getFont()->setSize(9);
 
-        // ============================
-        // HITUNG OVER SLA
-        // ============================
         $overSLA = Data::whereBetween('created', [$start_date, $end_date])
             ->whereNotNull('rca_time')
             ->where('rca_days', '>', 5)
             ->count();
 
-        // ============================
-        // CONTAINER CHART BOX
-        // ============================
+        // Container
         $container = $slide3->createRichTextShape();
         $container->setHeight(180);
         $container->setWidth(410);
@@ -865,15 +860,11 @@ class MonthlyController extends Controller
         $container->setOffsetY(505);
         $container->getBorder()->setLineStyle(Border::LINE_SINGLE);
         $container->getBorder()->setLineWidth(1);
-        // BACKGROUND PUTIH CHART
         $container->getFill()
             ->setFillType(Fill::FILL_SOLID)
             ->setStartColor(new Color('FFFFFFFF'));
 
-
-        // ============================
-        // PILIH IMAGE SPEEDOMETER
-        // ============================
+        // Choose Speedometer
         if ($overSLA == 0) {
             $img = storage_path('image/speedometer_green.png');
         } elseif ($overSLA < 3) {
@@ -883,9 +874,7 @@ class MonthlyController extends Controller
         }
 
 
-        // ============================
-        // INSERT SPEEDOMETER
-        // ============================
+        // Insert Speedometer
         $speedo = new File();
         $speedo->setPath($img)
             ->setWidth(240)
@@ -894,10 +883,7 @@ class MonthlyController extends Controller
 
         $slide3->addShape($speedo);
 
-
-        // ============================
-        // LEGEND
-        // ============================
+        // Legend
         $legend = $slide3->createRichTextShape();
         $legend->setWidth(110);
         $legend->setHeight(120);
@@ -911,7 +897,6 @@ class MonthlyController extends Controller
             ->setFillType(Fill::FILL_SOLID)
             ->setStartColor(new Color('FFDDD9C3'));
 
-        // TITLE
         $title = $legend->getActiveParagraph();
         $title->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
@@ -919,7 +904,6 @@ class MonthlyController extends Controller
         $run->getFont()->setBold(true);
         $run->getFont()->setUnderline(Font::UNDERLINE_SINGLE);
 
-        // LEGEND ITEMS
         $p1 = $legend->createParagraph();
         $p1->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $p1->createTextRun("🟢 No Over SLA");
@@ -934,7 +918,11 @@ class MonthlyController extends Controller
 
 
 
-        // ---------- SLIDE 3 PROBLEM DETAILS -------------- //
+        /**
+         * ====================================
+         * SLIDE 3
+         * ====================================
+         */
 
         $slide_additional = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
