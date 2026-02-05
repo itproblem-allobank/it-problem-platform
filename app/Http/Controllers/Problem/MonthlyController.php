@@ -827,7 +827,7 @@ class MonthlyController extends Controller
 
         /**
          * ------------------------------------------
-         * 5. Overall SLA Health RCA Time
+         * 5. RCA Performance
          * ------------------------------------------
          */
 
@@ -841,7 +841,7 @@ class MonthlyController extends Controller
         $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
         $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        $textRun1 = $titleTable->createTextRun('Overall SLA Health RCA Time');
+        $textRun1 = $titleTable->createTextRun('RCA Performance');
         $textRun1->getFont()->setBold(true);
         $textRun1->getFont()->setSize(10);
         $textRun2 = $titleTable->createTextRun("\nblablablabla");
@@ -916,12 +916,163 @@ class MonthlyController extends Controller
         $p3->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $p3->createTextRun("🔴 > 3 Over SLA");
 
+        /**
+         * ------------------------------------------
+         * 6. Aging Time
+         * ------------------------------------------
+         */
 
+        $titleTable = $slide3->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(410);
+        $titleTable->setOffsetX(845);
+        $titleTable->setOffsetY(455);
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $textRun1 = $titleTable->createTextRun('Aging Time');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10);
+        $textRun2 = $titleTable->createTextRun("\nblablablabla");
+        $textRun2->getFont()->setSize(9);
+
+        //high header
+        $highHeader = $slide3->createRichTextShape();
+        $highHeader->setWidth(137);
+        $highHeader->setHeight(35);
+        $highHeader->setOffsetX(845);
+        $highHeader->setOffsetY(505);
+
+        $highHeader->getActiveParagraph()->getFont()->setSize(12);
+        $highHeader->getActiveParagraph()->getFont()->setBold(true);
+        $highHeader->getActiveParagraph()->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+        $highHeader->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $highHeader->createTextRun("High")->getFont()->setBold(true);
+        $highHeader->getFill()->setFillType(Fill::FILL_SOLID)
+            ->setStartColor(new Color('FFFF0000'));
+
+
+        //medium header
+        $medHeader = $slide3->createRichTextShape();
+        $medHeader->setWidth(137);
+        $medHeader->setHeight(35);
+        $medHeader->setOffsetX(982);
+        $medHeader->setOffsetY(505);
+
+        $medHeader->getActiveParagraph()->getFont()->setSize(12);
+        $medHeader->getActiveParagraph()->getFont()->setBold(true);
+        $medHeader->getActiveParagraph()->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+        $medHeader->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $medHeader->createTextRun("Medium")->getFont()->setBold(true);
+        $medHeader->getFill()->setFillType(Fill::FILL_SOLID)
+            ->setStartColor(new Color('FFFFC000'));
+
+
+        //low header
+        $lowHeader = $slide3->createRichTextShape();
+        $lowHeader->setWidth(136);
+        $lowHeader->setHeight(35);
+        $lowHeader->setOffsetX(1119);
+        $lowHeader->setOffsetY(505);
+
+        $lowHeader->getActiveParagraph()->getFont()->setSize(12);
+        $lowHeader->getActiveParagraph()->getFont()->setBold(true);
+        $lowHeader->getActiveParagraph()->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+        $lowHeader->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $lowHeader->createTextRun("High")->getFont()->setBold(true);
+        $lowHeader->getFill()->setFillType(Fill::FILL_SOLID)
+            ->setStartColor(new Color('FF00C000'));
+
+
+        //high box
+        $boxHigh = $slide3->createRichTextShape();
+        $boxHigh->setWidth(137);
+        $boxHigh->setHeight(145);
+        $boxHigh->setOffsetX(845);
+        $boxHigh->setOffsetY(540);
+        $boxHigh->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        // config font 
+        $boxHigh->getActiveParagraph()->getFont()->setSize(12);
+        $boxHigh->getActiveParagraph()->getFont()->setBold(true);
+        $boxHigh->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->setStartColor(new Color('FFFFFFFF'));
+        $boxHigh->getActiveParagraph()->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $boxHigh->createTextRun("0\nOpen Ticket\n");
+        $boxHigh->createTextRun("------------------------\n");
+        $boxHigh->createTextRun("0\n");
+        $boxHigh->createTextRun("⚠️ Warning\n");
+        $monthHigh = $boxHigh->createTextRun("2 Month");
+        $monthHigh->getFont()->setColor(new Color('FFFF0000'));
+
+
+        //medium box
+        $boxMed = $slide3->createRichTextShape();
+        $boxMed->setWidth(137);
+        $boxMed->setHeight(145);
+        $boxMed->setOffsetX(982);
+        $boxMed->setOffsetY(540);
+        $boxMed->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        // config font 
+        $boxMed->getActiveParagraph()->getFont()->setSize(12);
+        $boxMed->getActiveParagraph()->getFont()->setBold(true);
+        $boxMed->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->setStartColor(new Color('FFFFFFFF'));
+        $boxMed->getActiveParagraph()->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $boxMed->createTextRun("1\nOpen Ticket\n");
+        $boxMed->createTextRun("------------------------\n");
+        $boxMed->createTextRun("0\n");
+        $boxMed->createTextRun("⚠️ Warning\n");
+        $monthMed = $boxMed->createTextRun("4 Month");
+        $monthMed->getFont()->setColor(new Color('FFFFC000'));
+
+
+        //low box
+        $boxLow = $slide3->createRichTextShape();
+        $boxLow->setWidth(136);
+        $boxLow->setHeight(145);
+        $boxLow->setOffsetX(1119);
+        $boxLow->setOffsetY(540);
+        $boxLow->getBorder()->setLineStyle(Border::LINE_SINGLE);
+
+        // config font 
+        $boxLow->getActiveParagraph()->getFont()->setSize(12);
+        $boxLow->getActiveParagraph()->getFont()->setBold(true);
+        $boxLow->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->setStartColor(new Color('FFFFFFFF'));
+        $boxLow->getActiveParagraph()->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $boxLow->createTextRun("2\nOpen Ticket\n");
+        $boxLow->createTextRun("------------------------\n");
+        $boxLow->createTextRun("0\n");
+        $boxLow->createTextRun("⚠️ Warning\n");
+        $monthLow = $boxLow->createTextRun("12 Month");
+        $monthLow->getFont()->setColor(new Color('FF00C000'));
 
         /**
-         * ====================================
+         * =============================================================
          * SLIDE 3
-         * ====================================
+         * =============================================================
          */
 
         $slide_additional = $objPHPPresentation->createSlide();
