@@ -324,79 +324,47 @@ class MonthlyController extends Controller
 
         //Source Data
         $problem = Data::select('problem', DB::raw('count(*) as count'))->groupBy('problem')->where('problem', '!=', 'Enhancement')->get();
-        // dd($problem);
+        
         $total = [];
         foreach ($problem as $key => $value) {
-            $high_lastmonth = Data::where(DB::raw('DATE(created)'), '<', $start_date)
-                ->where('problem', '=', $value->problem)
-                ->where('priority', '=', 'High')
-                ->whereIn('status', ['Root Cause Identified', 'Pending'])
-                ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
-                    ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
-                    ->where('problem', '=', $value->problem)
-                    ->where('priority', '=', 'High')
-                    ->where('status', '=', 'Closed'))
-                ->count();
 
-            $medium_lastmonth = Data::where(DB::raw('DATE(created)'), '<', $start_date)
-                ->where('problem', '=', $value->problem)
-                ->where('priority', '=', 'Medium')
-                ->whereIn('status', ['Root Cause Identified', 'Pending'])
-                ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
-                    ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
-                    ->where('problem', '=', $value->problem)
-                    ->where('priority', '=', 'Medium')
-                    ->where('status', '=', 'Closed'))
-                ->count();
-
-            $low_lastmonth = Data::where(DB::raw('DATE(created)'), '<', $start_date)
-                ->where('problem', '=', $value->problem)
-                ->where('priority', '=', 'Low')
-                ->whereIn('status', ['Root Cause Identified', 'Pending'])
-                ->union(Data::where(DB::raw('DATE(created)'), '<', $start_date)
-                    ->whereBetween(DB::raw('DATE(closed_time)'), [$start_date, $end_date])
-                    ->where('problem', '=', $value->problem)
-                    ->where('priority', '=', 'Low')
-                    ->where('status', '=', 'Closed'))
-                ->count();
-
-            $high_thismonth = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            $high_created = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'High')
                 ->count();
 
-            $medium_thismonth = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            $medium_created = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Medium')
                 ->count();
 
-            $low_thismonth = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
+            $low_created = Data::whereBetween(DB::raw('DATE(created)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Low')
                 ->count();
 
-            $high_closed_thismonth = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            $high_closed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'High')
                 ->where('status', '=', 'Closed')
                 ->count();
 
-            $medium_closed_thismonth = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            $medium_closed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Medium')
                 ->where('status', '=', 'Closed')
                 ->count();
 
-            $low_closed_thismonth = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
+            $low_closed = Data::whereBetween(DB::raw('DATE(changed_at)'), [$start_date, $end_date])
                 ->where('problem', '=', $value->problem)
                 ->where('priority', '=', 'Low')
                 ->where('status', '=', 'Closed')
                 ->count();
 
             // COUNT DATA
-            $total_high = $high_lastmonth + $high_thismonth - $high_closed_thismonth;
-            $total_medium = $medium_lastmonth + $medium_thismonth - $medium_closed_thismonth;
-            $total_low = $low_lastmonth + $low_thismonth - $low_closed_thismonth;
+            $total_high = $high_created - $high_closed;
+            $total_medium =  $medium_created - $medium_closed;
+            $total_low =  $low_created - $low_closed;
 
             $total_count = $total_high + $total_medium + $total_low;
 
@@ -429,15 +397,12 @@ class MonthlyController extends Controller
                 'problem' => $value->problem,
                 'total' => $total_count,
                 'color' => $color,
-                'high_lastmonth' => $high_lastmonth,
-                'medium_lastmonth' => $medium_lastmonth,
-                'low_lastmonth' => $low_lastmonth,
-                'high_thismonth' => $high_thismonth,
-                'medium_thismonth' => $medium_thismonth,
-                'low_thismonth' => $low_thismonth,
-                'high_closed_thismonth' => $high_closed_thismonth,
-                'medium_closed_thismonth' => $medium_closed_thismonth,
-                'low_closed_thismonth' => $low_closed_thismonth,
+                'high_created' => $high_created,
+                'medium_created' => $medium_created,
+                'low_created' => $low_created,
+                'high_closed' => $high_closed,
+                'medium_closed' => $medium_closed,
+                'low_closed' => $low_closed,
             ];
         }
 
@@ -492,24 +457,9 @@ class MonthlyController extends Controller
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(20);
             $value = [
-                $data['high_lastmonth'],
-                $data['medium_lastmonth'],
-                $data['low_lastmonth']
-            ];
-            foreach ($value as $key => $v) {
-                $cell = $rowShape->nextCell();
-                $cell->getFill()->setFillType(Fill::FILL_SOLID)->setStartColor(new Color($data["color"]));
-                $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $cell->createTextRun($v);
-            }
-
-            $rowShape = $tableShape->createRow();
-            $rowShape->setHeight(20);
-            $value = [
-                $data['high_thismonth'],
-                $data['medium_thismonth'],
-                $data['low_thismonth']
+                $data['high_created'],
+                $data['medium_created'],
+                $data['low_created']
             ];
 
             foreach ($value as $key => $v) {
@@ -523,9 +473,9 @@ class MonthlyController extends Controller
             $rowShape = $tableShape->createRow();
             $rowShape->setHeight(20);
             $value = [
-                $data['high_closed_thismonth'],
-                $data['medium_closed_thismonth'],
-                $data['low_closed_thismonth']
+                $data['high_closed'],
+                $data['medium_closed'],
+                $data['low_closed']
             ];
 
             foreach ($value as $key => $v) {
@@ -539,8 +489,7 @@ class MonthlyController extends Controller
             //set tempat box selanjutnya
             $offsetx = $offsetx + 137.5;
         }
-
-        $total_last_month = 0;
+        
         $total_this_month = 0;
         $total_closed_this_month = 0;
         $total_high = 0;
@@ -548,12 +497,11 @@ class MonthlyController extends Controller
         $total_low = 0;
 
         foreach ($total as $key => $value) {
-            $total_last_month += $value["high_lastmonth"] + $value["medium_lastmonth"] + $value["low_lastmonth"];
-            $total_this_month += $value["high_thismonth"] + $value["medium_thismonth"] + $value["low_thismonth"];
-            $total_closed_this_month += $value["high_closed_thismonth"] + $value["medium_closed_thismonth"] + $value["low_closed_thismonth"];
-            $total_high += $value["high_lastmonth"] + $value["high_thismonth"] - $value["high_closed_thismonth"];
-            $total_medium += $value["medium_lastmonth"] + $value["medium_thismonth"] - $value["medium_closed_thismonth"];
-            $total_low += $value["low_lastmonth"] + $value["low_thismonth"] - $value["low_closed_thismonth"];
+            $total_this_month += $value["high_created"] + $value["medium_created"] + $value["low_created"];
+            $total_closed_this_month += $value["high_closed"] + $value["medium_closed"] + $value["low_closed"];
+            $total_high +=  $value["high_created"] - $value["high_closed"];
+            $total_medium +=  $value["medium_created"] - $value["medium_closed"];
+            $total_low +=  $value["low_created"] - $value["low_closed"];
         }
         // dd($totalcreated, $totalclosed, $totalexisting, $totalhigh);
 
@@ -613,18 +561,6 @@ class MonthlyController extends Controller
         $textRun = $shape->createTextRun('-');
         $textRun->getFont()->setBold(true)
             ->setSize(16)
-            ->setColor(new Color(Color::COLOR_BLACK));
-
-        // Total Existing
-        $shape = $slide3->createRichTextShape();
-        $shape->setHeight(25)
-            ->setWidth(40)
-            ->setOffsetX(1247)
-            ->setOffsetY(190);
-        $shape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $shape->createTextRun($total_last_month);
-        $textRun->getFont()->setBold(true)
-            ->setSize(12)
             ->setColor(new Color(Color::COLOR_BLACK));
 
         //Total Created
