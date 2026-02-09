@@ -1065,7 +1065,7 @@ class MonthlyController extends Controller
 
         /**
          * =============================================================
-         * SLIDE 3
+         *                       PROBLEM OVERVIEW
          * =============================================================
          */
 
@@ -1610,9 +1610,263 @@ class MonthlyController extends Controller
             }
         }
 
+        /**
+         * =============================================================
+         *                  IT PROBLEM CHART SLIDE
+         * =============================================================
+         */
+        $problemchartslide = $objPHPPresentation->createSlide();
+        $backgroundImagePath = storage_path('image/background.png');
+        $backgroundImage = new File();
+        $backgroundImage->setPath($backgroundImagePath);
+        $backgroundImage->setWidth(1280);
+        $backgroundImage->setOffsetX(0);
+        $backgroundImage->setOffsetY(0);
+        $problemchartslide->addShape($backgroundImage);
+
+        $imagePath = storage_path('image/allobank.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(1050); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(20); // Posisi vertikal gambar
+        $problemchartslide->addShape($pictureShape);
+
+        $imagePath = storage_path('image/Line.png');
+        $pictureShape = new File();
+        $pictureShape->setPath($imagePath);
+        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
+        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
+        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $problemchartslide->addShape($pictureShape);
+
+        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
+            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
+            ->setCY(700, DocumentLayout::UNIT_PIXEL);
+
+        $shape = $problemchartslide->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(1000)
+            ->setOffsetX(25)
+            ->setOffsetY(15);
+        $textRun = $shape->createTextRun('Problem Management');
+        $textRun->getFont()->setBold(true)
+            ->setSize(30);
+
+        $shape = $problemchartslide->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(65);
+        $textRun = $shape->createTextRun('As of ' . $date);
+        $textRun->getFont()->setSize(14);
+
+        $shape = $problemchartslide->createRichTextShape()
+            ->setHeight(25)
+            ->setWidth(400)
+            ->setOffsetX(25)
+            ->setOffsetY(110);
+        $textRun = $shape->createTextRun('IT PROBLEM CHART');
+        $textRun->getFont()->setSize(10)->setBold(true);
 
 
-        // ----------- SLIDE ENHANCEMENT ------------------------
+
+        // ================== CHART PROBLEM BY ASSIGNEE & STATUS ==================
+
+        // set title table
+        $titleTable = $problemchartslide->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(400);
+        $titleTable->setOffsetX(425);
+        $titleTable->setOffsetY(135);
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $textRun1 = $titleTable->createTextRun('IT Problem Ticket By Assignee');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10);
+        $textRun2 = $titleTable->createTextRun("\nCounting IT Problem Tickets by Assignee on this Month");
+        $textRun2->getFont()->setSize(9);
+
+        // 1. Ambil assignee (URUTAN = CATEGORY)
+        $assignees = Data::select('nickname')
+            ->whereNotNull('nickname')
+            ->where('nickname', '!=', 'Intan')
+            ->where('problem', '!=', 'Enhancement')
+            ->groupBy('nickname')
+            ->orderBy('nickname')
+            ->pluck('nickname')
+            ->toArray();
+
+        // 2. Mapping status & warna
+        $statusMap = [
+            'Closed' => ['field' => 'closed_time', 'color' => 'FF00B050'],
+            'Root Cause Identified' => ['field' => 'created', 'color' => 'fff85208'],
+            'Pending' => ['field' => 'created', 'color' => 'FFFFC000'],
+        ];
+
+        // 3. Hitung & NORMALISASI (ASSOCIATIVE!)
+        $chartSeriesData = [];
+
+        foreach ($statusMap as $status => $config) {
+            foreach ($assignees as $nickname) {
+
+                $count = Data::whereBetween(
+                    DB::raw('DATE(' . $config['field'] . ')'),
+                    [$start_date, $end_date]
+                )
+                    ->where('nickname', $nickname)
+                    ->where('status', $status)
+                    ->where('problem', '!=', 'Enhancement')
+                    ->count();
+
+                $chartSeriesData[$status][$nickname] = $count;
+            }
+        }
+
+        // 4. Buat chart
+        $chartShape = $problemchartslide->createChartShape();
+        $chartShape->setHeight(200)
+            ->setWidth(400)
+            ->setOffsetX(425)
+            ->setOffsetY(185);
+
+        $chartShape->getBorder()
+            ->setLineStyle(Border::LINE_SINGLE)
+            ->setLineWidth(1)
+            ->setColor(new Color('FF000000')); // hitam
+
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+        $chartShape->getPlotArea()->getAxisX()->setTitle('');
+        $yAxis = $chartShape->getPlotArea()->getAxisY()->setTitle('');
+        $chartShape->getTitle()->setVisible(false);
+        $yAxis->setMajorUnit(1);
+
+        $chartShape->getTitle()->setText('Problem By Assignee & Status');
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE);
+
+        // 5. Tambahkan series (ASSOCIATIVE ARRAY!)
+        foreach ($statusMap as $status => $config) {
+
+            // skip kalau semuanya 0
+            if (array_sum($chartSeriesData[$status]) === 0) {
+                continue;
+            }
+
+            $series = new Series($status, $chartSeriesData[$status]);
+
+            $series->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->setStartColor(new Color($config['color']));
+
+            $chartType->addSeries($series);
+        }
+
+        // ================== CHART JIRA SERVICE REQUEST (CLEAN) ==================
+
+        // set title table
+        $titleTable = $problemchartslide->createRichTextShape();
+        $titleTable->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $titleTable->setHeight(50);
+        $titleTable->setWidth(400);
+        $titleTable->setOffsetX(825);
+        $titleTable->setOffsetY(135);
+        $titleTable->getFill()->setFillType(Fill::FILL_SOLID);
+        $titleTable->getFill()->setStartColor(new Color('ffddd9c3'));
+        $titleTable->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $titleTable->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $textRun1 = $titleTable->createTextRun('Allo Care & Contact Center Service Request Ticket');
+        $textRun1->getFont()->setBold(true);
+        $textRun1->getFont()->setSize(10);
+        $textRun2 = $titleTable->createTextRun("\nAllo Care & CC Service Request Tickets Created This Month by Status");
+        $textRun2->getFont()->setSize(9);
+
+        // 1️⃣ Ambil data sekali (aggregate)
+        $services = Service::whereBetween(
+            DB::raw('DATE(created)'),
+            [$start_date, $end_date]
+        )
+            ->select(
+                'issue_type',
+                'status',
+                DB::raw('COUNT(*) as total')
+            )
+            ->groupBy('issue_type', 'status')
+            ->get();
+
+        // 2️⃣ Ambil status dan urutkan berdasarkan total terbanyak
+        $statuses = $services
+            ->groupBy('status')
+            ->map(fn($items) => $items->sum('total'))
+            ->sortDesc()
+            ->keys()
+            ->values()
+            ->toArray();
+
+        // 3️⃣ Ambil issue_type dan urutkan berdasarkan total terbanyak
+        $issueTypes = $services
+            ->groupBy('issue_type')
+            ->map(fn($items) => $items->sum('total'))
+            ->sortDesc()
+            ->keys()
+            ->values();
+
+        // 4️⃣ Build series data (issue_type sebagai series)
+        $seriesData = [];
+
+        foreach ($issueTypes as $issueType) {
+            $data = [];
+
+            foreach ($statuses as $status) {
+                $data[$status] = $services
+                    ->where('issue_type', $issueType)
+                    ->where('status', $status)
+                    ->sum('total');
+            }
+
+            // hanya tambahkan kalau ada datanya
+            if (array_sum($data) > 0) {
+                $seriesData[$issueType] = $data;
+            }
+        }
+
+        // ================== GENERATE CHART ==================
+
+        $chartShape = $problemchartslide->createChartShape();
+        $chartShape->setHeight(200)
+            ->setWidth(400)
+            ->setOffsetX(825)
+            ->setOffsetY(185);
+        // Chart type
+        $chartType = new Bar();
+        $chartShape->getPlotArea()->setType($chartType);
+
+        // Title
+        $chartShape->getTitle()->setVisible(false);
+
+        // Axis & styling
+        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE);
+        $chartShape->getPlotArea()->getAxisX()->setTitle('');
+        $chartShape->getPlotArea()->getAxisY()->setTitle('');
+        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
+        $chartShape->getBorder()->setColor(new Color('FF000000'));
+        $chartShape->getBorder()->setLineWidth(1);
+
+        // Add series ke chart
+        foreach ($seriesData as $issueType => $statusCounts) {
+            $chartType->addSeries(
+                new Series($issueType, $statusCounts)
+            );
+        }
+
+        /**
+         * =============================================================
+         *                     ENHANCEMENT SLIDE
+         * =============================================================
+         */
         $slideEnhancement = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
@@ -2216,393 +2470,7 @@ class MonthlyController extends Controller
             ->setSize(12)
             ->setColor(new Color(Color::COLOR_BLACK));
 
-        // ----------------- ADDITIONAL SLIDE ----------------
-        $additionalslide = $objPHPPresentation->createSlide();
-        $backgroundImagePath = storage_path('image/background.png');
-        $backgroundImage = new File();
-        $backgroundImage->setPath($backgroundImagePath);
-        $backgroundImage->setWidth(1280);
-        $backgroundImage->setOffsetX(0);
-        $backgroundImage->setOffsetY(0);
-        $additionalslide->addShape($backgroundImage);
 
-        $imagePath = storage_path('image/allobank.png');
-        $pictureShape = new File();
-        $pictureShape->setPath($imagePath);
-        $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
-        $pictureShape->setOffsetX(1050); // Posisi horizontal gambar
-        $pictureShape->setOffsetY(20); // Posisi vertikal gambar
-        $additionalslide->addShape($pictureShape);
-
-        $imagePath = storage_path('image/Line.png');
-        $pictureShape = new File();
-        $pictureShape->setPath($imagePath);
-        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
-        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
-        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
-        $additionalslide->addShape($pictureShape);
-
-        $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
-            ->setCX(1280, DocumentLayout::UNIT_PIXEL)
-            ->setCY(700, DocumentLayout::UNIT_PIXEL);
-
-        $shape = $additionalslide->createRichTextShape()
-            ->setHeight(50)
-            ->setWidth(1000)
-            ->setOffsetX(25)
-            ->setOffsetY(15);
-        $textRun = $shape->createTextRun('Problem Management');
-        $textRun->getFont()->setBold(true)
-            ->setSize(30);
-
-        $shape = $additionalslide->createRichTextShape()
-            ->setHeight(25)
-            ->setWidth(400)
-            ->setOffsetX(25)
-            ->setOffsetY(65);
-        $textRun = $shape->createTextRun('As of ' . $date);
-        $textRun->getFont()->setSize(14);
-
-        $shape = $additionalslide->createRichTextShape()
-            ->setHeight(25)
-            ->setWidth(400)
-            ->setOffsetX(25)
-            ->setOffsetY(110);
-        $textRun = $shape->createTextRun('IT PROBLEM CHART');
-        $textRun->getFont()->setSize(10)->setBold(true);
-
-        // -------------- SET CHART RCA TIME --------------------------
-
-        // Define data
-        $days1 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
-            ->whereNotNull('rca_time')
-            ->where('rca_days', '=', 1)
-            ->count();
-        $days2 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
-            ->whereNotNull('rca_time')
-            ->where('rca_days', '=', 2)
-            ->count();
-        $days3 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
-            ->whereNotNull('rca_time')
-            ->where('rca_days', '=', 3)
-            ->count();
-        $days4 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
-            ->whereNotNull('rca_time')
-            ->where('rca_days', '=', 4)
-            ->count();
-        $days5 = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
-            ->whereNotNull('rca_time')
-            ->where('rca_days', '=', 5)
-            ->count();
-        $pie_data = ['1 Day' => $days1, '2 Days' => $days2, '3 Days' => $days3, '4 Days' => $days4, '5 Days' => $days5];
-
-        // Create pie chart & Insert to slide
-        $pie3DChart = new Pie();
-        $pie3DChart->setExplosion(0);
-        $series = new Series('RCA Time', $pie_data);
-        $series->setShowPercentage(true);
-        $series->setShowValue(true);
-        $series->setShowSeriesName(false);
-        $series->getDataPointFill(0)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffff0000'));
-        $series->getDataPointFill(1)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ffFF4C4C'));
-        $series->getDataPointFill(2)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('fffeb909'));
-        $series->getDataPointFill(3)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('FFFFC634'));
-        $series->getDataPointFill(4)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff00c000'));
-        $series->getDataPointFill(5)->setFillType(Fill::FILL_SOLID)->setStartColor(new Color('ff36dc36'));
-        $pie3DChart->addSeries($series);
-
-        /* Create a shape (chart) */
-        $shape = $additionalslide->createChartShape();
-        $shape->setResizeProportional(false)
-            ->setHeight(250)
-            ->setWidth(600)
-            ->setOffsetX(25)
-            ->setOffsetY(135);
-        // Set judul chart
-        $shape->getTitle()->setText('Ticket RCA Time');
-        $shape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
-        $shape->getPlotArea()->setType($pie3DChart);
-        $shape->getView3D()->setRotationX(40);
-        $shape->getView3D()->setPerspective(10);
-        //set borders
-        $shape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $shape->getBorder()->setColor(new Color('FF000000')); // Black border
-        $shape->getBorder()->setLineWidth(1);
-        $shape->getPlotArea()->getAxisY()->setIsVisible(false);
-        $shape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE); // Menghilangkan kotak pada legenda
-        //
-
-        // ------------ DETAIL LIST RCA TIME TICKET ------------------
-        $columns = 6; // Number of columns
-        $tableShape = $additionalslide->createTableShape($columns);
-        $tableShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $tableShape->setHeight(275);
-        $tableShape->setWidth(600);
-        $tableShape->setOffsetX(25);
-        $tableShape->setOffsetY(385);
-
-        // QUERY
-        $data_table = Data::where('created', '>=', Carbon::now()->subMonth()->format('Y-m-d'))
-            ->whereNotNull('rca_time')
-            ->Orderby('rca_days', 'desc')
-            ->get();
-
-        // DEFINE ARRAY
-        $tempdata = [
-            ['', 'Category', 'Summary', 'Created Date', 'Created-RCA Time', 'Resolved Time', 'Status & Complete Time'],
-        ];
-
-        // ADD ARRAY DATA
-        foreach ($data_table as $key => $value) {
-            $tempstatus = $value->status;
-            if ($value->status == 'Root Cause Identified') {
-                $tempstatus = 'RC Iden';
-            }
-
-            if ($value->status == 'Closed') {
-                $status = $tempstatus . "\n" . Carbon::parse($value->changed_at)->format('d/m/y');
-            } else {
-                $status = $tempstatus . "\n" . '-';
-            }
-
-            $summary = "[" . $value->code_jira . "]" . " " . $value->summary;
-
-            //convert date to carbon parse
-            $created = Carbon::parse($value->created);
-            $rcatime = Carbon::parse($value->rca_time);
-            $closed_time = Carbon::parse($value->closed_time);
-
-            //declare rca time
-            if ($value->rca_time == null) {
-                $rca_time = '-';
-            } else {
-                $rca_days = intval($created->diffInDays($rcatime));
-                $rca_days_string = strval($rca_days) . ' days';
-                $rca_time = $rca_days_string . "\n" . Carbon::parse($value->rca_time)->format('d/m/y');
-            }
-
-            //declare completion time
-            if ($value->closed_time == null) {
-                $completion_time = '-';
-            } else {
-                $completion_days = intval($created->diffInDays($closed_time));
-                $completion_days_string = strval($completion_days) . ' Days';
-                $completion_time = $completion_days_string . "\n" . Carbon::parse($value->closed_time)->format('d/m/y');
-            }
-
-            $tempdata[] = [$value->problem, $value->category, $summary,  $created->format('d/m/y'), $rca_time,  $completion_time, $status];
-        }
-
-
-        // INSERT ARRAY TO TABLE
-        foreach ($tempdata as $rowIndex => $row) {
-            $tableRow = $tableShape->createRow();
-            $tableRow->setHeight(25); // Set the height of the row
-            foreach ($row as $cellIndex => $cellText) {
-                if ($cellIndex == 0) {
-                    continue; // Lewati kolom yang disembunyikan
-                }
-
-                //set width
-                $cell = $tableRow->nextCell();
-                if ($cellIndex == 1) {
-                    $cell->setWidth(80);
-                } else if ($cellIndex == 2) {
-                    $cell->setWidth(240);
-                } else if ($cellIndex == 3) {
-                    $cell->setWidth(70);
-                } else if ($cellIndex == 4) {
-                    $cell->setWidth(70);
-                } else if ($cellIndex == 5) {
-                    $cell->setWidth(70);
-                } else if ($cellIndex == 6) {
-                    $cell->setWidth(70);
-                }
-
-                //set status
-                $problem = $row[0];
-                $status = explode("\n", $row[6]);
-                $firstStatus = $status[0];
-                $textRun = $cell->createTextRun($cellText);
-                $textRun->getFont()->setSize(8);
-                $textRun->getFont()->setBold($rowIndex == 0);
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                if ($cellIndex == 2) { // jangan override untuk kolom ke-4
-                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                    $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                    $cell->getActiveParagraph()->getAlignment()->setMarginLeft(2.8);
-                } else {
-                    $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                }
-                if ($rowIndex == 0) {
-                    $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
-                    $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-                } else {
-                    $cell->getFill()->setStartColor(new Color('ff95b3d7'));
-                }
-            }
-        }
-
-        // ================== CHART PROBLEM BY ASSIGNEE & STATUS ==================
-
-        // 1. Ambil assignee (URUTAN = CATEGORY)
-        $assignees = Data::select('nickname')
-            ->whereNotNull('nickname')
-            ->where('nickname', '!=', 'Intan')
-            ->where('problem', '!=', 'Enhancement')
-            ->groupBy('nickname')
-            ->orderBy('nickname')
-            ->pluck('nickname')
-            ->toArray();
-
-        // 2. Mapping status & warna
-        $statusMap = [
-            'Closed' => ['field' => 'closed_time', 'color' => 'FF00B050'],
-            'Root Cause Identified' => ['field' => 'created', 'color' => 'fff85208'],
-            'Pending' => ['field' => 'created', 'color' => 'FFFFC000'],
-        ];
-
-        // 3. Hitung & NORMALISASI (ASSOCIATIVE!)
-        $chartSeriesData = [];
-
-        foreach ($statusMap as $status => $config) {
-            foreach ($assignees as $nickname) {
-
-                $count = Data::whereBetween(
-                    DB::raw('DATE(' . $config['field'] . ')'),
-                    [$start_date, $end_date]
-                )
-                    ->where('nickname', $nickname)
-                    ->where('status', $status)
-                    ->where('problem', '!=', 'Enhancement')
-                    ->count();
-
-                $chartSeriesData[$status][$nickname] = $count;
-            }
-        }
-
-        // 4. Buat chart
-        $chartShape = $additionalslide->createChartShape();
-        $chartShape->setHeight(250)
-            ->setWidth(600)
-            ->setOffsetX(625)
-            ->setOffsetY(135);
-
-        $chartShape->getBorder()
-            ->setLineStyle(Border::LINE_SINGLE)
-            ->setLineWidth(1)
-            ->setColor(new Color('FF000000')); // hitam
-
-
-        $chartType = new Bar();
-        $chartShape->getPlotArea()->setType($chartType);
-        $chartShape->getPlotArea()->getAxisX()->setTitle('');
-        $yAxis = $chartShape->getPlotArea()->getAxisY()->setTitle('');
-        $yAxis->setMajorUnit(1);
-
-
-
-        $chartShape->getTitle()->setText('Problem By Assignee & Status');
-        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE);
-
-        // 5. Tambahkan series (ASSOCIATIVE ARRAY!)
-        foreach ($statusMap as $status => $config) {
-
-            // skip kalau semuanya 0
-            if (array_sum($chartSeriesData[$status]) === 0) {
-                continue;
-            }
-
-            $series = new Series($status, $chartSeriesData[$status]);
-
-            $series->getFill()
-                ->setFillType(Fill::FILL_SOLID)
-                ->setStartColor(new Color($config['color']));
-
-            $chartType->addSeries($series);
-        }
-
-        // ================== CHART JIRA SERVICE REQUEST (CLEAN) ==================
-
-        // 1️⃣ Ambil data sekali (aggregate)
-        $services = Service::whereBetween(
-            DB::raw('DATE(created)'),
-            [$start_date, $end_date]
-        )
-            ->select(
-                'issue_type',
-                'status',
-                DB::raw('COUNT(*) as total')
-            )
-            ->groupBy('issue_type', 'status')
-            ->get();
-
-        // 2️⃣ Ambil status dan urutkan berdasarkan total terbanyak
-        $statuses = $services
-            ->groupBy('status')
-            ->map(fn($items) => $items->sum('total'))
-            ->sortDesc()
-            ->keys()
-            ->values()
-            ->toArray();
-
-        // 3️⃣ Ambil issue_type dan urutkan berdasarkan total terbanyak
-        $issueTypes = $services
-            ->groupBy('issue_type')
-            ->map(fn($items) => $items->sum('total'))
-            ->sortDesc()
-            ->keys()
-            ->values();
-
-        // 4️⃣ Build series data (issue_type sebagai series)
-        $seriesData = [];
-
-        foreach ($issueTypes as $issueType) {
-            $data = [];
-
-            foreach ($statuses as $status) {
-                $data[$status] = $services
-                    ->where('issue_type', $issueType)
-                    ->where('status', $status)
-                    ->sum('total');
-            }
-
-            // hanya tambahkan kalau ada datanya
-            if (array_sum($data) > 0) {
-                $seriesData[$issueType] = $data;
-            }
-        }
-
-        // ================== GENERATE CHART ==================
-
-        $chartShape = $additionalslide->createChartShape();
-        $chartShape->setHeight(250)
-            ->setWidth(600)
-            ->setOffsetX(625)
-            ->setOffsetY(385);
-
-        // Chart type
-        $chartType = new Bar();
-        $chartShape->getPlotArea()->setType($chartType);
-
-        // Title
-        $chartShape->getTitle()->setText('Ticket Jira Service Request');
-
-        // Axis & styling
-        $chartShape->getLegend()->getBorder()->setLineStyle(Border::LINE_NONE);
-        $chartShape->getPlotArea()->getAxisX()->setTitle('');
-        $chartShape->getPlotArea()->getAxisY()->setTitle('');
-        $chartShape->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $chartShape->getBorder()->setColor(new Color('FF000000'));
-        $chartShape->getBorder()->setLineWidth(1);
-
-        // Add series ke chart
-        foreach ($seriesData as $issueType => $statusCounts) {
-            $chartType->addSeries(
-                new Series($issueType, $statusCounts)
-            );
-        }
 
 
         // ------------------------------------------------------------------------------------
