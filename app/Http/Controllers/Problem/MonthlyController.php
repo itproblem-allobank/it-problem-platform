@@ -1627,17 +1627,17 @@ class MonthlyController extends Controller
         $imagePath = storage_path('image/allobank.png');
         $pictureShape = new File();
         $pictureShape->setPath($imagePath);
-        $pictureShape->setWidth(200);  // Ubah ukuran gambar sesuai kebutuhan
-        $pictureShape->setOffsetX(1050); // Posisi horizontal gambar
-        $pictureShape->setOffsetY(20); // Posisi vertikal gambar
+        $pictureShape->setWidth(200);
+        $pictureShape->setOffsetX(1050);
+        $pictureShape->setOffsetY(20); 
         $problemchartslide->addShape($pictureShape);
 
         $imagePath = storage_path('image/Line.png');
         $pictureShape = new File();
         $pictureShape->setPath($imagePath);
-        $pictureShape->setWidth(1200);  // Ubah ukuran gambar sesuai kebutuhan
-        $pictureShape->setOffsetX(20); // Posisi horizontal gambar
-        $pictureShape->setOffsetY(100); // Posisi vertikal gambar
+        $pictureShape->setWidth(1200);  
+        $pictureShape->setOffsetX(20); 
+        $pictureShape->setOffsetY(100);
         $problemchartslide->addShape($pictureShape);
 
         $objPHPPresentation->getLayout()->setDocumentLayout(['cx' => 1280, 'cy' => 700], true)
@@ -1669,6 +1669,81 @@ class MonthlyController extends Controller
         $textRun = $shape->createTextRun('IT PROBLEM CHART');
         $textRun->getFont()->setSize(10)->setBold(true);
 
+
+        // ==================  TABLE PROBLEM RESPONSE ==================
+        $table = $problemchartslide->createTableShape(2);
+        $table->setHeight(250);
+        $table->setWidth(400);
+        $table->setOffsetX(25);
+        $table->setOffsetY(135);
+
+        $row = $table->createRow();
+        $row->setHeight(40);
+        $cell = $row->nextCell();
+        $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        $cell->getFill()->setStartColor(new Color('FF000000')); // hitam
+
+        $textRun = $cell->createTextRun("SLA Problem\nResponse");
+        $textRun->getFont()->setBold(true)->setSize(16)->setColor(new Color('FFFFFFFF'));
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell = $row->nextCell();
+        $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        $cell->getFill()->setStartColor(new Color('FF000000'));
+        $textRun = $cell->createTextRun("SLA Problem\nResolution");
+        $textRun->getFont()->setBold(true)->setSize(16)->setColor(new Color('FFFFFFFF'));
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+
+        $row = $table->createRow();
+        $row->setHeight(74);
+        $cell = $row->nextCell();
+        $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        $cell->getFill()->setStartColor(new Color('FF81ff63'));
+        $textRun = $cell->createTextRun("100%");
+        $textRun->getFont()->setBold(true)->setSize(28);
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $cell = $row->nextCell();
+        $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        $cell->getFill()->setStartColor(new Color('FF81ff63'));
+        $textRun = $cell->createTextRun("100%");
+        $textRun->getFont()->setBold(true)->setSize(28);
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+
+        $row = $table->createRow();
+        $row->setHeight(40);
+        $cell = $row->nextCell();
+        $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        $cell->getFill()->setStartColor(new Color('FF000000'));
+        $textRun = $cell->createTextRun("SLA Incident\nResponse");
+        $textRun->getFont()->setBold(true)->setSize(16)->setColor(new Color('FFFFFFFF'));
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell = $row->nextCell();
+        $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        $cell->getFill()->setStartColor(new Color('FF000000'));
+        $textRun = $cell->createTextRun("SLA Incident\nResolution");
+        $textRun->getFont()->setBold(true)->setSize(16)->setColor(new Color('FFFFFFFF'));
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+
+        $row = $table->createRow();
+        $row->setHeight(74);
+        $cell = $row->nextCell();
+        $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        $cell->getFill()->setStartColor(new Color('FF81ff63'));
+        $textRun = $cell->createTextRun("97.7%");
+        $textRun->getFont()->setBold(true)->setSize(28);
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $cell = $row->nextCell();
+        $cell->getFill()->setFillType(Fill::FILL_SOLID);
+        $cell->getFill()->setStartColor(new Color('FF81ff63'));
+        $textRun = $cell->createTextRun("98.8%");
+        $textRun->getFont()->setBold(true)->setSize(28);
+        $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
 
         // ================== CHART PROBLEM BY ASSIGNEE & STATUS ==================
