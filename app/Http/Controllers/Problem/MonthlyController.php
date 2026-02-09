@@ -1629,14 +1629,14 @@ class MonthlyController extends Controller
         $pictureShape->setPath($imagePath);
         $pictureShape->setWidth(200);
         $pictureShape->setOffsetX(1050);
-        $pictureShape->setOffsetY(20); 
+        $pictureShape->setOffsetY(20);
         $problemchartslide->addShape($pictureShape);
 
         $imagePath = storage_path('image/Line.png');
         $pictureShape = new File();
         $pictureShape->setPath($imagePath);
-        $pictureShape->setWidth(1200);  
-        $pictureShape->setOffsetX(20); 
+        $pictureShape->setWidth(1200);
+        $pictureShape->setOffsetX(20);
         $pictureShape->setOffsetY(100);
         $problemchartslide->addShape($pictureShape);
 
@@ -1935,6 +1935,92 @@ class MonthlyController extends Controller
             $chartType->addSeries(
                 new Series($issueType, $statusCounts)
             );
+        }
+
+        // =============== ARROW ===================
+        // posisi X tiap kolom
+        $arrowPositions = [180, 580, 980];
+
+        foreach ($arrowPositions as $x) {
+
+            $shape = $problemchartslide->createRichTextShape();
+            $shape->setHeight(40);
+            $shape->setWidth(40);
+            $shape->setOffsetX($x);
+            $shape->setOffsetY(380);
+
+            $textRun = $shape->createTextRun("▼");
+            $textRun->getFont()->setSize(36);
+            $textRun->getFont()->setBold(true);
+            $textRun->getFont()->setColor(new Color('ff0000ff'));
+        }
+
+
+        // ================= INSIGHT TEXT ===================
+        // buat table 3 kolom
+        $table = $problemchartslide->createTableShape(3);
+        $table->setWidth(1200);
+        $table->setOffsetX(25);
+        $table->setOffsetY(440);
+
+        // header
+        $row = $table->createRow();
+        $row->setHeight(45);
+
+        $headers = [
+            "Insight – SLA Performance",
+            "Insight – Ticket Assignment",
+            "Insight – Service Activity"
+        ];
+
+        foreach ($headers as $text) {
+            $cell = $row->nextCell();
+
+            $cell->getFill()->setFillType(Fill::FILL_SOLID);
+            $cell->getFill()->setStartColor(new Color('FFD9D2B6')); // beige
+
+            $run = $cell->createTextRun($text);
+            $run->getFont()->setBold(true)->setSize(16);
+
+            $cell->getActiveParagraph()->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->getActiveParagraph()->getAlignment()
+                ->setVertical(Alignment::VERTICAL_CENTER);
+        }
+
+
+        // content
+        $row = $table->createRow();
+        $row->setHeight(180);
+
+        // DATA bullet
+        $contents = [
+            "✓ SLA problem response & resolution tercapai 100%.
+✓ SLA incident tetap dijaga di atas 97%.
+✓ Tidak ada pelanggaran SLA kritikal.
+✓ Performa stabil sepanjang periode.",
+
+            "✓ Distribusi tiket antar personel seimbang.
+✓ Tidak ada beban kerja berlebih.
+✓ Semua tiket berhasil ditutup tanpa backlog signifikan.
+✓ Root cause berhasil diidentifikasi pada mayoritas kasus.",
+
+            "✓ Tidak terdapat penumpukan tiket pending.
+✓ Alur permintaan layanan berjalan normal."
+        ];
+
+        foreach ($contents as $text) {
+            $cell = $row->nextCell();
+            $cell->getActiveParagraph()->getAlignment()->setMarginTop(5);
+            $cell->getActiveParagraph()->getAlignment()->setMarginLeft(8);
+            $cell->getFill()->setFillType(Fill::FILL_SOLID);
+            $cell->getFill()->setStartColor(new Color('FFFFFFFF'));
+
+            $run = $cell->createTextRun($text);
+            $run->getFont()->setSize(14);
+
+            $cell->getActiveParagraph()->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_LEFT);
         }
 
         /**
