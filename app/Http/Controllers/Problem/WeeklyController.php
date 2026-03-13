@@ -978,7 +978,7 @@ class WeeklyController extends Controller
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'Category', 'No Ticket', 'Summary', 'Level', 'Created Date', 'Created-RCA Time', 'Status & Complete Time'],
+            ['', 'Sub Category', 'No Ticket', 'Summary', 'Level', 'Created Date', 'Created-RCA Time', 'Status & Complete Time'],
         ];
 
         // ADD DATA
@@ -1177,7 +1177,7 @@ class WeeklyController extends Controller
 
         //SET TABLE HEADER
         $tempdata = [
-            ['', 'Category', 'No Ticket', 'Summary', 'Level', 'Created Date',  'Created-RCA Time', 'Status & Complete Time'],
+            ['', 'Sub Category', 'No Ticket', 'Summary', 'Level', 'Created Date',  'Created-RCA Time', 'Status & Complete Time'],
         ];
 
         //SET TABLE DATA
@@ -1389,28 +1389,14 @@ class WeeklyController extends Controller
         // Define data
         $detaildata = Data::where('problem', '!=', 'Enhancement')->where('status', '=', 'Pending')
             ->union(Data::where('problem', '!=', 'Enhancement')->where('status',  '=', 'Root Cause Identified'))
-            ->orderByRaw("
-        CASE 
-            WHEN target_version = '' THEN 3  -- Kosong di paling bawah
-            WHEN target_version = 'Backlog' THEN 2  -- Backlog di atas kosong
-            ELSE 1  -- Lainnya di atas semua
-            END, target_version ASC
-            ")
-            ->orderByRaw("
-            CASE problem
-            WHEN 'Loan' THEN 1
-            WHEN 'Onboarding' THEN 2
-            WHEN 'Core Surrounding' THEN 3
-            ELSE 4 
-        END
-    ")
+            ->orderBy('created', 'asc')
             ->get();
 
         // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
 
         // ----------------- Create Table ------------------------------ 
         $tempdata = [
-            ['', 'No', 'Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type', 'Team', 'SLA', "Status\nCreated Date", 'Created - RCA Time', 'Ticket Age'],
+            ['', 'No', 'Sub Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type', 'Team', 'SLA', "Status\nCreated Date", 'Created - RCA Time', 'Ticket Age'],
         ];
 
         $no = 1;
@@ -1715,7 +1701,7 @@ class WeeklyController extends Controller
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'Category', 'No Ticket', 'Summary', 'Solution'],
+            ['', 'Sub Category', 'No Ticket', 'Summary', 'Solution'],
         ];
 
         // ADD ARRAY DATA
@@ -1891,7 +1877,7 @@ class WeeklyController extends Controller
 
         // DEFINE ARRAY
         $tempdata = [
-            ['', 'No', 'Category', 'No Ticket', 'Summary', 'Created Date', 'Target Version', 'Version Type', 'Target Date', 'Level', 'Team', 'Aspect', 'Status'],
+            ['', 'No', 'Sub Category', 'No Ticket', 'Summary', 'Created Date', 'Target Version', 'Version Type', 'Target Date', 'Level', 'Team', 'Aspect', 'Status'],
         ];
 
         // ADD ARRAY DATA
@@ -2052,7 +2038,7 @@ class WeeklyController extends Controller
 
             // DEFINE ARRAY
             $tempdata = [
-                ['', 'No', 'Category', 'No Ticket', 'Summary', 'Created Date', 'Target Version', 'Version Type', 'Target Date', 'Level', 'Team', 'Aspect', 'Status'],
+                ['', 'No', 'Sub Category', 'No Ticket', 'Summary', 'Created Date', 'Target Version', 'Version Type', 'Target Date', 'Level', 'Team', 'Aspect', 'Status'],
             ];
 
             // ADD ARRAY DATA
