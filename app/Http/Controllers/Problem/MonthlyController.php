@@ -981,7 +981,7 @@ class MonthlyController extends Controller
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_CENTER);
         $lowHeader->getBorder()->setLineStyle(Border::LINE_SINGLE);
-        $lowHeader->createTextRun("High")->getFont()->setBold(true);
+        $lowHeader->createTextRun("Low")->getFont()->setBold(true);
         $lowHeader->getFill()->setFillType(Fill::FILL_SOLID)
             ->setStartColor(new Color('FF00C000'));
 
