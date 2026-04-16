@@ -1325,7 +1325,7 @@ class WeeklyController extends Controller
             }
         }
 
-        // ---------- SLIDE TAMBAHAN (Detail Ticket RCA & Pending) ----------------
+        // ---------- SLIDE SUMMARY ALL PROBLEM ----------------
 
         // Set mockup 
         $slide_additional = $objPHPPresentation->createSlide();
@@ -1377,31 +1377,48 @@ class WeeklyController extends Controller
         $slide_additional->addShape($pictureShape);
 
 
-        // SUMMARY ALL PROBLEM
+        // ================= TITLE =================
         $shape = $slide_additional->createRichTextShape()
             ->setHeight(25)
             ->setWidth(400)
             ->setOffsetX(25)
             ->setOffsetY(110);
-        $textRun = $shape->createTextRun('SUMMARY ALL PROBLEM');
-        $textRun->getFont()->setSize(10)->setBold(true);
 
-        // Define data
-        $detaildata = Data::where('problem', '!=', 'Enhancement')->where('status', '=', 'Pending')
-            ->union(Data::where('problem', '!=', 'Enhancement')->where('status',  '=', 'Root Cause Identified'))
+        $shape->createTextRun('SUMMARY ALL PROBLEM')
+            ->getFont()->setSize(10)->setBold(true);
+
+
+        // ================= DATA =================
+        $detaildata = Data::where('problem', '!=', 'Enhancement')->where('status', 'Pending')
+            ->union(
+                Data::where('problem', '!=', 'Enhancement')->where('status', 'Root Cause Identified')
+            )
             ->orderBy('created', 'asc')
             ->get();
 
-        // dd(json_encode($detaildata, JSON_PRETTY_PRINT));
 
-        // ----------------- Create Table ------------------------------ 
+        // ================= HEADER =================
         $tempdata = [
-            ['', 'No', 'Sub Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type', 'Team', 'SLA', "Status\nCreated Date", 'Created - RCA Time', 'Ticket Age'],
+            ['No', 'Sub Category', 'No Ticket', 'Summary', 'Level', 'Target Version', 'Version Type', 'Team', 'SLA', "Status\nCreated Date", 'Created - RCA Time', 'Ticket Age'],
         ];
 
         $no = 1;
 
         foreach ($detaildata as $value) {
+
+            // ===== COLOR BASED ON PROBLEM =====
+            $rowColor = match ($value->problem) {
+                'Core Surrounding' => 'ff89a64e',
+                'Ekosistem MPC' => 'ff00b0f0',
+                'Loan' => 'ffa6a6a6',
+                'Onboarding' => 'ff81ff63',
+                'Online Payment' => 'ff09b1a7',
+                'Switching 3rdparty' => 'ffee52e1',
+                'Transaction' => 'ff8380ee',
+                'Wholesale' => 'ff8064a2',
+                'Cybersecurity' => 'ffb9cd96',
+                default => 'ffffffff',
+            };
 
             // ===== STATUS =====
             $tempstatus = $value->status === 'Root Cause Identified'
@@ -1415,13 +1432,15 @@ class WeeklyController extends Controller
                 $createdDate = Carbon::parse($value->created);
                 $rcaDate = Carbon::parse($value->rca_time);
                 $rca_days = (int) $createdDate->diffInDays($rcaDate, false);
-                $rca_time = $rca_days . " days\n" . Carbon::parse($value->rca_time)->format('d/m/y');
+
+                $rca_time = $rca_days . " days\n" . $rcaDate->format('d/m/y');
             } else {
                 $rca_time = '-';
             }
 
             // ===== SLA =====
             $priority = strtolower($value->priority);
+
             $limitMonth = match ($priority) {
                 'high' => 2,
                 'medium' => 4,
@@ -1439,23 +1458,8 @@ class WeeklyController extends Controller
                 $slaStatus = '-';
             }
 
-            // ===== ROW COLOR =====
-            $rowColor = match ($value->problem) {
-                'Core Surrounding' => 'ff89a64e',
-                'Ekosistem MPC' => 'ff00b0f0',
-                'Loan' => 'ffa6a6a6',
-                'Onboarding' => 'ff81ff63',
-                'Online Payment' => 'ff09b1a7',
-                'Switching 3rdparty' => 'ffee52e1',
-                'Transaction' => 'ff8380ee',
-                'Wholesale' => 'ff8064a2',
-                'Cybersecurity' => 'ffb9cd96',
-                default => 'ffffffff',
-            };
-
             // ===== MAIN ROW =====
             $tempdata[] = [
-                $value->problem,
                 $no,
                 $value->category,
                 $value->code_jira,
@@ -1475,7 +1479,6 @@ class WeeklyController extends Controller
             $tempdata[] = [
                 'RCA',
                 '',
-                'RCA',
                 '',
                 $value->root_cause,
                 '',
@@ -1493,17 +1496,17 @@ class WeeklyController extends Controller
         }
 
 
-        $totalColumns = 12;
-        $rcaColspan = 11;
-        $table = $slide_additional->createTableShape($totalColumns);
+        // ================= TABLE =================
+        $table = $slide_additional->createTableShape(12);
         $table->getBorder()->setLineStyle(Border::LINE_SINGLE);
 
-        // Set table position & Size
-        $table->setheight(210);
-        $table->setwidth(1200);
+        $table->setHeight(210);
+        $table->setWidth(1200);
         $table->setOffsetX(25);
         $table->setOffsetY(135);
 
+
+        // ================= RENDER =================
         foreach ($tempdata as $rowIndex => $row) {
 
             $isHeader = ($rowIndex === 0);
@@ -1513,65 +1516,59 @@ class WeeklyController extends Controller
             $tableRow = $table->createRow();
             $tableRow->setHeight($isRcaRow ? 45 : 25);
 
-            /**
-             * ======================
-             * RCA ROW (MANUAL)
-             * ======================
-             */
+
+            // ================= RCA ROW =================
             if ($isRcaRow) {
 
-                // 🔹 SKIP kolom "No" (karena rowspan dari atas)
-                $tableRow->nextCell(); // ⬅️ INI KUNCI UTAMANYA
+                $tableRow->nextCell(); // skip No
 
-                // 🔹 CELL 1: Category = RCA
-                $cell = $tableRow->nextCell();
-                $cell->setWidth(120);
-                $cell->createTextRun('RCA')->getFont()->setBold(true);
-                $cell->getActiveParagraph()->getAlignment()
+                // RCA label
+                $cell_title = $tableRow->nextCell();
+                $cell_title->setWidth(120);
+                $cell_title->createTextRun('RCA')->getFont()->setBold(true);
+
+                $cell_title->getActiveParagraph()->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER)
                     ->setVertical(Alignment::VERTICAL_CENTER);
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getFill()->setStartColor(new Color($rowColor));
 
-                // 🔹 CELL 2: Summary (MERGED)
-                $cell = $tableRow->nextCell();
-                $cell->setColSpan($rcaColspan);
-                $cell->createTextRun($row[4])
+                $cell_title->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell_title->getFill()->setStartColor(new Color($rowColor));
+
+                // RCA content
+                $cell_desc = $tableRow->nextCell();
+                $cell_desc->setColSpan(10);
+                $cell_desc->createTextRun($row[3])
                     ->getFont()->setItalic(true)->setSize(10);
-                $cell->getActiveParagraph()->getAlignment()
+
+                $cell_desc->getActiveParagraph()->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_LEFT)
-                    ->setVertical(Alignment::VERTICAL_CENTER)
-                    ->setMarginLeft(3);
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getFill()->setStartColor(new Color($rowColor));
+                    ->setMarginLeft(5);
 
                 continue;
             }
-            /**
-             * ======================
-             * HEADER & MAIN ROW
-             * ======================
-             */
+
+
+            // ================= NORMAL ROW =================
             foreach ($row as $cellIndex => $cellText) {
 
-                if ($cellIndex === 0 || $cellIndex === '__ROWCOLOR__') continue;
+                if ($cellIndex === '__ROWCOLOR__') continue;
 
                 $cell = $tableRow->nextCell();
 
-                // WIDTH
-                if ($cellIndex == 1) $cell->setWidth(40);
-                elseif ($cellIndex == 2) $cell->setWidth(120);
-                elseif ($cellIndex == 3) $cell->setWidth(90);
-                elseif ($cellIndex == 4) $cell->setWidth(410);
-                elseif ($cellIndex == 10) $cell->setWidth(80);
-                else $cell->setWidth(70);
+                // ================= WIDTH (FOLLOW OLD STYLE - FIXED INDEX) =================
+                if ($cellIndex == 0) $cell->setWidth(40);     // No  (dulu index 1)
+                elseif ($cellIndex == 1) $cell->setWidth(120); // Sub Category (dulu index 2)
+                elseif ($cellIndex == 2) $cell->setWidth(90);  // No Ticket (dulu index 3)
+                elseif ($cellIndex == 3) $cell->setWidth(410); // Summary (dulu index 4)
+                elseif ($cellIndex == 9) $cell->setWidth(80);  // Status (dulu index 10)
+                else $cell->setWidth(70); // sisanya
 
-                // TEXT
+
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($isHeader);
 
                 // ALIGN
-                if ($cellIndex == 4) {
+                if ($cellIndex == 3) {
                     $cell->getActiveParagraph()->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_LEFT)
                         ->setMarginLeft(3);
@@ -1583,7 +1580,8 @@ class WeeklyController extends Controller
                 $cell->getActiveParagraph()->getAlignment()
                     ->setVertical(Alignment::VERTICAL_CENTER);
 
-                // HEADER STYLE
+
+                // ===== HEADER =====
                 if ($isHeader) {
                     $cell->getFill()->setFillType(Fill::FILL_SOLID);
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
@@ -1591,39 +1589,53 @@ class WeeklyController extends Controller
                     continue;
                 }
 
-                // ROWSPAN "No"
-                if ($cellIndex == 1) {
+                // ===== ROWSPAN No =====
+                if ($cellIndex == 0) {
                     $cell->setRowSpan(2);
                 }
 
-                // ===== STATUS COLUMN COLOR =====
-                if ($cellIndex == 10) {
+                // ===== COLOR (No Only) =====
+                if ($cellIndex == 0) {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                    $cell->getFill()->setStartColor(new Color($rowColor));
+                }
+                // ===== COLOR (TEXT Sub Category Only) =====
+                if ($cellIndex == 1) {
+                    $textRun->getFont()->setColor(new Color('ffff0000')); // merah
+                }
 
+                // ===== LEVEL COLOR =====
+                if ($cellIndex == 4) {
+                    $level = strtolower($cellText);
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
+
+                    if ($level == 'high') {
+                        $cell->getFill()->setStartColor(new Color('ffff0000'));
+                    } elseif ($level == 'medium') {
+                        $cell->getFill()->setStartColor(new Color('ffffff00'));
+                    } elseif ($level == 'low') {
+                        $cell->getFill()->setStartColor(new Color('ff00ff00'));
+                    }
+                }
+
+                // ===== STATUS COLOR =====
+                if ($cellIndex == 9) {
                     $firstStatus = trim(explode("\n", $cellText)[0]);
 
                     $cell->getFill()->setFillType(Fill::FILL_SOLID);
 
                     if ($firstStatus == 'Pending') {
-                        $cell->getFill()->setStartColor(new Color('fff6f610')); // kuning
+                        $cell->getFill()->setStartColor(new Color('ffffff99'));
                     } elseif ($firstStatus == 'Closed') {
-                        $cell->getFill()->setStartColor(new Color('ff14ca66')); // hijau
+                        $cell->getFill()->setStartColor(new Color('ff00cc66'));
                     } elseif ($firstStatus == 'RC Identified') {
-                        $cell->getFill()->setStartColor(new Color('fff85208')); // orange
-                    } else {
-                        $cell->getFill()->setFillType(Fill::FILL_NONE);
+                        $cell->getFill()->setStartColor(new Color('fff85208'));
                     }
-
-                    continue;
                 }
-
-                // ROW COLOR
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                $cell->getFill()->setStartColor(new Color($rowColor));
             }
         }
 
-
-        // ----------- SLIDE CLOSED TICKET ------------------------
+        // ----------- SLIDE DETAIL PROBLEM CLOSED ON THIS WEEK ------------------------
         $slideclosedticket = $objPHPPresentation->createSlide();
         $backgroundImagePath = storage_path('image/background.png');
         $backgroundImage = new File();
