@@ -1952,18 +1952,21 @@ class WeeklyController extends Controller
             $i++;
         }
 
-        // dd($tempdata);
-
         // INSERT ARRAY TO TABLE
         foreach ($tempdata as $rowIndex => $row) {
+
             $tableRow = $tableShape->createRow();
-            $tableRow->setHeight(25); // Set the height of the row
+            $tableRow->setHeight(25);
+
             foreach ($row as $cellIndex => $cellText) {
+
                 if ($cellIndex == 0) {
-                    continue; // Lewati kolom yang disembunyikan
+                    continue; // skip kolom hidden
                 }
 
                 $cell = $tableRow->nextCell();
+
+                // ================= WIDTH =================
                 if ($cellIndex == 1) {
                     $cell->setWidth(30);
                 } else if ($cellIndex == 2) {
@@ -1992,39 +1995,63 @@ class WeeklyController extends Controller
                     $cell->setWidth(60);
                 }
 
-                //set status
-                $problem = $row[0];
-                $status = explode("\n", $row[12]);
-                $firstStatus = $status[0];
-                // $cell = $tableRow->nextCell();
+                // ================= TEXT =================
                 $textRun = $cell->createTextRun($cellText);
                 $textRun->getFont()->setBold($rowIndex == 0);
-                $cell->getFill()->setFillType(Fill::FILL_SOLID);
-                if ($cellIndex != 4) { // jangan override untuk kolom ke-4
+
+                // ================= ALIGN =================
+                if ($cellIndex != 4) {
                     $cell->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 }
                 $cell->getActiveParagraph()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $cell->getFill()->setStartColor(new Color('ffffffff'));
-                //
+
+                // ================= STATUS PREP =================
+                $statusArr = explode("\n", $row[12] ?? '');
+                $firstStatus = $statusArr[0] ?? '';
+
+                // ================= HEADER =================
                 if ($rowIndex == 0) {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
                     $cell->getFill()->setStartColor(new Color(Color::COLOR_BLACK));
                     $textRun->getFont()->setColor(new Color(Color::COLOR_WHITE));
-                } else {
-                    if ($cellIndex == 12) {
-                        //coloring by status
-                        if ($firstStatus == 'Pending') {
-                            $cell->getFill()->setStartColor(new Color('fff6f610'));
-                        } elseif ($firstStatus == 'Closed') {
-                            $cell->getFill()->setStartColor(new Color('ff14ca66'));
-                        } elseif ($firstStatus == 'RC Identified') {
-                            $cell->getFill()->setStartColor(new Color('fff85208'));
-                        } else {
-                            $cell->getFill()->setFillType(Fill::FILL_NONE);
-                        }
+                    continue;
+                }
+
+                // ================= LEVEL COLOR (PRIORITAS) =================
+                if ($cellIndex == 9) {
+                    $level = strtolower(trim($cellText));
+
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
+
+                    if ($level == 'high') {
+                        $cell->getFill()->setStartColor(new Color('ffff0000')); // merah
+                        $textRun->getFont()->setColor(new Color('ffffffff')); // text putih
+                    } elseif ($level == 'medium') {
+                        $cell->getFill()->setStartColor(new Color('ffffff00')); // kuning
                     } else {
                         $cell->getFill()->setStartColor(new Color('ffffffff'));
                     }
+                    continue;
                 }
+
+                // ================= STATUS COLOR =================
+                if ($cellIndex == 12) {
+                    $cell->getFill()->setFillType(Fill::FILL_SOLID);
+
+                    if ($firstStatus == 'Pending') {
+                        $cell->getFill()->setStartColor(new Color('fff6f610'));
+                    } elseif ($firstStatus == 'Closed') {
+                        $cell->getFill()->setStartColor(new Color('ff14ca66'));
+                    } elseif ($firstStatus == 'RC Identified') {
+                        $cell->getFill()->setStartColor(new Color('fff85208'));
+                    }
+
+                    continue;
+                }
+
+                // ================= DEFAULT =================
+                $cell->getFill()->setFillType(Fill::FILL_SOLID);
+                $cell->getFill()->setStartColor(new Color('ffffffff'));
             }
         }
 
