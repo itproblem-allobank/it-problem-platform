@@ -30,7 +30,8 @@
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label class="form-control-label">Start Date</label>
-                        <input type="date" id="start_date" class="form-control" name="start_date" onchange="setEndDate()" required>
+                        {{-- <input type="date" id="start_date" class="form-control" name="start_date" onchange="setEndDate()" required> --}}
+                        <input type="date" id="start_date" class="form-control" name="start_date" required>
                     </div>
                 </div>
             </div>
@@ -38,7 +39,8 @@
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label class="form-control-label">End Date</label>
-                        <input type="date" id="end_date" class="form-control" name="end_date" onchange="setStartDate()" required>
+                        {{-- <input type="date" id="end_date" class="form-control" name="end_date" onchange="setStartDate()" required> --}}
+                        <input type="date" id="end_date" class="form-control" name="end_date" required>
                     </div>
                 </div>
             </div>
