@@ -2,5 +2,6 @@
   "$schema": "https://schema.railpack.com",
   "php": {
     "extensions": ["zip", "gd"]
-  }
+  },
+  "aptPackages": ["libzip-dev", "libpng-dev", "libjpeg-dev", "libfreetype6-dev"]
 }
